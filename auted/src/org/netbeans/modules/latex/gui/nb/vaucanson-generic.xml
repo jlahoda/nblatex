@@ -132,6 +132,62 @@ made subject to such option by the copyright holder.
     </argument>
   </command>
 
+  <command name="\LoopNE">
+    <argument type="nonmandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+
+    <argument type="mandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+
+    <argument type="mandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+  </command>
+  
+  <command name="\LoopNW">
+    <argument type="nonmandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+
+    <argument type="mandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+
+    <argument type="mandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+  </command>
+  
+  <command name="\LoopSE">
+    <argument type="nonmandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+
+    <argument type="mandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+
+    <argument type="mandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+  </command>
+  
+  <command name="\LoopSW">
+    <argument type="nonmandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+
+    <argument type="mandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+
+    <argument type="mandatory">
+      <attribute name="#code" value="true" />
+    </argument>
+  </command>
+  
   <command name="\Final">
     <argument type="nonmandatory">
       <attribute name="#code" value="true" />

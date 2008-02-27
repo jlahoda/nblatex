@@ -484,6 +484,10 @@ public final class VauParserImpl {
                 "\\LoopE",
                 "\\LoopS",
                 "\\LoopW",
+                "\\LoopNE",
+                "\\LoopNW",
+                "\\LoopSE",
+                "\\LoopSW",
             };
         }
         
