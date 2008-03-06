@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -61,13 +61,17 @@ import java.util.Collections;
 import java.util.List;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
+import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
+import org.netbeans.api.project.FileOwnerQuery;
+import org.netbeans.api.project.Project;
 import org.netbeans.modules.latex.model.platform.FilePosition;
 import org.openide.ErrorManager;
 import org.openide.cookies.LineCookie;
@@ -78,7 +82,9 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.text.Line;
+import org.openide.util.NbPreferences;
 import org.openide.util.RequestProcessor;
+import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
 
 /**
@@ -100,6 +106,8 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         (int) (96 * sqrt2 * sqrt2 * sqrt2),
         (int) (96 * sqrt2 * sqrt2 * sqrt2 * sqrt2),
     };
+    
+    private static final String REFRESH_PREF_KEY = DocumentTopComponent.class.getName() + ".refresh";
 
     private DocumentComponent viewer;
     private int resolutionIndex;
@@ -108,8 +116,9 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
     private FileObject source;
     
     private JComboBox pages;
+    private JToggleButton rebuildAutomatically;
 
-    public DocumentTopComponent(FileObject source, ViewerImpl viewerImpl) {
+    public DocumentTopComponent(final FileObject source, ViewerImpl viewerImpl) {
         setLayout(new BorderLayout());
         setDisplayName(source.getNameExt());
         resolutionIndex = 4;
@@ -122,6 +131,8 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
 
         JButton zoomInButton = new JButton("+");
         JButton zoomOutButton = new JButton("-");
+        
+        rebuildAutomatically = new JToggleButton(new ImageIcon(Utilities.loadImage("org/netbeans/modules/latex/ui/resources/refresh.png")));
 
         zoomInButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -137,6 +148,16 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
             }
         });
         
+        rebuildAutomatically.setSelected(NbPreferences.forModule(DocumentTopComponent.class).getBoolean(REFRESH_PREF_KEY, true));
+
+        rebuildAutomatically.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleRebuildAutomatically();
+                
+                NbPreferences.forModule(DocumentTopComponent.class).putBoolean(REFRESH_PREF_KEY, rebuildAutomatically.isSelected());
+            }
+        });
+        
         pages = new JComboBox();
 
         pages.setRenderer(new DVIPageDescriptionRenderer());
@@ -149,6 +170,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         });
         toolBar.add(zoomOutButton);
         toolBar.add(zoomInButton);
+        toolBar.add(rebuildAutomatically);
         toolBar.add(pages);
 
         add(toolBar, BorderLayout.PAGE_START);
@@ -160,6 +182,16 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         addKeyListener(viewer);
 	
         setFile(source);
+    }
+    
+    private void handleRebuildAutomatically() {
+        Project p = FileOwnerQuery.getOwner(source);
+
+        if (rebuildAutomatically.isSelected()) {
+            ProjectRebuilDer.INSTANCE.registerProject(p);
+        } else {
+            ProjectRebuilDer.INSTANCE.unregisterProject(p);
+        }
     }
     
     private void setFile(final FileObject source) {
@@ -218,9 +250,17 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         viewer.requestFocus();
     }
 
+    @Override
+    protected void componentOpened() {
+        super.componentOpened();
+        handleRebuildAutomatically();
+    }
+
+    @Override
     protected void componentClosed() {
         super.componentClosed();
         viewerImpl.componentClosed(this);
+        ProjectRebuilDer.INSTANCE.unregisterProject(FileOwnerQuery.getOwner(source));
     }
 
     private void handleDVI(FileObject dvi) {
