@@ -61,6 +61,7 @@ public class LaTeXSharabilityQuery implements SharabilityQueryImplementation {
         "dvi",
         "log",
         "ps",
+        "pdf",
         "toc",
         "lot",
         "lof",
