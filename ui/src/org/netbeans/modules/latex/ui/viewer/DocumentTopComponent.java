@@ -108,6 +108,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
     };
     
     private static final String REFRESH_PREF_KEY = DocumentTopComponent.class.getName() + ".refresh";
+    private static final String FOLLOW_PREF_KEY = DocumentTopComponent.class.getName() + ".follow";
 
     private DocumentComponent viewer;
     private int resolutionIndex;
@@ -117,6 +118,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
     
     private JComboBox pages;
     private JToggleButton rebuildAutomatically;
+    private JToggleButton followCaret;
 
     public DocumentTopComponent(final FileObject source, ViewerImpl viewerImpl) {
         setLayout(new BorderLayout());
@@ -133,6 +135,10 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         JButton zoomOutButton = new JButton("-");
         
         rebuildAutomatically = new JToggleButton(new ImageIcon(Utilities.loadImage("org/netbeans/modules/latex/ui/resources/refresh.png")));
+        followCaret = new JToggleButton(new ImageIcon(Utilities.loadImage("org/netbeans/modules/latex/ui/resources/caret.png")));
+        
+        rebuildAutomatically.setToolTipText("Automatically rebuild on save");
+        followCaret.setToolTipText("Follow caret");
 
         zoomInButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
@@ -158,6 +164,16 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
             }
         });
         
+        followCaret.setSelected(NbPreferences.forModule(DocumentTopComponent.class).getBoolean(FOLLOW_PREF_KEY, true));
+
+        followCaret.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                handleRebuildAutomatically();
+                
+                NbPreferences.forModule(DocumentTopComponent.class).putBoolean(FOLLOW_PREF_KEY, followCaret.isSelected());
+            }
+        });
+        
         pages = new JComboBox();
 
         pages.setRenderer(new DVIPageDescriptionRenderer());
@@ -171,6 +187,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         toolBar.add(zoomOutButton);
         toolBar.add(zoomInButton);
         toolBar.add(rebuildAutomatically);
+        toolBar.add(followCaret);
         toolBar.add(pages);
 
         add(toolBar, BorderLayout.PAGE_START);
@@ -188,7 +205,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         Project p = FileOwnerQuery.getOwner(source);
 
         if (rebuildAutomatically.isSelected()) {
-            ProjectRebuilDer.INSTANCE.registerProject(p);
+            ProjectRebuilDer.INSTANCE.registerProject(p, followCaret.isSelected() ? this : null);
         } else {
             ProjectRebuilDer.INSTANCE.unregisterProject(p);
         }
@@ -221,6 +238,10 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         
         handleDVI(FileUtil.findBrother(source, "dvi"));
     }
+    
+    FileObject getFile() {
+        return source;
+    }
 
     private boolean wasInitialized;
 
@@ -251,16 +272,21 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
     }
 
     @Override
-    protected void componentOpened() {
-        super.componentOpened();
+    protected void componentShowing() {
+        super.componentShowing();
         handleRebuildAutomatically();
+    }
+
+    @Override
+    protected void componentHidden() {
+        super.componentHidden();
+        ProjectRebuilDer.INSTANCE.unregisterProject(FileOwnerQuery.getOwner(source));
     }
 
     @Override
     protected void componentClosed() {
         super.componentClosed();
         viewerImpl.componentClosed(this);
-        ProjectRebuilDer.INSTANCE.unregisterProject(FileOwnerQuery.getOwner(source));
     }
 
     private void handleDVI(FileObject dvi) {
