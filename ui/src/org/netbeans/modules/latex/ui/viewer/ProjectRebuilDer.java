@@ -40,17 +40,23 @@
  */
 package org.netbeans.modules.latex.ui.viewer;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import javax.swing.SwingUtilities;
+import javax.swing.text.Document;
+import javax.swing.text.StyledDocument;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
+import org.netbeans.modules.latex.model.platform.FilePosition;
 import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.napi.gsfret.source.Phase;
 import org.netbeans.napi.gsfret.source.Source.Priority;
+import org.netbeans.napi.gsfret.source.support.CaretAwareSourceTaskFactory;
 import org.netbeans.napi.gsfret.source.support.EditorAwareSourceTaskFactory;
 import org.netbeans.spi.project.ActionProvider;
 import org.openide.filesystems.FileAttributeEvent;
@@ -58,6 +64,7 @@ import org.openide.filesystems.FileChangeListener;
 import org.openide.filesystems.FileEvent;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileRenameEvent;
+import org.openide.text.NbDocument;
 import org.openide.util.Lookup;
 
 /**
@@ -69,8 +76,9 @@ public class ProjectRebuilDer implements FileChangeListener {
     public static final ProjectRebuilDer INSTANCE = new ProjectRebuilDer();
     
     private Project p;
+    private DocumentTopComponent dtc;
     
-    public synchronized void registerProject(Project p) {
+    public synchronized void registerProject(Project p, DocumentTopComponent dtc) {
         unregisterProject(this.p);
         
         if (p == null) {
@@ -84,6 +92,7 @@ public class ProjectRebuilDer implements FileChangeListener {
         }
         
         this.p = p;
+        this.dtc = dtc;
         
         FactoryImpl.getInstance().reschedule();
     }
@@ -102,6 +111,26 @@ public class ProjectRebuilDer implements FileChangeListener {
         doSetFiles(files);
     }
     
+    private synchronized void caretMoved(final CompilationInfo info) throws IOException {
+        if (dtc != null && this.p == FileOwnerQuery.getOwner(dtc.getFile())) {
+            Document doc = info.getDocument();
+            if (doc == null) {
+                return;
+            }
+
+            FileObject file = info.getFileObject();
+            int offset = CaretAwareSourceTaskFactory.getLastPosition(file);
+            final FilePosition pos = new FilePosition(file, NbDocument.findLineNumber((StyledDocument) doc, offset), NbDocument.findLineColumn((StyledDocument) doc, offset));
+            
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    synchronized (ProjectRebuilDer.this) {
+                        dtc.setFilePosition(pos);
+                    }
+                }
+            });
+        }
+    }
     
     private static final class ReparseTaskImpl implements CancellableTask<CompilationInfo> {
 
@@ -135,6 +164,24 @@ public class ProjectRebuilDer implements FileChangeListener {
             return Lookup.getDefault().lookup(FactoryImpl.class);
         }
     }
+    
+    public static final class CaretFactoryImpl extends CaretAwareSourceTaskFactory {
+        
+        public CaretFactoryImpl() {
+            super(Phase.RESOLVED, Priority.NORMAL);
+        }
+
+        @Override
+        protected CancellableTask<CompilationInfo> createTask(FileObject file) {
+            return new CancellableTask<CompilationInfo>() {
+                public void cancel() {}
+                public void run(CompilationInfo parameter) throws Exception {
+                    ProjectRebuilDer.INSTANCE.caretMoved(parameter);
+                }
+            };
+        }
+        
+    }
 
     public synchronized void fileChanged(FileEvent fe) {
         if (p == null) {
@@ -163,6 +210,7 @@ public class ProjectRebuilDer implements FileChangeListener {
     public synchronized void unregisterProject(Project p) {
         if (this.p == p) {
             this.p = null;
+            this.dtc = null;
             doSetFiles(Collections.<FileObject>emptyList());
         }
     }
