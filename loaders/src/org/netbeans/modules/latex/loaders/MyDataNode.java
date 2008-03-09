@@ -71,7 +71,7 @@ public class MyDataNode extends DataNode {
     
     protected MyDataNode(TexDataObject obj, Children ch) {
         super(obj, ch);
-        setIconBase("org/netbeans/modules/latex/loaders/MyDataIcon");
+        setIconBaseWithExtension("org/netbeans/modules/latex/loaders/MyDataIcon.gif");
     }
     
     protected TexDataObject getMyDataObject() {
@@ -79,6 +79,7 @@ public class MyDataNode extends DataNode {
     }
     
 //     Example of adding Executor / Debugger / Arguments to node:
+    @Override
     protected Sheet createSheet() {
         Sheet sheet = super.createSheet();
         
@@ -104,31 +105,34 @@ public class MyDataNode extends DataNode {
     }
     
     private PropertySupport createTextEncodingProperty() {
-        return new PropertySupport.ReadWrite(
+        return new PropertySupport.ReadWrite<String>(
                   TexDataObject.ENCODING_PROPERTY_NAME,
                   String.class,
                   "Encoding",
                   "Encoding of the document") {
-             public Object getValue() {
+             public String getValue() {
                  return ((TexDataObject) getDataObject()).getCharSet();
              }
              
-             public void setValue(Object value) throws InvocationTargetException {
+             public void setValue(String value) throws InvocationTargetException {
                  try {
-                     ((TexDataObject) getDataObject()).setCharSet((String) value);
+                     ((TexDataObject) getDataObject()).setCharSet(value);
                  } catch (IOException e) {
                      throw new InvocationTargetException(e);
                  }
              }
              
+            @Override
              public boolean supportsDefaultValue() {
                  return true;
              }
              
+            @Override
              public void restoreDefaultValue() throws InvocationTargetException {
                  setValue(null);
              }
              
+            @Override
              public boolean canWrite() {
                  return getDataObject().getPrimaryFile().canWrite();
              }
@@ -136,31 +140,34 @@ public class MyDataNode extends DataNode {
     }
 
     private PropertySupport createLocaleProperty() {
-        return new PropertySupport.ReadWrite(
+        return new PropertySupport.ReadWrite<String>(
         TexDataObject.LOCALE_PROPERTY_NAME,
         String.class,
         "Locale",
         "Locale of the document") {
-            public Object getValue() {
+            public String getValue() {
                 return ((TexDataObject) getDataObject()).getLocale();
             }
             
-            public void setValue(Object value) throws InvocationTargetException {
+            public void setValue(String value) throws InvocationTargetException {
                 try {
-                    ((TexDataObject) getDataObject()).setLocale((String) value);
+                    ((TexDataObject) getDataObject()).setLocale(value);
                 } catch (IOException e) {
                     throw new InvocationTargetException(e);
                 }
             }
             
+            @Override
             public boolean supportsDefaultValue() {
                 return true;
             }
             
+            @Override
             public void restoreDefaultValue() throws InvocationTargetException {
                 setValue(Locale.getDefault().toString());
             }
             
+            @Override
             public boolean canWrite() {
                 return getDataObject().getPrimaryFile().canWrite();
             }
