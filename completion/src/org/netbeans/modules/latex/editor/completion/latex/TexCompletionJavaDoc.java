@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2006.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -47,7 +47,6 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.Properties;
@@ -61,7 +60,6 @@ import org.openide.ErrorManager;
 
 import org.openide.modules.InstalledFileLocator;
 import org.openide.util.RequestProcessor;
-import org.netbeans.modules.latex.editor.completion.latex.TexCompletionDocumentation;
 import org.netbeans.spi.editor.completion.CompletionTask;
 import org.openide.util.NbBundle;
 
@@ -71,8 +69,8 @@ import org.openide.util.NbBundle;
  */
 public class TexCompletionJavaDoc {
     
-    private Reference jarFile;
-    private Reference directory;
+    private Reference<JarFile> jarFile;
+    private Reference<Properties> directory;
     
     private RequestProcessor.Task task = null;
     
@@ -110,7 +108,7 @@ public class TexCompletionJavaDoc {
     
     private synchronized JarFile getJarFile() throws IOException {
         if (jarFile != null) {
-            JarFile file = (JarFile) jarFile.get();
+            JarFile file = jarFile.get();
             
             if (file != null)
                 return file;
@@ -123,7 +121,7 @@ public class TexCompletionJavaDoc {
 
         JarFile file = new JarFile(jarAsFile);
         
-        jarFile = new WeakReference(file);
+        jarFile = new WeakReference<JarFile>(file);
         
         return file;
     }
@@ -140,7 +138,7 @@ public class TexCompletionJavaDoc {
     
     private synchronized Properties getDirectory() throws IOException {
         if (directory != null) {
-            Properties dir = (Properties) directory.get();
+            Properties dir = directory.get();
             
             if (dir != null)
                 return dir;
@@ -160,7 +158,7 @@ public class TexCompletionJavaDoc {
         InputStream ins = file.getInputStream(dirEntry);
         
         dir.load(ins);
-        directory = new WeakReference(dir);
+        directory = new WeakReference<Properties>(dir);
         
         return dir;
     }
