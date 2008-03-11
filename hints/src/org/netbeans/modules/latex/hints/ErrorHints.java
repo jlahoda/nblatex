@@ -153,7 +153,7 @@ public class ErrorHints implements CancellableTask<CompilationInfo> {
         code2StringProvider.put("unknown.command", new AddPackageFixProvider(true));
         code2StringProvider.put("unknown.environment", new AddPackageFixProvider(false));
         
-        code2Ignore = new HashSet();
+        code2Ignore = new HashSet<String>();
         
         code2Ignore.add("unknown.command");
         code2Ignore.add("unknown.environment");
