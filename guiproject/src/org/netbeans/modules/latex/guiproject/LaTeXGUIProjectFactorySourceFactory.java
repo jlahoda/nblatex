@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -59,17 +59,15 @@ import org.openide.util.Lookup;
 public class LaTeXGUIProjectFactorySourceFactory extends LaTeXSourceFactory {
     
 //    private LaTeXGUIProjectFactory factory;
-    /*package private*/ Map mainFile2Project;
+    /*package private*/ Map<FileObject, LaTeXGUIProject> mainFile2Project;
     
     /** Creates a new instance of LaTeXGUIProjectFactory */
     public LaTeXGUIProjectFactorySourceFactory() {
-        mainFile2Project = new WeakHashMap();
+        mainFile2Project = new WeakHashMap<FileObject, LaTeXGUIProject>();
     }
     
     public synchronized static LaTeXGUIProjectFactorySourceFactory get() {
-        for (Iterator i = Lookup.getDefault().lookup(new Lookup.Template(LaTeXSourceFactory.class)).allInstances().iterator(); i.hasNext(); ) {
-            LaTeXSourceFactory fact = (LaTeXSourceFactory) i.next();
-            
+        for (LaTeXSourceFactory fact : Lookup.getDefault().lookupAll(LaTeXSourceFactory.class)) {
             if (fact instanceof LaTeXGUIProjectFactorySourceFactory) {
                 return (LaTeXGUIProjectFactorySourceFactory) fact;
             }
@@ -78,7 +76,7 @@ public class LaTeXGUIProjectFactorySourceFactory extends LaTeXSourceFactory {
         return null;
     }
     
-    public boolean supports(Object file) {
+    public boolean supports(FileObject file) {
         return file instanceof FileObject;
     }
     
@@ -91,11 +89,11 @@ public class LaTeXGUIProjectFactorySourceFactory extends LaTeXSourceFactory {
             return null;
     }
     
-    private LaTeXGUIProject findProject(Object file) {
+    private LaTeXGUIProject findProject(FileObject file) {
 //        System.err.println("findProject");
 //        System.err.println("file = " + file );
 //        System.err.println("mainFile2Project=" + mainFile2Project);
-        LaTeXGUIProject mainProj = (LaTeXGUIProject) mainFile2Project.get(file);
+        LaTeXGUIProject mainProj = mainFile2Project.get(file);
 
 //        System.err.println("mainProj = " + mainProj );
         if (mainProj != null)
@@ -106,23 +104,23 @@ public class LaTeXGUIProjectFactorySourceFactory extends LaTeXSourceFactory {
             LaTeXGUIProject p = (LaTeXGUIProject) i.next();
             
 //            System.err.println("p = " + p );
-            if (p.contains((FileObject) file))
+            if (p.contains(file))
                 return p;
             
         }
         return null;
     }
     
-    public boolean isKnownFile(Object file) {
+    public boolean isKnownFile(FileObject file) {
         return findProject(file) != null;
     }
     
-    public boolean isMainFile(Object file) {
+    public boolean isMainFile(FileObject file) {
         return mainFile2Project.get(file) != null;
     }
     
-    public Collection getAllKnownFiles() {
-        Collection result = new ArrayList();
+    public Collection<FileObject> getAllKnownFiles() {
+        Collection<FileObject> result = new ArrayList<FileObject>();
         
         //TODO: is this fast enough?:
         for (Iterator i = mainFile2Project.values().iterator(); i.hasNext(); ) {

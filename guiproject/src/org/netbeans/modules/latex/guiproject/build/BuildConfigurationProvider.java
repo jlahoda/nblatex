@@ -62,7 +62,7 @@ public final class BuildConfigurationProvider {
     /** Creates a new instance of BuildConfigurationProvider */
     public BuildConfigurationProvider(LaTeXGUIProject project) {
         this.project = project;
-        configurations = new ArrayList();
+        configurations = new ArrayList<BuildConfiguration>();
         configurations.add(new BuildConfiguration("latex", "latex", new String[] {
             LaTeXPlatform.TOOL_LATEX,
         }));
@@ -79,7 +79,7 @@ public final class BuildConfigurationProvider {
             LaTeXPlatform.TOOL_LATEX,
             LaTeXPlatform.TOOL_DVIPDF,
         }));
-        showConfigurations = new ArrayList();
+        showConfigurations = new ArrayList<ShowConfiguration>();
 
         LaTeXPlatform platform = Utilities.getPlatform(project);
 

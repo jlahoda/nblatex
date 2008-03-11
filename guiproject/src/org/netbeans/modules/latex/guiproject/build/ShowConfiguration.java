@@ -47,9 +47,9 @@ import java.util.List;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
+import org.netbeans.api.editor.EditorRegistry;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
-import org.netbeans.editor.Registry;
 import org.netbeans.modules.latex.guiproject.LaTeXGUIProject;
 import org.netbeans.modules.latex.guiproject.Utilities;
 import org.netbeans.modules.latex.guiproject.ui.ProjectSettings;
@@ -87,7 +87,7 @@ public final class ShowConfiguration implements Builder {
     }
 
     private FilePosition findCurrentPosition(LaTeXGUIProject p) {
-        JTextComponent c = Registry.getMostActiveComponent();
+        JTextComponent c = EditorRegistry.lastFocusedComponent();
         
         if (c == null)
             return null;
@@ -188,7 +188,7 @@ public final class ShowConfiguration implements Builder {
         LaTeXPlatform platform = Utilities.getPlatform(p);
 
         for (String tool : conf.getTools()) {
-            result.addAll(platform.getTargetFiles(tool, (FileObject) p.getMainFile()));
+            result.addAll(platform.getTargetFiles(tool,p.getMainFile()));
         }
 
         return result;

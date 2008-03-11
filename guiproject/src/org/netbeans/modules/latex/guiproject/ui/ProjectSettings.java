@@ -232,10 +232,10 @@ public class ProjectSettings implements FileChangeListener {
         }
     }
     
-    private static Map/*<LaTeXGUIProject, ProjectSettings>*/ project2Settings = new WeakHashMap();
+    private static Map<LaTeXGUIProject, ProjectSettings> project2Settings = new WeakHashMap<LaTeXGUIProject, ProjectSettings>();
     
     public static synchronized ProjectSettings getDefault(LaTeXGUIProject p) {
-        ProjectSettings s = (ProjectSettings) project2Settings.get(p);
+        ProjectSettings s = project2Settings.get(p);
         
         if (s == null) {
             s = new ProjectSettings(p, true);
@@ -330,7 +330,7 @@ public class ProjectSettings implements FileChangeListener {
         DialogDescriptor dd = new DialogDescriptor("The settings for LaTeX project: " + ProjectUtils.getInformation(project).getDisplayName() + " has been changed on disk and are also changed in memory. Drop the in-memory changes?", "External modification");
         Dialog dialog = DialogDisplayer.getDefault().createDialog(dd);
         
-        dialog.show();
+        dialog.setVisible(true);
         
         if (dd.getValue() == DialogDescriptor.OK_OPTION) {
             load();

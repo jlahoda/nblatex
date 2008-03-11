@@ -42,7 +42,6 @@ package org.netbeans.modules.latex.guiproject.build;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,8 +63,6 @@ import org.netbeans.modules.latex.model.platform.LaTeXPlatform;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.HintsController;
 import org.openide.ErrorManager;
-import org.openide.LifecycleManager;
-import org.openide.execution.ExecutionEngine;
 import org.openide.execution.NbProcessDescriptor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -73,7 +70,6 @@ import org.openide.filesystems.URLMapper;
 import org.openide.util.Exceptions;
 import org.openide.util.MapFormat;
 import org.openide.util.NbBundle;
-import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 import org.openide.windows.OutputWriter;
 
@@ -108,10 +104,10 @@ public final class BuildConfiguration implements Builder {
         if (getErrorIfAny(p) != null)
             throw new IllegalArgumentException();
         
-        FileObject file = (FileObject) p.getMainFile();
+        FileObject file = p.getMainFile();
         File wd = FileUtil.toFile(file.getParent());
         LaTeXPlatform platform = Utilities.getPlatform(p);
-        Map format = new HashMap();
+        Map<String, String> format = new HashMap<String, String>();
         boolean result = true;
         
         format.put(LaTeXPlatform.ARG_INPUT_FILE_BASE, file.getName());
@@ -209,6 +205,7 @@ public final class BuildConfiguration implements Builder {
                         public void run(CompilationController parameter) throws Exception {
                             parameter.toPhase(Phase.RESOLVED);
                             LaTeXParserResult.get(parameter).getDocument().traverse(new DefaultTraverseHandler() {
+                                @Override
                                 public boolean commandStart(CommandNode node) {
                                     if ("\\bibliography".equals(node.getCommand().getCommand())) {
                                         result[0] = true;
@@ -232,7 +229,7 @@ public final class BuildConfiguration implements Builder {
         if (getErrorIfAny(p) != null)
             throw new IllegalArgumentException();
 
-        FileObject file = (FileObject) p.getMainFile();
+        FileObject file = p.getMainFile();
         LaTeXPlatform platform = Utilities.getPlatform(p);
         List<URI> targets = new ArrayList<URI>();
         

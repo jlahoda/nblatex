@@ -82,11 +82,8 @@ import org.openide.filesystems.FileStatusEvent;
 import org.openide.filesystems.FileStatusListener;
 import org.openide.filesystems.FileSystem;
 import org.openide.filesystems.FileUtil;
-import org.openide.filesystems.Repository;
-import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
-import org.openide.loaders.FolderLookup;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.FilterNode;
@@ -119,7 +116,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
     private static final Icon LaTeXGUIProjectICON;
     
     static {
-        LaTeXGUIProjectIMAGE = org.openide.util.Utilities.loadImage("org/netbeans/modules/latex/guiproject/resources/latex_gui_project_icon.gif");//NOI18N
+        LaTeXGUIProjectIMAGE = org.openide.util.Utilities.loadImage("org/netbeans/modules/latex/guiproject/resources/latex_gui_project_icon.png");//NOI18N
         LaTeXGUIProjectICON  = new ImageIcon(LaTeXGUIProjectIMAGE);
     }
     
@@ -172,7 +169,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             return null;
         
         Node[] files = root.getChildren().getNodes(true);
-        Lookup.Template searchingTemplate= new Lookup.Template(null, null, target);
+        Lookup.Template<Object> searchingTemplate= new Lookup.Template<Object>(null, null, target);
         
         for (int cntr = 0; cntr < files.length; cntr++) {
             if (files[cntr].getLookup().lookup(searchingTemplate).allInstances().size() > 0)
@@ -209,7 +206,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
         return FileUtil.toFile(dir);
     }
     
-    private Collection containedFilesCache;
+    private Collection<FileObject> containedFilesCache;
     
     /*package private*/synchronized boolean contains(FileObject file) {
         //TODO: more effeciently:
@@ -220,7 +217,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
         }
     }
     
-    public synchronized Collection getContainedFiles() {
+    public synchronized Collection<FileObject> getContainedFiles() {
         if (containedFilesCache == null)
             return Collections.singletonList(getMainFile());
         else {
@@ -248,8 +245,8 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
         private LaTeXGUIProject project;
         
         // icon badging >>>
-        private Set files;
-        private Map fileSystemListeners;
+        private Set<FileObject> files;
+        private Map<FileSystem, FileStatusListener> fileSystemListeners;
         private RequestProcessor.Task task;
         private final Object privateLock = new Object();
         private boolean iconChange;
@@ -261,14 +258,15 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
         public LaTeXGUIProjectNode(LaTeXGUIProject project) {
             super(new LaTeXChildren(project), Lookups.fixed(new Object[] {project, NAVIGATOR_HINT, new SearchInfoImpl(project)}));
             setDisplayName(ProjectUtils.getInformation(project).getDisplayName());
-            setIconBase("org/netbeans/modules/latex/guiproject/resources/latex_gui_project_icon");
+            setIconBaseWithExtension("org/netbeans/modules/latex/guiproject/resources/latex_gui_project_icon.png");
             this.project = project;
             setProjectFiles(project);
             project.addPropertyChangeListener(this);
         }
         
+        @Override
         public Action[] getActions(boolean context) {
-            List actions = new ArrayList();
+            List<Action> actions = new ArrayList<Action>();
             
             actions.add(ActionsFactory.createShowAction());
             actions.add(null);
@@ -285,60 +283,46 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             
             // honor 57874 contact
             
-            try {
-                Repository repository  = Repository.getDefault();
-                FileSystem sfs = repository.getDefaultFileSystem();
-                FileObject fo = sfs.findResource("Projects/Actions");  // NOI18N
-                if (fo != null) {
-                    DataObject dobj = DataObject.find(fo);
-                    FolderLookup actionRegistry = new FolderLookup((DataFolder)dobj);
-                    Lookup.Template query = new Lookup.Template(Object.class);
-                    Lookup lookup = actionRegistry.getLookup();
-                    Iterator it = lookup.lookup(query).allInstances().iterator();
-                    if (it.hasNext()) {
-                        actions.add(null);
-                    }
-                    while (it.hasNext()) {
-                        Object next = it.next();
-                        if (next instanceof Action) {
-                            actions.add(next);
-                        } else if (next instanceof JSeparator) {
-                            actions.add(null);
-                        }
-                    }
+            Iterator<? extends Object> it = Lookups.forPath("Projects/Actions").lookupAll(Object.class).iterator();
+            if (it.hasNext()) {
+                actions.add(null);
+            }
+            while (it.hasNext()) {
+                Object next = it.next();
+                if (next instanceof Action) {
+                    actions.add((Action) next);
+                } else if (next instanceof JSeparator) {
+                    actions.add(null);
                 }
-            } catch (DataObjectNotFoundException ex) {
-                // data folder for exitinf fileobject expected
-                ErrorManager.getDefault().notify(ex);
             }
             
             actions.add(null);
             actions.add(CommonProjectActions.customizeProjectAction());
             
-            return (Action []) actions.toArray(new Action[actions.size()]);
+            return actions.toArray(new Action[actions.size()]);
         }
 
         
         protected final void setProjectFiles(LaTeXGUIProject project) {
-            setFiles(new HashSet(project.getContainedFiles()));
+            setFiles(new HashSet<FileObject>(project.getContainedFiles()));
         }
         
-        protected final void setFiles(Set files) {
+        protected final void setFiles(Set<FileObject> files) {
             if (fileSystemListeners != null) {
                 Iterator it = fileSystemListeners.keySet().iterator();
                 while (it.hasNext()) {
                     FileSystem fs = (FileSystem) it.next();
-                    FileStatusListener fsl = (FileStatusListener) fileSystemListeners.get(fs);
+                    FileStatusListener fsl = fileSystemListeners.get(fs);
                     fs.removeFileStatusListener(fsl);
                 }
             }
                         
-            fileSystemListeners = new HashMap();
+            fileSystemListeners = new HashMap<FileSystem, FileStatusListener>();
             this.files = files;
             if (files == null) return;
 
             Iterator it = files.iterator();
-            Set hookedFileSystems = new HashSet();
+            Set<FileSystem> hookedFileSystems = new HashSet<FileSystem>();
             while (it.hasNext()) {
                 FileObject fo = (FileObject) it.next();
                 try {
@@ -358,12 +342,13 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             }
         }
 
+        @Override
         public String getDisplayName () {
             String s = super.getDisplayName ();
 
             if (files != null && files.iterator().hasNext()) {
                 try {
-                    FileObject fo = (FileObject) files.iterator().next();
+                    FileObject fo = files.iterator().next();
                     s = fo.getFileSystem ().getStatus ().annotateName (s, files);
                 } catch (FileStateInvalidException e) {
                     ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
@@ -373,10 +358,11 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             return s;
         }
 
+        @Override
          public String getHtmlDisplayName() {
             if (files != null && files.iterator().hasNext()) {
                 try {
-                    FileObject fo = (FileObject) files.iterator().next();
+                    FileObject fo = files.iterator().next();
                     FileSystem.Status stat = fo.getFileSystem().getStatus();
                     if (stat instanceof FileSystem.HtmlStatus) {
                         FileSystem.HtmlStatus hstat = (FileSystem.HtmlStatus) stat;
@@ -396,12 +382,13 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             return getDisplayName();
         }
          
+        @Override
         public Image getIcon (int type) {
             Image img = super.getIcon(type);
 
             if (files != null && files.iterator().hasNext()) {
                 try {
-                    FileObject fo = (FileObject) files.iterator().next();
+                    FileObject fo = files.iterator().next();
                     img = fo.getFileSystem ().getStatus ().annotateIcon (img, type, files);
                 } catch (FileStateInvalidException e) {
                     ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
@@ -410,12 +397,13 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
 
             return img;
         }
+        @Override
         public Image getOpenedIcon (int type) {
             Image img = super.getOpenedIcon(type);
 
             if (files != null && files.iterator().hasNext()) {
                 try {
-                    FileObject fo = (FileObject) files.iterator().next();
+                    FileObject fo = files.iterator().next();
                     img = fo.getFileSystem ().getStatus ().annotateIcon (img, type, files);
                 } catch (FileStateInvalidException e) {
                     ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
@@ -471,7 +459,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
     }
     
     
-    private static class LaTeXChildren extends Children.Keys implements ChangeListener/*TODO: Weak?*/ {
+    private static class LaTeXChildren extends Children.Keys<FileObject> implements ChangeListener/*TODO: Weak?*/ {
 
         private LaTeXGUIProject project;
 
@@ -479,6 +467,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             this.project = project;
         }
 
+        @Override
         public void addNotify() {
             project.addChangeListener(this);
             doSetKeys();
@@ -486,11 +475,11 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
         
         private void doSetKeys() {
 //            Thread.dumpStack();
-            List toAdd = new ArrayList();
+            List<FileObject> toAdd = new ArrayList<FileObject>();
             
             toAdd.addAll(project.getContainedFiles());
             
-            Object main = project.getMainFile();
+            FileObject main = project.getMainFile();
             
             toAdd.remove(main);
             toAdd.add(0, main);
@@ -499,11 +488,11 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             setKeys(toAdd);
         }
         
-        protected Node[] createNodes(Object key) {
+        protected Node[] createNodes(FileObject key) {
             try {
-            DataObject od = DataObject.find((FileObject) key);
-            
-            return new Node[] {new SourceFileNode(od.getNodeDelegate(), (FileObject) key)};
+                DataObject od = DataObject.find(key);
+
+                return new Node[]{new SourceFileNode(od.getNodeDelegate(), key)};
             } catch (DataObjectNotFoundException e) {
                 ErrorManager.getDefault().notify(e);
                 return new Node[0];
