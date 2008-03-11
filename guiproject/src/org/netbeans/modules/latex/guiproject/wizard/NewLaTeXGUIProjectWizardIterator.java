@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2004.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -59,7 +59,6 @@ import org.netbeans.modules.latex.guiproject.CreateNewLaTeXProject;
 import org.openide.ErrorManager;
 
 import org.openide.WizardDescriptor;
-import org.openide.WizardDescriptor.InstantiatingIterator;
 import org.openide.WizardDescriptor.Panel;
 
 import org.openide.filesystems.FileLock;
@@ -153,7 +152,7 @@ public class NewLaTeXGUIProjectWizardIterator implements org.openide.WizardDescr
             }
         }
         
-        Set results = new HashSet();
+        Set<FileObject> results = new HashSet<FileObject>();
         
         results.add(mainFileFO);
                 

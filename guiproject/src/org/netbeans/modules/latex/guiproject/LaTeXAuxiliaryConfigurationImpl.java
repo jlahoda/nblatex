@@ -237,8 +237,8 @@ public class LaTeXAuxiliaryConfigurationImpl implements AuxiliaryConfiguration {
      * @return (a clone of) the named configuration fragment, or null if it does not exist
      */
     public Element getConfigurationFragment(final String elementName, final String namespace, final boolean shared) {
-        return (Element) ProjectManager.mutex().readAccess(new Mutex.Action() {
-            public Object run() {
+        return ProjectManager.mutex().readAccess(new Mutex.Action<Element>() {
+            public Element run() {
                 Element root = getConfigurationDataRoot(shared);
                 Element data = findElement(root, elementName, namespace);
                 if (data != null) {
@@ -258,8 +258,8 @@ public class LaTeXAuxiliaryConfigurationImpl implements AuxiliaryConfiguration {
      * @param shared to use project.xml vs. private.xml
      */
     public void putConfigurationFragment(final Element fragment, final boolean shared) {
-        ProjectManager.mutex().writeAccess(new Mutex.Action() {
-            public Object run() {
+        ProjectManager.mutex().writeAccess(new Mutex.Action<Void>() {
+            public Void run() {
                 Element root = getConfigurationDataRoot(shared);
                 Element existing = findElement(root, fragment.getLocalName(), fragment.getNamespaceURI());
                 // XXX first compare to existing and return if the same
@@ -298,8 +298,8 @@ public class LaTeXAuxiliaryConfigurationImpl implements AuxiliaryConfiguration {
      * @return true if anything was actually removed
      */
     public boolean removeConfigurationFragment(final String elementName, final String namespace, final boolean shared) {
-        return ((Boolean) ProjectManager.mutex().writeAccess(new Mutex.Action() {
-            public Object run() {
+        return ProjectManager.mutex().writeAccess(new Mutex.Action<Boolean>() {
+            public Boolean run() {
                 Element root = getConfigurationDataRoot(shared);
                 Element data = findElement(root, elementName, namespace);
                 if (data != null) {
@@ -310,7 +310,7 @@ public class LaTeXAuxiliaryConfigurationImpl implements AuxiliaryConfiguration {
                     return Boolean.FALSE;
                 }
             }
-        })).booleanValue();
+        });
     }
     
     /**

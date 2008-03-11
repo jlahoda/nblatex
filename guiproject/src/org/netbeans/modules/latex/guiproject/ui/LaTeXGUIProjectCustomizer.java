@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -40,18 +40,15 @@
  */
 package org.netbeans.modules.latex.guiproject.ui;
 
-import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.JComponent;
-import javax.swing.JLabel;
 import org.netbeans.modules.latex.guiproject.LaTeXGUIProject;
 import org.netbeans.spi.project.ui.CustomizerProvider;
 import org.netbeans.spi.project.ui.support.ProjectCustomizer;
@@ -67,7 +64,7 @@ public class LaTeXGUIProjectCustomizer extends WindowAdapter implements Customiz
     private static final String CAT_BUILD = "build";
     
     private LaTeXGUIProject project;
-    private List/*<StorableSettingsPresenter>*/ currentPresenters;
+    private List<StorableSettingsPresenter> currentPresenters;
     private Dialog current;
     
     /** Creates a new instance of LaTeXGUIProjectCustomizer */
@@ -81,9 +78,9 @@ public class LaTeXGUIProjectCustomizer extends WindowAdapter implements Customiz
             return ;
         }
         
-        Category build = ProjectCustomizer.Category.create(CAT_BUILD, "Build&Show", null, null);
+        Category build = ProjectCustomizer.Category.create(CAT_BUILD, "Build&Show", null);
         
-        currentPresenters = new ArrayList();
+        currentPresenters = new ArrayList<StorableSettingsPresenter>();
         
         current = ProjectCustomizer.createCustomizerDialog(new Category[] {build}, this, null, new ActionListener() {
             public void actionPerformed(ActionEvent e) {

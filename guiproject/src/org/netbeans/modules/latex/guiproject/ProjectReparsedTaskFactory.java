@@ -70,7 +70,7 @@ public class ProjectReparsedTaskFactory extends SourceTaskFactory {
             public void run(CompilationInfo parameter) throws Exception {
                 LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
                 
-                LaTeXGUIProject p = (LaTeXGUIProject) LaTeXGUIProjectFactorySourceFactory.get().mainFile2Project.get(file);
+                LaTeXGUIProject p = LaTeXGUIProjectFactorySourceFactory.get().mainFile2Project.get(file);
                 
                 if (p != null) {
                     p.setContainedFile(lpr.getDocument().getFiles());

@@ -67,8 +67,8 @@ public final class SearchInfoImpl implements SearchInfo {
         return true;
     }
 
-    public Iterator objectsToSearch() {
-        List result = new ArrayList();
+    public Iterator<DataObject> objectsToSearch() {
+        List<DataObject> result = new ArrayList<DataObject>();
         
         for (Iterator i = p.getContainedFiles().iterator(); i.hasNext(); ) {
             FileObject file = (FileObject) i.next();

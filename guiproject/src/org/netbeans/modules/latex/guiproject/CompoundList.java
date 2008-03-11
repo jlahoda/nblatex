@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2004.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -42,16 +42,11 @@
  * Contributor(s): Jan Lahoda.
  */
 package org.netbeans.modules.latex.guiproject;
-import java.util.AbstractCollection;
 
-import java.util.AbstractList;
+import java.util.AbstractCollection;
 import java.util.ArrayList;
 import java.util.Collection;
-
-
 import java.util.Iterator;
-
-
 import java.util.List;
 
 /**
@@ -60,9 +55,9 @@ import java.util.List;
  */
 public class CompoundList extends AbstractCollection {
 
-    private List/*<Collection>*/ collections;
+    private List<Collection> collections;
 
-    public CompoundList(List/*<Collection>*/ collections) {
+    public CompoundList(List<Collection> collections) {
         this.collections = collections;
     }
 
@@ -83,19 +78,19 @@ public class CompoundList extends AbstractCollection {
     private static class IteratorImpl implements Iterator {
         
         private Iterator current;
-        private Iterator content;
+        private Iterator<Iterator> content;
         
-        public IteratorImpl(List collections) {
-            List/*<Iterator>*/ iterators = new ArrayList();
+        public IteratorImpl(List<Collection> collections) {
+            List<Iterator> iterators = new ArrayList<Iterator>();
             
-            for (Iterator i = collections.iterator(); i.hasNext(); ) {
-                iterators.add(((Collection) i.next()).iterator());
+            for (Collection c : collections) {
+                iterators.add(c.iterator());
             }
             
             content = iterators.iterator();
             
             if (content.hasNext())
-                current = (Iterator) content.next();
+                current = content.next();
             else
                 current = null;
         }
@@ -110,7 +105,7 @@ public class CompoundList extends AbstractCollection {
             if (!content.hasNext())
                 return false;
             
-            current = (Iterator) content.next();
+            current = content.next();
             
             return hasNext();
         }
