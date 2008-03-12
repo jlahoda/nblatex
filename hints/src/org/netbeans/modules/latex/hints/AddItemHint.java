@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -56,6 +56,7 @@ import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.CommandNode;
+import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
 import org.netbeans.napi.gsfret.source.CompilationInfo;
@@ -87,7 +88,7 @@ public class AddItemHint implements HintProvider {
         return n instanceof CommandNode && n.hasAttribute("item-command") && ((CommandNode) n).getCommand().getArgumentCount() == 2 /*XXX*/;
     }
 
-    public List<ErrorDescription> computeHints(CompilationInfo info, Node n) throws Exception {
+    public List computeHints(CompilationInfo info, Node n, Data providerPrivateData) throws Exception {
         return computeHints(info, n, CaretAwareSourceTaskFactory.getLastPosition(info.getFileObject()));
     }
     
@@ -238,6 +239,10 @@ public class AddItemHint implements HintProvider {
             return textToInsert;
         }
         
+    }
+
+    public List scanningFinished(CompilationInfo info, DocumentNode dn, Data providerPrivateData) throws Exception {
+        return null;
     }
     
 }

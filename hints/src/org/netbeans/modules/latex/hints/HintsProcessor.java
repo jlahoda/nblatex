@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -42,16 +42,20 @@
 package org.netbeans.modules.latex.hints;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.text.Document;
 import org.netbeans.modules.gsf.api.CancellableTask;
+import org.netbeans.modules.latex.hints.HintProvider.Data;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.BlockNode;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.DefaultTraverseHandler;
+import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.MathNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.TextNode;
@@ -94,6 +98,7 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
 
         final List<ErrorDescription> hints = new LinkedList<ErrorDescription>();
         LaTeXParserResult lpr = LaTeXParserResult.get(info);
+        final Map<Class, Data<?>> providerPrivateData = new HashMap<Class, Data<?>>();
         
         lpr.getDocument().traverse(new DefaultTraverseHandler() {
             @Override
@@ -102,7 +107,7 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
                     return false;
                 }
                 
-                handleNode(info, providers, hints, node);
+                handleNode(info, providers, hints, node, providerPrivateData);
                 
                 return !cancel.get();
             }
@@ -112,7 +117,7 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
                     return false;
                 }
 
-                handleNode(info, providers, hints, node);
+                handleNode(info, providers, hints, node, providerPrivateData);
                 
                 return !cancel.get();
             }
@@ -122,7 +127,7 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
                     return false;
                 }
 
-                handleNode(info, providers, hints, node);
+                handleNode(info, providers, hints, node, providerPrivateData);
                 
                 return !cancel.get();
             }
@@ -132,7 +137,7 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
                     return false;
                 }
 
-                handleNode(info, providers, hints, node);
+                handleNode(info, providers, hints, node, providerPrivateData);
                 
                 return !cancel.get();
             }
@@ -142,11 +147,13 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
                     return false;
                 }
 
-                handleNode(info, providers, hints, node);
+                handleNode(info, providers, hints, node, providerPrivateData);
                 
                 return !cancel.get();
             }
         });
+        
+        handleFinished(info, providers, hints, lpr.getDocument(), providerPrivateData);
         
         return hints;
     }
@@ -158,13 +165,21 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
         
         providers.add(new CheckCountersHint());
         providers.add(new UnknownCiteHint());
+        providers.add(new UnbalancedBrackets());
     }
         
-    static void handleNode(CompilationInfo info, List<HintProvider> providers, List<ErrorDescription> hints, Node n) {
-        for (HintProvider p : providers) {
+    static void handleNode(CompilationInfo info, List<HintProvider> providers, List<ErrorDescription> hints, Node n, Map<Class, Data<?>> providerPrivateData) {
+        for (HintProvider<?> p : providers) {
             if (p.accept(info, n)) {
+                Data d = providerPrivateData.get(p.getClass());
+                
+                if (d == null) {
+                    providerPrivateData.put(p.getClass(), d = new Data());
+                }
+                
                 try {
-                    List<ErrorDescription> h = p.computeHints(info, n);
+                    @SuppressWarnings("unchecked")
+                    List<ErrorDescription> h = p.computeHints(info, n, d);
 
                     if (h != null) {
                         for (ErrorDescription ed : h) {
@@ -176,6 +191,31 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
                 } catch (Exception ex) {
                     Exceptions.printStackTrace(ex);
                 }
+            }
+        }
+    }
+    
+    static void handleFinished(CompilationInfo info, List<HintProvider> providers, List<ErrorDescription> hints, DocumentNode dn, Map<Class, Data<?>> providerPrivateData) {
+        for (HintProvider<?> p : providers) {
+            Data d = providerPrivateData.get(p.getClass());
+
+            if (d == null) {
+                providerPrivateData.put(p.getClass(), d = new Data());
+            }
+
+            try {
+                @SuppressWarnings("unchecked")
+                List<ErrorDescription> h = p.scanningFinished(info, dn, d);
+
+                if (h != null) {
+                    for (ErrorDescription ed : h) {
+                        if (info.getFileObject().equals(ed.getFile())) {
+                            hints.add(ed);
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
             }
         }
     }

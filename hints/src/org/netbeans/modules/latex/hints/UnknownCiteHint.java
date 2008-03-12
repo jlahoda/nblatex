@@ -43,10 +43,12 @@ package org.netbeans.modules.latex.hints;
 
 import java.util.LinkedList;
 import java.util.List;
+import org.netbeans.modules.latex.hints.HintProvider.Data;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.bibtex.PublicationEntry;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
+import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.spi.editor.hints.ErrorDescription;
@@ -57,13 +59,13 @@ import org.netbeans.spi.editor.hints.Severity;
  *
  * @author Jan Lahoda
  */
-public class UnknownCiteHint implements HintProvider {
+public class UnknownCiteHint implements HintProvider<Void> {
 
     public boolean accept(CompilationInfo info, Node n) {
         return n instanceof ArgumentNode && n.hasAttribute("#cite");
     }
 
-    public List<ErrorDescription> computeHints(CompilationInfo info, Node n) throws Exception {
+    public List<ErrorDescription> computeHints(CompilationInfo info, Node n, Data<Void> providerPrivateData) throws Exception {
         LaTeXParserResult lpr = LaTeXParserResult.get(info);
         ArgumentNode anode = (ArgumentNode) n;
         String       nodeValue = lpr.getCommandUtilities().getArgumentValue(anode).toString();
@@ -90,6 +92,10 @@ public class UnknownCiteHint implements HintProvider {
         }
         
         return res;
+    }
+
+    public List<ErrorDescription> scanningFinished(CompilationInfo info, DocumentNode dn, Data<Void> providerPrivateData) throws Exception {
+        return null;
     }
     
 }
