@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -45,7 +45,6 @@ package org.netbeans.modules.latex.model.command.impl;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 import org.openide.filesystems.FileObject;
 
 public class LaTeXSourceFactoryImpl extends AbstractLaTeXSourceFactory {
@@ -53,20 +52,20 @@ public class LaTeXSourceFactoryImpl extends AbstractLaTeXSourceFactory {
     public LaTeXSourceFactoryImpl() {
     }
 
-    public boolean supports(Object file) {
+    public boolean supports(FileObject file) {
         return file instanceof FileObject;
     }
 
-    public boolean isKnownFile(Object file) {
+    public boolean isKnownFile(FileObject file) {
         return true;
     }
     
-    public boolean isMainFile(Object file) {
+    public boolean isMainFile(FileObject file) {
         return true;
     }
 
-    public Collection getAllKnownFiles() {
-        return Collections.EMPTY_LIST;
+    public Collection<FileObject> getAllKnownFiles() {
+        return Collections.emptyList();
     }
 
     public FileObject findMainFile(FileObject file) {
