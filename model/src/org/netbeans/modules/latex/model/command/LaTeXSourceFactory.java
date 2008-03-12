@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -71,7 +71,7 @@ public abstract class LaTeXSourceFactory {
         listeners.remove(l);
     }
     
-    protected void fireMainFileEvent(Object mainFile, boolean isMainFile, boolean isKnownFile) {
+    protected void fireMainFileEvent(FileObject mainFile, boolean isMainFile, boolean isKnownFile) {
         List clone;
         
         synchronized (this) {
@@ -90,13 +90,13 @@ public abstract class LaTeXSourceFactory {
         }
     }
     
-    public abstract boolean supports(Object file);
+    public abstract boolean supports(FileObject file);
     
     public abstract FileObject findMainFile(FileObject file);
     
-    public abstract boolean isKnownFile(Object file);
+    public abstract boolean isKnownFile(FileObject file);
     
-    public abstract boolean isMainFile(Object file);
+    public abstract boolean isMainFile(FileObject file);
     
     /**Return collection of known files. This method should return collection of
      * files for which holds <code>get(file) != null</code> for this factory.
@@ -107,7 +107,7 @@ public abstract class LaTeXSourceFactory {
      * @return list of all known files (<code>get(file) != null</code>). Should
      *              never return <code>null</code>.
      */
-    public abstract Collection getAllKnownFiles();
+    public abstract Collection<FileObject> getAllKnownFiles();
 
     public static interface MainFileListener extends EventListener {
         
@@ -116,11 +116,11 @@ public abstract class LaTeXSourceFactory {
     
     public static class MainFileEvent extends EventObject {
         
-        private Object             mainFile;
+        private FileObject         mainFile;
         private boolean            isMainFile;
         private boolean            isKnownFile;
         
-        public MainFileEvent(LaTeXSourceFactory factory, Object mainFile, boolean isMainFile, boolean isKnownFile) {
+        public MainFileEvent(LaTeXSourceFactory factory, FileObject mainFile, boolean isMainFile, boolean isKnownFile) {
             super(factory);
             this.mainFile = mainFile;
             this.isMainFile = isMainFile;
@@ -131,7 +131,7 @@ public abstract class LaTeXSourceFactory {
             return (LaTeXSourceFactory) getSource();
         }
         
-        public Object getMainFile() {
+        public FileObject getMainFile() {
             return mainFile;
         }
         
