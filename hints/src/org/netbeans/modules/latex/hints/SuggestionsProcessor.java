@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -42,10 +42,13 @@
 package org.netbeans.modules.latex.hints;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import javax.swing.text.Document;
 import org.netbeans.modules.gsf.api.CancellableTask;
+import org.netbeans.modules.latex.hints.HintProvider.Data;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.napi.gsfret.source.CompilationInfo;
@@ -91,12 +94,15 @@ public class SuggestionsProcessor implements CancellableTask<CompilationInfo> {
         }
         
         final List<ErrorDescription> hints = new LinkedList<ErrorDescription>();
+        final Map<Class, Data<?>> providerPrivateData = new HashMap<Class, Data<?>>();
         
         while (n != null) {
-            handleNode(info, providers, hints, n);
+            HintsProcessor.handleNode(info, providers, hints, n, providerPrivateData);
             
             n = n.getParent();
         }
+        
+        HintsProcessor.handleFinished(info, providers, hints, lpr.getDocument(), providerPrivateData);
         
         return hints;
     }
@@ -109,18 +115,6 @@ public class SuggestionsProcessor implements CancellableTask<CompilationInfo> {
         providers.add(new AddItemHint());
     }
         
-    static void handleNode(CompilationInfo info, List<HintProvider> providers, List<ErrorDescription> hints, Node n) throws Exception {
-        for (HintProvider p : providers) {
-            if (p.accept(info, n)) {
-                List<ErrorDescription> h = p.computeHints(info, n);
-                
-                if (h != null) {
-                    hints.addAll(h);
-                }
-            }
-        }
-    }
-    
     public static final class Factory extends CaretAwareSourceTaskFactory {
 
         public Factory() {
