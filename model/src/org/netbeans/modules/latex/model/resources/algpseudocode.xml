@@ -2,7 +2,7 @@
 <!--
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
 
 
 The contents of this file are subject to the terms of either the GNU
@@ -26,7 +26,7 @@ your own identifying information:
 Contributor(s):
 
 The Original Software is the LaTeX module. The Initial Developer of the Original
-Software is Jan Lahoda. Portions Copyright 2003-2004 Sun
+Software is Jan Lahoda. Portions Copyright 2003-2008 Sun
 Microsystems, Inc. All Rights Reserved.
 
 If you wish your version of this file to be governed by only the CDDL
@@ -56,34 +56,51 @@ made subject to such option by the copyright holder.
             <command name="\State"/>
 
             <command name="\For">
+              <attribute name="bracket" value="open"/>
+              <attribute name="bracket-type" value="algorithmic-for"/>
               <argument type="mandatory">
                 <attribute name="#code" value="true" />
               </argument>
             </command>
 
             <command name="\ForAll">
+              <attribute name="bracket" value="open"/>
+              <attribute name="bracket-type" value="algorithmic-for"/>
               <argument type="mandatory">
                 <attribute name="#code" value="true" />
               </argument>
             </command>
 
-            <command name="\EndFor"/>
+            <command name="\EndFor">
+              <attribute name="bracket" value="close"/>
+              <attribute name="bracket-type" value="algorithmic-for"/>
+            </command>
 
             <command name="\While">
+              <attribute name="bracket" value="open"/>
+              <attribute name="bracket-type" value="algorithmic-while"/>
               <argument type="mandatory">
                 <attribute name="#code" value="true" />
               </argument>
             </command>
 
-            <command name="\EndWhile"/>
+            <command name="\EndWhile">
+              <attribute name="bracket" value="close"/>
+              <attribute name="bracket-type" value="algorithmic-while"/>
+            </command>
 
             <command name="\Until">
+              <attribute name="bracket" value="open"/>
+              <attribute name="bracket-type" value="algorithmic-until"/>
               <argument type="mandatory">
                 <attribute name="#code" value="true" />
               </argument>
             </command>
 
-            <command name="\Repeat"/>
+            <command name="\Repeat">
+              <attribute name="bracket" value="close"/>
+              <attribute name="bracket-type" value="algorithmic-until"/>
+            </command>
 
             <command name="\If">
               <argument type="mandatory">
@@ -100,6 +117,8 @@ made subject to such option by the copyright holder.
             <command name="\Else"/>
 
             <command name="\Procedure">
+              <attribute name="bracket" value="open"/>
+              <attribute name="bracket-type" value="algorithmic-procedure"/>
               <argument type="mandatory">
                 <attribute name="#code" value="true" />
               </argument>
@@ -108,9 +127,14 @@ made subject to such option by the copyright holder.
               </argument>
             </command>
 
-            <command name="\EndProcedure" />
+            <command name="\EndProcedure">
+              <attribute name="bracket" value="close"/>
+              <attribute name="bracket-type" value="algorithmic-procedure"/>
+            </command>
 
             <command name="\Function">
+              <attribute name="bracket" value="open"/>
+              <attribute name="bracket-type" value="algorithmic-function"/>
               <argument type="mandatory">
                 <attribute name="#code" value="true" />
               </argument>
@@ -119,10 +143,19 @@ made subject to such option by the copyright holder.
               </argument>
             </command>
 
-            <command name="\EndFunction" />
+            <command name="\EndFunction">
+              <attribute name="bracket" value="close"/>
+              <attribute name="bracket-type" value="algorithmic-function"/>
+            </command>
 
-            <command name="\Loop" />
-            <command name="\EndLoop" />
+            <command name="\Loop">
+              <attribute name="bracket" value="open"/>
+              <attribute name="bracket-type" value="algorithmic-loop"/>
+            </command>
+            <command name="\EndLoop">
+              <attribute name="bracket" value="close"/>
+              <attribute name="bracket-type" value="algorithmic-loop"/>
+            </command>
             <command name="\Require" />
             <command name="\Ensure" />
 
