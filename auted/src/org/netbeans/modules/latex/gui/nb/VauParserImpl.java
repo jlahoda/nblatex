@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -43,7 +43,6 @@
  */
 package org.netbeans.modules.latex.gui.nb;
 
-import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Collection;
 import java.util.Collections;
@@ -64,16 +63,12 @@ import org.netbeans.modules.latex.gui.VCurveEdgeNode;
 import org.netbeans.modules.latex.gui.VVCurveEdgeNode;
 import org.netbeans.modules.latex.model.ParseError;
 import org.netbeans.modules.latex.model.ParseError.Severity;
-import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
-import org.netbeans.modules.latex.model.command.Command;
 
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.DefaultTraverseHandler;
 import org.netbeans.modules.latex.model.command.SourcePosition;
 import org.netbeans.modules.latex.model.command.TextNode;
-import org.netbeans.modules.latex.model.structural.DelegatedParser;
-import org.netbeans.modules.latex.model.structural.StructuralElement;
 import org.openide.ErrorManager;
 
 /**
@@ -115,7 +110,8 @@ public final class VauParserImpl {
             this.attributes      = new HashMap();
         }
         
-       public boolean commandStart(CommandNode node) {
+        @Override
+        public boolean commandStart(CommandNode node) {
             if (node.getArgumentCount() != node.getCommand().getArgumentCount()) {
                 errors.add(createError("Command " + node.getCommand().getCommand() + " is supposed to have " + node.getCommand().getArgumentCount() + " arguments, but found " + node.getArgumentCount() + ".", node.getStartingPosition()));
             }
@@ -142,10 +138,10 @@ public final class VauParserImpl {
         }
     }
     
-    private Map/*String->CommandParser*/ commandHandlers;
-    private synchronized Map/*String->CommandParser*/ getCommandHandlers() {
+    private Map<String, CommandParser> commandHandlers;
+    private synchronized Map<String, CommandParser> getCommandHandlers() {
         if (commandHandlers == null) {
-            commandHandlers = new HashMap();
+            commandHandlers = new HashMap<String, CommandParser>();
             
             addCommand(commandHandlers, new StateCommandParser());
             addCommand(commandHandlers, new EdgeBorderParser());
@@ -161,7 +157,7 @@ public final class VauParserImpl {
         return commandHandlers;
     }
     
-    private void addCommand(Map commandHandlers, CommandParser parser) {
+    private void addCommand(Map<String, CommandParser> commandHandlers, CommandParser parser) {
         String[] commands = parser.getSupportedCommandsName();
         
         for (int cntr = 0; cntr < commands.length; cntr++) {
@@ -212,10 +208,10 @@ public final class VauParserImpl {
         }
     }
     
-    private static Map/*String->String*/ parseOptions(TextNode node, Collection<ParseError> errors) {
-        String options = node.getText().toString();
-        StringTokenizer tokenizer = new StringTokenizer(options, ",");
-        Map             result    = new HashMap();
+    private static Map<String, String> parseOptions(TextNode node, Collection<ParseError> errors) {
+        String              options   = node.getText().toString();
+        StringTokenizer     tokenizer = new StringTokenizer(options, ",");
+        Map<String, String> result    = new HashMap<String, String>();
         
         while (tokenizer.hasMoreTokens()) {
             String token = tokenizer.nextToken();
@@ -224,21 +220,21 @@ public final class VauParserImpl {
             
             if (!equals.hasMoreTokens()) {
                 errors.add(createError("Incorrect options: " + options + ".", node.getStartingPosition()));
-                return Collections.EMPTY_MAP;
+                return Collections.emptyMap();
             }
             
             String name = equals.nextToken();
             
             if (!equals.hasMoreTokens()) {
                 errors.add(createError("Incorrect options: " + options + ".", node.getStartingPosition()));
-                return Collections.EMPTY_MAP;
+                return Collections.emptyMap();
             }
             
             String value = equals.nextToken();
             
             if (equals.hasMoreTokens()) {
                 errors.add(createError("Incorrect options: " + options + ".", node.getStartingPosition()));
-                return Collections.EMPTY_MAP;
+                return Collections.emptyMap();
             }
             
             result.put(name, value);
