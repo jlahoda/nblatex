@@ -83,7 +83,12 @@ public class SectionStructuralElement extends StructuralElement {
         return node;
     }
     
-    /*package private*/ void fireNameChanged() {
+    void update(CommandNode node) {
+        this.node = node;
+        fireNameChanged();
+    }
+    
+    private void fireNameChanged() {
         pcs.firePropertyChange(NAME, null, null);
     }
 }
