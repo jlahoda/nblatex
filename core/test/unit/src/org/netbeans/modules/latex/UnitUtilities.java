@@ -116,10 +116,10 @@ public class UnitUtilities extends ProxyLookup {
         Repository repository = new Repository(fs);
         Object[] lookupContent = new Object[additionalLookupContent.length + 2];
         
-        System.arraycopy(additionalLookupContent, 0, lookupContent, 2, additionalLookupContent.length);
+        System.arraycopy(additionalLookupContent, 0, lookupContent, 0, additionalLookupContent.length);
         
-        lookupContent[0] = repository;
-        lookupContent[1] = new ModelUtilities();
+        lookupContent[additionalLookupContent.length] = repository;
+        lookupContent[additionalLookupContent.length + 1] = new ModelUtilities();
         
         DEFAULT_LOOKUP.setLookup(lookupContent, Utilities.class.getClassLoader());
     }
