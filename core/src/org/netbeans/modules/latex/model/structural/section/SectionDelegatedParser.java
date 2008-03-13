@@ -129,7 +129,9 @@ public class SectionDelegatedParser extends DelegatedParser {
         if (!(element instanceof SectionStructuralElement))
             throw new IllegalStateException("");
         
-        ((SectionStructuralElement) element).fireNameChanged();
+        assert node instanceof CommandNode;
+        
+        ((SectionStructuralElement) element).update((CommandNode) node);
         return element;
     }
     
