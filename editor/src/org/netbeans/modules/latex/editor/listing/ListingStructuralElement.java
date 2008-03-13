@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -43,14 +43,8 @@
  */
 package org.netbeans.modules.latex.editor.listing;
 
-import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.command.BlockNode;
-import org.netbeans.modules.latex.model.command.CommandNode;
-import org.netbeans.modules.latex.model.command.GroupNode;
-import org.netbeans.modules.latex.model.command.Node;
-import org.netbeans.modules.latex.model.command.ParagraphNode;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
-import org.openide.util.actions.SystemAction;
 
 /**
  *
@@ -82,7 +76,12 @@ public class ListingStructuralElement extends StructuralElement {
         return org.openide.util.NbBundle.getBundle(ListingStructuralElement.class).getString("LBL_Listing");
     }
 
-    /*package private*/ void fireNameChanged() {
+    void update(BlockNode node) {
+        this.node = node;
+        fireNameChanged();
+    }
+    
+    private void fireNameChanged() {
         pcs.firePropertyChange(NAME, null, null);
     }
 }

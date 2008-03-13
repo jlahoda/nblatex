@@ -116,7 +116,9 @@ public class ListingDelegatedParser extends DelegatedParser {
         
         getElements((FileObject) node.getStartingPosition().getFile()).add((ListingStructuralElement) element);
         
-        ((ListingStructuralElement) element).fireNameChanged();
+        assert node instanceof BlockNode;
+        
+        ((ListingStructuralElement) element).update((BlockNode) node);
         return element;
     }
     

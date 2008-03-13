@@ -88,7 +88,9 @@ public class SlideDelegatedParser extends DelegatedParser {
         if (!(element instanceof SlideStructuralElement))
             throw new IllegalStateException("");
         
-        ((SlideStructuralElement) element).fireNameChanged();
+        assert node instanceof BlockNode;
+        
+        ((SlideStructuralElement) element).update((BlockNode) node);
         return element;
     }
     
