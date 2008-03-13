@@ -103,7 +103,9 @@ public class FigtableDelegatedParser extends DelegatedParser {
         if (!(element instanceof FigtableStructuralElement))
             throw new IllegalStateException("");
         
-        ((FigtableStructuralElement) element).fireNameChanged();
+        assert node instanceof BlockNode;
+        
+        ((FigtableStructuralElement) element).update((BlockNode) node);
         return element;
     }
     
