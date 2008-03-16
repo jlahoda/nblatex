@@ -72,6 +72,7 @@ import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Fix;
 import org.netbeans.spi.editor.hints.Severity;
 import org.openide.cookies.EditorCookie;
+import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.text.CloneableEditorSupport;
 import org.openide.text.NbDocument;
@@ -107,6 +108,7 @@ public class AddItemHint implements HintProvider {
         boolean hasBracketsInTheSecondArgument = tokens.hasNext() && tokens.next().id() == TexTokenId.COMP_BRACKET_LEFT;
         int start = secondArgument.getStartingPosition().getOffsetValue();
         int end = secondArgument.getEndingPosition().getOffsetValue();
+        FileObject file = (FileObject) secondArgument.getStartingPosition().getFile();
 
         if (start > offset || offset > end) {
             return null;
@@ -121,7 +123,7 @@ public class AddItemHint implements HintProvider {
         }
         
         if (!fixes.isEmpty()) {
-            return Collections.singletonList(ErrorDescriptionFactory.createErrorDescription(Severity.HINT, "Add Item", fixes, info.getFileObject(), offset, offset));
+            return Collections.singletonList(ErrorDescriptionFactory.createErrorDescription(Severity.HINT, "Add Item", fixes, file, offset, offset));
         } else {
             return null;
         }
