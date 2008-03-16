@@ -185,6 +185,7 @@ public abstract class HintsTestBase extends NbTestCase {
         return true;
     }
     
+    //XXX: duplicate code in StructuralParserTest
     public final static FileObject copyStringToFile(FileObject f, String content) throws Exception {
         OutputStream os = f.getOutputStream();
         InputStream is = new ByteArrayInputStream(content.getBytes("UTF-8"));
