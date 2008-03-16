@@ -54,6 +54,7 @@ import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Severity;
+import org.openide.filesystems.FileObject;
 
 /**
  *
@@ -73,6 +74,7 @@ public class UnknownCiteHint implements HintProvider<Void> {
         CharSequence fullText = anode.getFullText();
         int currentOffset = anode.getStartingPosition().getOffsetValue() + (fullText.length() != nodeValue.length() ? 1 : 0);
         int endOffset = anode.getEndingPosition().getOffsetValue() + (fullText.length() - nodeValue.length() == 2 ? -1 : 0);
+        FileObject file = (FileObject) anode.getStartingPosition().getFile();
         
         for (String citation : nodeValue.split(",")) {
             boolean found = false;
@@ -85,7 +87,7 @@ public class UnknownCiteHint implements HintProvider<Void> {
             }
 
             if (!found) {
-                res.add(ErrorDescriptionFactory.createErrorDescription(Severity.WARNING, "Undefined citation", info.getFileObject(), currentOffset, Math.min(citation.length() + currentOffset, endOffset)));
+                res.add(ErrorDescriptionFactory.createErrorDescription(Severity.WARNING, "Undefined citation", file, currentOffset, Math.min(citation.length() + currentOffset, endOffset)));
             }
             
             currentOffset += citation.length() + 1;

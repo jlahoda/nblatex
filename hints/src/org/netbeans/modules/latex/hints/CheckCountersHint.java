@@ -56,6 +56,7 @@ import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Severity;
+import org.openide.filesystems.FileObject;
 
 /**
  *
@@ -90,7 +91,9 @@ public class CheckCountersHint implements HintProvider {
         
         if (an.hasAttribute("existing-counter")) {
             if (!getExistingCounters(info).contains(getArgumentValue(an).toString())) {
-                ErrorDescription e = ErrorDescriptionFactory.createErrorDescription(Severity.WARNING, "Undefined counter", info.getFileObject(), n.getStartingPosition().getOffsetValue(), n.getEndingPosition().getOffsetValue());
+                ErrorDescription e = ErrorDescriptionFactory.createErrorDescription(Severity.WARNING,
+                        "Undefined counter", (FileObject) n.getStartingPosition().getFile(),
+                        n.getStartingPosition().getOffsetValue(), n.getEndingPosition().getOffsetValue());
                 
                 return Collections.singletonList(e);
             }
