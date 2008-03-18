@@ -69,6 +69,7 @@ public class TexKit extends NbEditorKit {
             new ActionsFactory.CiteAction(ActionsFactory.CiteAction.REF),
             new CommentAction("%"),
             new UncommentAction("%"),
+            new ToggleCommentAction("%"),
         };
         return TextAction.augmentList(super.createActions(), texActions);
     }
