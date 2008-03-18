@@ -50,7 +50,6 @@ import org.netbeans.editor.BaseDocument;
 import org.netbeans.editor.Syntax;
 import org.netbeans.editor.SyntaxSupport;
 import org.netbeans.modules.editor.NbEditorKit;
-import org.openide.util.RequestProcessor;
 
 /**
 * Editor kit used to edit the plain text.
@@ -89,14 +88,6 @@ public class TexKit extends NbEditorKit {
         return new TexSyntaxSupport(doc);
     }
 
-//    public Completion createCompletion(ExtEditorUI extEditorUI) {
-//        return new TexCompletion(extEditorUI);
-//    }
-//    
-//    public CompletionJavaDoc createCompletionJavaDoc(ExtEditorUI extEditorUI) {
-//        return new TexCompletionJavaDoc(extEditorUI);
-//    }
-    
     public @Override void install(JEditorPane pane) {
         super.install(pane);
         
@@ -115,22 +106,6 @@ public class TexKit extends NbEditorKit {
         super.initDocument(doc);
         doc.putProperty("mime-type", TEX_MIME_TYPE);
         doc.putProperty(Language.class, TexLanguage.description());
-        RequestProcessor.getDefault().post(new Runnable() {
-            public void run() {
-                ColoringEvaluator.getColoringEvaluator(doc);
-            }
-        }, 2000);
-/*        try {
-            System.err.println("Creating spelling layer:");*/
-//            if (!Dictionary.getDefault().isEmpty())
-//                doc.addLayer(new SpellingLayer(lDescriptor, doc), 1010);
-            
-//            doc.addLayer(new LexerLayer(lDescriptor, doc), 1009);
-/*            System.err.println("done");
-        } catch (RuntimeException e) {
-            e.printStackTrace(System.err);
-            throw e;
-        }*/
     }
 
 }
