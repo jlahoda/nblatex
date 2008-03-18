@@ -41,15 +41,22 @@
 
 package org.netbeans.modules.latex.editor;
 
+import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import javax.swing.JEditorPane;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.editor.BaseDocument;
+import org.netbeans.editor.BaseKit;
+import org.netbeans.editor.Settings;
+import org.netbeans.editor.SettingsNames;
 import org.netbeans.editor.Syntax;
 import org.netbeans.editor.SyntaxSupport;
 import org.netbeans.modules.editor.NbEditorKit;
+import org.openide.util.Exceptions;
 
 /**
 * Editor kit used to edit the plain text.
@@ -69,6 +76,7 @@ public class TexKit extends NbEditorKit {
             new CommentAction("%"),
             new UncommentAction("%"),
             new ToggleCommentAction("%"),
+            new WrappingDefaultKeyTypedAction(),
         };
         return TextAction.augmentList(super.createActions(), texActions);
     }
@@ -108,4 +116,38 @@ public class TexKit extends NbEditorKit {
         doc.putProperty(Language.class, TexLanguage.description());
     }
 
+    private static final class WrappingDefaultKeyTypedAction extends ExtDefaultKeyTypedAction {
+
+        @Override
+        public void actionPerformed(ActionEvent evt, JTextComponent target) {
+            String cmd = evt.getActionCommand();
+            int mod = evt.getModifiers();
+
+            if ((target != null) && (evt != null)) {
+                if (" ".equals(cmd) && (mod & ActionEvent.ALT_MASK) == 0 && (mod & ActionEvent.CTRL_MASK) == 0) {
+                    try {
+                        int caret = target.getCaretPosition();
+                        int start = org.netbeans.editor.Utilities.getRowStart(target, caret);
+                        int end = org.netbeans.editor.Utilities.getRowEnd(target, caret);
+                        final BaseKit kit = org.netbeans.editor.Utilities.getKit(target);
+                        Integer rightMargin = (Integer) Settings.getValue(kit.getClass(), SettingsNames.TEXT_LIMIT_WIDTH);
+                        
+                        if (rightMargin == null) {
+                            rightMargin = 80;
+                        }
+
+                        if (end - start > rightMargin && caret == end) {
+                            ((InsertBreakAction) kit.getActionByName(insertBreakAction)).actionPerformed(evt, target);
+                            return ;
+                        }
+                    } catch (BadLocationException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
+                }
+            }
+            
+            super.actionPerformed(evt, target);
+        }
+        
+    }
 }
