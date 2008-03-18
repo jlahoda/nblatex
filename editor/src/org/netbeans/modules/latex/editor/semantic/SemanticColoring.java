@@ -66,7 +66,6 @@ import org.netbeans.api.editor.settings.FontColorSettings;
 import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.napi.gsfret.source.CompilationInfo;
-import org.netbeans.modules.latex.editor.ColoringEvaluator;
 import org.netbeans.modules.latex.editor.TexColoringNames;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.ArgumentContainingNode;
@@ -335,7 +334,7 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
             }
         });
 
-        ColoringEvaluator.getDelegate(document).setHighlights(bag);
+        getDelegate(document).setHighlights(bag);
     }
 
     private void add(Map<Token, List<AttributeSet>> token2Attributes, Token t, AttributeSet att) {
@@ -363,4 +362,14 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
         "mod-ext-paragraph",
         "mod-ext-subparagraph"
     ));
+
+    public static PositionsBag getDelegate(Document doc) {
+        PositionsBag bag = (PositionsBag) doc.getProperty(SemanticColoring.class);
+        
+        if (bag == null) {
+            doc.putProperty(SemanticColoring.class, bag = new PositionsBag(doc));
+        }
+        
+        return bag;
+    }
 }
