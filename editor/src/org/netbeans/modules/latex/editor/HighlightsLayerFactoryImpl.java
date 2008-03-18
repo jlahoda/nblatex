@@ -40,7 +40,7 @@
  */
 package org.netbeans.modules.latex.editor;
 
-import org.netbeans.spi.editor.highlighting.HighlightsContainer;
+import org.netbeans.modules.latex.editor.semantic.SemanticColoring;
 import org.netbeans.spi.editor.highlighting.HighlightsLayer;
 import org.netbeans.spi.editor.highlighting.HighlightsLayerFactory;
 import org.netbeans.spi.editor.highlighting.ZOrder;
@@ -57,7 +57,7 @@ public class HighlightsLayerFactoryImpl implements HighlightsLayerFactory {
     
     public HighlightsLayer[] createLayers(Context context) {
         return new HighlightsLayer[] {
-            HighlightsLayer.create(HighlightsLayerFactoryImpl.class.getName(), ZOrder.SYNTAX_RACK.forPosition(2500), true, ColoringEvaluator.getDelegate(context.getDocument())),
+            HighlightsLayer.create(HighlightsLayerFactoryImpl.class.getName(), ZOrder.SYNTAX_RACK.forPosition(2500), true, SemanticColoring.getDelegate(context.getDocument())),
         };
     }
     
