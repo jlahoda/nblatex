@@ -43,6 +43,7 @@ package org.netbeans.modules.latex.loop;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Map;
 import org.netbeans.modules.gsf.api.GsfLanguage;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.modules.latex.editor.TexLanguage;
@@ -69,6 +70,18 @@ public class LaTeXGSFLanguage implements GsfLanguage {
 
     public Collection<FileObject> getCoreLibraries() {
         return Collections.emptyList();
+    }
+
+    public String getDisplayName() {
+        return "LaTeX";
+    }
+
+    public String getPreferredExtension() {
+        return "tex";
+    }
+
+    public Map<String, String> getSourceGroupNames() {
+        return Collections.emptyMap();
     }
 
 }
