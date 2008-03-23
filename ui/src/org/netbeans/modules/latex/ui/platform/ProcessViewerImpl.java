@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -40,18 +40,13 @@
  */
 package org.netbeans.modules.latex.ui.platform;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.netbeans.modules.latex.model.platform.FilePosition;
 import org.netbeans.modules.latex.model.platform.LaTeXPlatform;
 import org.netbeans.modules.latex.model.platform.Viewer;
@@ -84,7 +79,7 @@ public class ProcessViewerImpl implements Viewer {
 
     public void show(FileObject file, FilePosition startPosition) throws NullPointerException {
         File wd = FileUtil.toFile(file.getParent());
-        Map format = new HashMap();
+        Map<String, String> format = new HashMap<String, String>();
         boolean result = true;
         
         format.put(LaTeXPlatform.ARG_INPUT_FILE_BASE, file.getName());
@@ -175,6 +170,7 @@ public class ProcessViewerImpl implements Viewer {
         }
         
         /* Makes copy. */
+        @Override
         public void run() {
             try {
                 int read;

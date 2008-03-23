@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -47,7 +47,6 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
-import java.util.List;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -85,7 +84,7 @@ public class StructureToolbarAction extends    ToolbarCommandAction
         if (node == null)
             return getNormal();
         
-        CommandNode  cn = (CommandNode) node;
+        CommandNode  cn = node;
         String       command = cn.getCommand().getCommand();
         
         for (Iterator i = getDescriptions().iterator(); i.hasNext(); ) {
@@ -141,9 +140,9 @@ public class StructureToolbarAction extends    ToolbarCommandAction
     
     private static Map<String, List<Object>> type2Descriptions = null;
     
-    private static synchronized Map getType2Descriptions() {
+    private static synchronized Map<String, List<Object>> getType2Descriptions() {
         if (type2Descriptions == null) {
-            type2Descriptions = new HashMap();
+            type2Descriptions = new HashMap<String, List<Object>>();
             
             type2Descriptions.put("structure", 
                 Arrays.asList(new Object[] {
@@ -200,7 +199,7 @@ public class StructureToolbarAction extends    ToolbarCommandAction
             return null;
         }
             
-        List descriptions = (List) getType2Descriptions().get(type);
+        List<?> descriptions = getType2Descriptions().get(type);
         
         if (descriptions == null) {
             ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, new IllegalArgumentException("StructureToolbarAction: type not known: " + type + ", file=" + fo));
@@ -218,7 +217,7 @@ public class StructureToolbarAction extends    ToolbarCommandAction
     }
 
     /** Creates a new instance of StructureToolbarAction */
-    private StructureToolbarAction(String name, List<Object> descriptions) {
+    private StructureToolbarAction(String name, List<?> descriptions) {
         this.descriptions = descriptions;
         
         putValue(NAME, name);
@@ -273,7 +272,7 @@ public class StructureToolbarAction extends    ToolbarCommandAction
         return HelpCtx.DEFAULT_HELP;
     }
     
-    private List<Object> descriptions = null;
+    private final List<?> descriptions;
     private int normalIndex = 0;
 
     public synchronized List getDescriptions() {
@@ -285,6 +284,7 @@ public class StructureToolbarAction extends    ToolbarCommandAction
     
     public static class SeparatorListCellRenderer extends DefaultListCellRenderer {
 
+        @Override
         public Component getListCellRendererComponent(JList list,
                                                       Object value,
                                                       int index,
@@ -336,6 +336,7 @@ public class StructureToolbarAction extends    ToolbarCommandAction
                 return getModel().getElementAt(index);
         }
         
+        @Override
         public void setSelectedItem(Object item) {
             if (shouldBeIgnored(item)) {
                 item = getNext(item);

@@ -46,7 +46,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import org.netbeans.modules.latex.model.IconsStorage;
-import org.netbeans.modules.latex.ui.TexCloneableEditor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.Repository;
 import org.openide.loaders.DataFolder;
@@ -89,13 +88,14 @@ public class RootNode extends AbstractNode {
             this.delegateTo = delegateTo;
         }
         
+        @Override
         protected void addNotify() {
-            List cath = new ArrayList(IconsStorage.getDefault().getCathegories());
+            List<String> cath = new ArrayList<String>(IconsStorage.getDefault().getCathegories());
             
             cath.remove("greek");
             cath.add(0, "greek");
 
-            List keys = new ArrayList(cath);
+            List<Object> keys = new ArrayList<Object>(cath);
 
             keys.addAll(Arrays.asList(delegateTo.getChildren()));
 
@@ -103,7 +103,7 @@ public class RootNode extends AbstractNode {
         }
         
         protected void removeNotify() {
-            setKeys(Collections.EMPTY_LIST);
+            setKeys(Collections.emptyList());
         }
         
         protected Node[] createNodes(Object key) {

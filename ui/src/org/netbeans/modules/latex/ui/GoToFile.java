@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the DocSup module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002,2003.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -47,9 +47,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import javax.swing.Action;
 import javax.swing.InputMap;
@@ -244,24 +242,20 @@ public class GoToFile extends JPanel implements DocumentListener {
         
         lastPrefix = prefix;
         
-        Lookup.Result factories = Lookup.getDefault().lookup(new Lookup.Template(LaTeXSourceFactory.class));
+        Lookup.Result<LaTeXSourceFactory> factories = Lookup.getDefault().lookupResult(LaTeXSourceFactory.class);
         
-        List result = new ArrayList();
+        List<ListEntry> result = new ArrayList<ListEntry>();
         
-        for (Iterator factoryIterator = factories.allInstances().iterator(); factoryIterator.hasNext(); ) {
-            LaTeXSourceFactory factImpl = (LaTeXSourceFactory) factoryIterator.next();
-            Collection files = factImpl.getAllKnownFiles();
-            Iterator iter = files.iterator();
-            
-            while (iter.hasNext()) {
-                ListEntry entry = new ListEntry((FileObject) iter.next());
+        for (LaTeXSourceFactory factImpl : factories.allInstances()) {
+            for (FileObject file : factImpl.getAllKnownFiles()) {
+                ListEntry entry = new ListEntry(file);
                 
                 if (entry.getName().startsWith(prefix))
                     result.add(entry);
             }
         }
         
-        Collections.sort(result);
+        Collections.<ListEntry>sort(result);
         
         jList1.setListData(result.toArray());
         
@@ -270,7 +264,7 @@ public class GoToFile extends JPanel implements DocumentListener {
         }
     }
     
-    private static class ListEntry implements Comparable {
+    private static class ListEntry implements Comparable<ListEntry> {
         private FileObject file; //!!!
         
         public ListEntry(FileObject file) {
@@ -285,12 +279,13 @@ public class GoToFile extends JPanel implements DocumentListener {
             return file.getName();
         }
         
+        @Override
         public String toString() {
             return getName();
         }
         
-        public int compareTo(Object o) {
-            return getName().compareTo(((ListEntry) o).getName());
+        public int compareTo(ListEntry o) {
+            return getName().compareTo(o.getName());
         }
         
     }

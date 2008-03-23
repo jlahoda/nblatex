@@ -59,7 +59,6 @@ import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
@@ -67,13 +66,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.netbeans.modules.latex.model.IconsStorage;
 import org.netbeans.modules.latex.model.IconsStorage.ChangeableIcon;
 import org.netbeans.modules.latex.model.Queue;
 
 import org.openide.ErrorManager;
+import org.openide.util.ChangeSupport;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 import org.openide.util.Utilities;
@@ -96,9 +95,9 @@ public final class IconsStorageImpl extends IconsStorage {
     /** Creates a new instance of IconsStorageImpl */
     public IconsStorageImpl() {
 //        Thread.dumpStack();
-        expression2Icon = new HashMap<String, Reference<Icon>>();
+        expression2Icon = new HashMap<String, Reference<ChangeableIcon>>();
         listeners = new HashMap();
-        iconsToCreate = new Queue();
+        iconsToCreate = new Queue<DelegatingIcon>();
         iconsCreator  = new RequestProcessor("LaTeX Icons Creator");
         
         iconsCreator.post(new IconCreatorTask());
@@ -132,13 +131,13 @@ public final class IconsStorageImpl extends IconsStorage {
     public List<String> getIconNamesForCathegory(String catName) {
         assureLoaded();
         
-        return (List) cathegory2Names.get(catName);
+        return cathegory2Names.get(catName);
     }
 
     public List<String> getAllIconNames() {
         assureLoaded();
         
-        List result = new ArrayList();
+        List<String> result = new ArrayList<String>();
         
         for (List<String> l : cathegory2Names.values()) {
             result.addAll(l);
@@ -183,10 +182,10 @@ public final class IconsStorageImpl extends IconsStorage {
             ErrorManager.getDefault().log(ErrorManager.INFORMATIONAL, "latex.IconsStorageImpl: default cathegory for \"" + iconDescription + "\"");
         }
         
-        List names = (List) cathegory2Names.get(cathegory);
+        List<String> names = cathegory2Names.get(cathegory);
         
         if (names == null) {
-            names = new ArrayList();
+            names = new ArrayList<String>();
             
             cathegory2Names.put(cathegory, names);
         }
@@ -198,7 +197,7 @@ public final class IconsStorageImpl extends IconsStorage {
         if (cathegory2Names != null)
             return ;
         
-        cathegory2Names = new HashMap();
+        cathegory2Names = new HashMap<String, List<String>>();
         
         String[] icons = readIconsFile();
         
@@ -211,14 +210,14 @@ public final class IconsStorageImpl extends IconsStorage {
         try {
             InputStream ins = IconsStorageImpl.class.getResourceAsStream("/org/netbeans/modules/latex/ui/symbols/symbols.txt");
             BufferedReader bins = new BufferedReader(new InputStreamReader(ins));
-            List icons = new ArrayList();
+            List<String> icons = new ArrayList<String>();
             String line;
             
             while ((line = bins.readLine()) != null) {
                 icons.add(line);
             }
             
-            return (String[] ) icons.toArray(new String[0]);
+            return icons.toArray(new String[0]);
         } catch (IOException e) {
             ErrorManager.getDefault().notify(e);
             return new String[0];
@@ -234,10 +233,10 @@ public final class IconsStorageImpl extends IconsStorage {
         }
     }
     
-    private Map<String, Reference<Icon>> expression2Icon;
+    private Map<String, Reference<ChangeableIcon>> expression2Icon;
     
     private final RequestProcessor iconsCreator;
-    private final Queue iconsToCreate;
+    private final Queue<DelegatingIcon> iconsToCreate;
     
     private class IconCreatorTask implements Runnable {
         public void run() {
@@ -253,7 +252,7 @@ public final class IconsStorageImpl extends IconsStorage {
                         }
                     }
                     
-                    toCreate = (DelegatingIcon) iconsToCreate.pop();
+                    toCreate = iconsToCreate.pop();
                 }
                 
                 createOrLoadIcon(toCreate);
@@ -364,15 +363,15 @@ public final class IconsStorageImpl extends IconsStorage {
     
     public ChangeableIcon getIcon(String expression, int sizeX, int sizeY) {
         ChangeableIcon i = null;
-        Reference sr = expression2Icon.get(expression);
+        Reference<ChangeableIcon> sr = expression2Icon.get(expression);
         
         if (sr != null) {
-            i = (ChangeableIcon) sr.get();
+            i = sr.get();
         }
         
         if (i == null) {
             i = getIconForExpressionImpl(expression, sizeX, sizeY);
-            expression2Icon.put(expression, new SoftReference(i));
+            expression2Icon.put(expression, new SoftReference<ChangeableIcon>(i));
         }
         
         return i;
@@ -388,15 +387,15 @@ public final class IconsStorageImpl extends IconsStorage {
         
         if (i == null) {
             i = getIconForTextImpl(text);
-            expression2Icon.put(text, new SoftReference(i));
+            expression2Icon.put(text, new SoftReference<ChangeableIcon>(i));
         }
         
         return i;
     }
     
     void configurationChanged() {
-        for (Iterator i = new ArrayList(expression2Icon.values()).iterator(); i.hasNext(); ) {
-            DelegatingIcon icon = (DelegatingIcon) ((Reference) i.next()).get();
+        for (Reference<ChangeableIcon> r : expression2Icon.values()) {
+            DelegatingIcon icon = (DelegatingIcon) r.get();
             
             if (icon != null && (icon.delegateTo == waitIcon || icon.delegateTo == noIcons || (icon.getCacheFileName() != null && !new File(icon.getCacheFileName()).exists()))) {
                 setWaitingIcon(icon);
@@ -464,7 +463,7 @@ public final class IconsStorageImpl extends IconsStorage {
                 this.computed = true;
             }
             
-            fireStateChanged();
+            cs.fireChange();
         }
         
         private String getText() {
@@ -487,70 +486,14 @@ public final class IconsStorageImpl extends IconsStorage {
             return desiredSizeY;
         }
         
-        private void fireStateChanged() {
-            ChangeListener[] listenersList = null;
-            
-            synchronized (IconsStorageImpl.this) {
-                Object content = listeners.get(this);
-                
-                if (content == null)
-                    return ;
-                
-                if (content instanceof ChangeListener) {
-                    listenersList = new ChangeListener[] {(ChangeListener) content};
-                } else {
-                    listenersList = (ChangeListener[] ) ((List) content).toArray(new ChangeListener[0]);
-                }
-            }
-            
-            ChangeEvent evt = new ChangeEvent(this);
-            
-            for (int cntr = 0; cntr < listenersList.length; cntr++) {
-                listenersList[cntr].stateChanged(evt);
-            }
-        }
+        private ChangeSupport cs = new ChangeSupport(this);
         
         public void removeChangeListener(ChangeListener l) {
-            synchronized (IconsStorageImpl.this) {
-                Object content = listeners.get(this);
-                
-                if (content == null) {
-                    return ;
-                }
-                
-                if (content instanceof ChangeListener) {
-                    if (content == l) {
-                        listeners.remove(this);
-                    }
-                    return ;
-                }
-                
-                ((List) content).remove(l);
-            }
+            cs.removeChangeListener(l);
         }
 
         public void addChangeListener(ChangeListener l) {
-            synchronized (IconsStorageImpl.this) {
-                Object content = listeners.get(this);
-                
-                if (content == null) {
-                    listeners.put(this, l);
-                    return ;
-                }
-                
-                if (content instanceof ChangeListener) {
-                    if (content != l) {
-                        List listenersList = new ArrayList();
-                        
-                        listenersList.add(content);
-                        listenersList.add(l);
-                        listeners.put(this, listenersList);
-                    }
-                    return ;
-                }
-                
-                ((List) content).add(l);
-            }
+            cs.addChangeListener(l);
         }
 
         public void paintIcon(Component c, Graphics g, int x, int y) {
