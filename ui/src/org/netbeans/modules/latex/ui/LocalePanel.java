@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2004.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -47,10 +47,8 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Set;
 import javax.swing.DefaultComboBoxModel;
 
 /**
@@ -184,10 +182,10 @@ public class LocalePanel extends javax.swing.JPanel {
     private javax.swing.JTextField variantTextField;
     // End of variables declaration//GEN-END:variables
     
-    private Map language2LanguageName;
-    private Map languageName2Language;
-    private Map country2CountryName;
-    private Map countryName2Country;
+    private Map<String, String> language2LanguageName;
+    private Map<String, String> languageName2Language;
+    private Map<String, String> country2CountryName;
+    private Map<String, String> countryName2Country;
     
     private PropertyChangeSupport support;
     
@@ -195,10 +193,10 @@ public class LocalePanel extends javax.swing.JPanel {
         String[] languages = Locale.getISOLanguages();
         String[] countries = Locale.getISOCountries();
         
-        language2LanguageName  = new HashMap();
-        languageName2Language  = new HashMap();
-        country2CountryName    = new HashMap();
-        countryName2Country    = new HashMap();
+        language2LanguageName  = new HashMap<String, String>();
+        languageName2Language  = new HashMap<String, String>();
+        country2CountryName    = new HashMap<String, String>();
+        countryName2Country    = new HashMap<String, String>();
         
         for (int cntr = 0; cntr < languages.length; cntr++) {
             String code = languages[cntr];
@@ -222,8 +220,8 @@ public class LocalePanel extends javax.swing.JPanel {
         country2CountryName.put("", "");
         countryName2Country.put("", "");
         
-        languages = (String[]) language2LanguageName.values().toArray(new String[0]);
-        countries = (String[]) country2CountryName.values().toArray(new String[0]);
+        languages = language2LanguageName.values().toArray(new String[0]);
+        countries = country2CountryName.values().toArray(new String[0]);
         
         Arrays.sort(languages);
         Arrays.sort(countries);
@@ -232,15 +230,17 @@ public class LocalePanel extends javax.swing.JPanel {
         variantTextField.setText("");
     }
     
+    @Override
     public void setLocale(Locale loc) {
         languageCombo.setSelectedItem(language2LanguageName.get(loc.getLanguage()));
         countryCombo.setSelectedItem(country2CountryName.get(loc.getCountry()));
         variantTextField.setText(loc.getVariant());
     }
     
+    @Override
     public Locale getLocale() {
-        String language = (String) languageName2Language.get(languageCombo.getSelectedItem());
-        String country  = (String) countryName2Country.get(countryCombo.getSelectedItem());
+        String language = languageName2Language.get(languageCombo.getSelectedItem());
+        String country  = countryName2Country.get(countryCombo.getSelectedItem());
         String variant  = variantTextField.getText();
         
         return new Locale(language, country, variant);

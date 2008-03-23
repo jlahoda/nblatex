@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -70,7 +70,7 @@ public class LaTeXPlatformImpl implements LaTeXPlatform {
     private static Map<String, List<String>> tool2TargetExtensions;
     
     static {
-        tool2DefaultArgs = new HashMap();
+        tool2DefaultArgs = new HashMap<String, String>();
         tool2DefaultArgs.put(TOOL_LATEX, "-interaction=nonstopmode -src-specials {" + ARG_INPUT_FILE_BASE + "}");
         tool2DefaultArgs.put(TOOL_DVIPS, "-o {" + ARG_INPUT_FILE_BASE + "}.ps  {" + ARG_INPUT_FILE_BASE + "}");
         tool2DefaultArgs.put(TOOL_DVIPDF, "-o {" + ARG_INPUT_FILE_BASE + "}.pdf  {" + ARG_INPUT_FILE_BASE + "}");
@@ -78,7 +78,7 @@ public class LaTeXPlatformImpl implements LaTeXPlatform {
         tool2DefaultArgs.put(TOOL_BIBTEX, "{" + ARG_INPUT_FILE_BASE + "}");
         tool2DefaultArgs.put(TOOL_XDVI, "{" + ARG_INPUT_FILE_BASE + "}.dvi");
         tool2DefaultArgs.put(TOOL_GV, "{" + ARG_INPUT_FILE + "}");
-        tool2TargetExtensions = new HashMap();
+        tool2TargetExtensions = new HashMap<String, List<String>>();
         tool2TargetExtensions.put(TOOL_LATEX, Arrays.asList("dvi", "aux", "log"));
         tool2TargetExtensions.put(TOOL_DVIPS, Arrays.asList("ps"));
         tool2TargetExtensions.put(TOOL_DVIPDF, Arrays.asList("pdf"));
@@ -129,7 +129,7 @@ public class LaTeXPlatformImpl implements LaTeXPlatform {
     }
     
     public static LaTeXPlatformImpl getInstance() {
-        return (LaTeXPlatformImpl) Lookup.getDefault().lookup(LaTeXPlatformImpl.class);
+        return Lookup.getDefault().lookup(LaTeXPlatformImpl.class);
     }
 
     public boolean isToolConfigured(String tool) {

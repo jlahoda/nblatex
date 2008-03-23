@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002,2003.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -244,14 +244,12 @@ public class PreambleForm extends javax.swing.JPanel {
     }//GEN-END:initComponents
 
     private void adjustTo(CommandPackage docclass) {
-        Collection options = new ArrayList(docclass.getOptions().values());
-        Collection paperSizesCol = new ArrayList();
-        Collection fontSizesCol  = new ArrayList();
-        Collection optionsCol    = new ArrayList();
+        Collection<Option> options = new ArrayList<Option>(docclass.getOptions().values());
+        Collection<String> paperSizesCol = new ArrayList<String>();
+        Collection<String> fontSizesCol  = new ArrayList<String>();
+        Collection<String> optionsCol    = new ArrayList<String>();
         
-        for (Iterator iter = options.iterator(); iter.hasNext(); ) {
-            Option current = (Option) iter.next();
-            
+        for (Option current : options) {
             if (current.hasAttribute("fontsize"))
                 fontSizesCol.add(current.getName());
             else
@@ -268,7 +266,7 @@ public class PreambleForm extends javax.swing.JPanel {
     
     
     private String[] getValidDocumentClasses() {
-        Collection result = new ArrayList();
+        Collection<String> result = new ArrayList<String>();
         CommandPackage defaultDC = CommandPackage.getDefaultDocumentClass();
         
         for (Iterator i = CommandPackage.getKnownDocumentClasses().iterator(); i.hasNext(); ) {
@@ -280,7 +278,7 @@ public class PreambleForm extends javax.swing.JPanel {
                 result.add(name);
         }
         
-        return (String[] ) result.toArray(new String[result.size()]);
+        return result.toArray(new String[result.size()]);
     }
     
     public CommandPackage getDocumentClass() {
@@ -297,7 +295,7 @@ public class PreambleForm extends javax.swing.JPanel {
         if (selected == null)
             return null;
         
-        return (Option) getDocumentClass().getOptions().get(selected.toString());
+        return getDocumentClass().getOptions().get(selected.toString());
     }
     
     public void setFontSize(Option fontSizeVal) {
@@ -310,7 +308,7 @@ public class PreambleForm extends javax.swing.JPanel {
         if (selected == null)
             return null;
         
-        return (Option) getDocumentClass().getOptions().get(selected.toString());
+        return getDocumentClass().getOptions().get(selected.toString());
     }
     
     public void setPaperSize(Option paperSizeVal) {
@@ -323,7 +321,7 @@ public class PreambleForm extends javax.swing.JPanel {
         if (selected == null)
             return null;
         
-        return (Option) CommandPackage.getCommandPackageForName("inputenc").getOptions().get(selected.toString());
+        return CommandPackage.getCommandPackageForName("inputenc").getOptions().get(selected.toString());
     }
     
     public void setInputEnc(Option inputEncVal) {
@@ -351,7 +349,7 @@ public class PreambleForm extends javax.swing.JPanel {
         Option[] result = new Option[options.length];
         
         for (int cntr = 0; cntr < options.length; cntr++) {
-            result[cntr] = (Option) getDocumentClass().getOptions().get(options[cntr].toString());
+            result[cntr] = getDocumentClass().getOptions().get(options[cntr].toString());
         }
         
         return result;

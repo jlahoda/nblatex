@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002,2003.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -52,7 +52,6 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import org.netbeans.modules.latex.model.command.LaTeXSourceFactory;
 import org.netbeans.modules.latex.model.command.Option;
 
 import org.openide.ErrorManager;
@@ -62,7 +61,6 @@ import org.openide.loaders.DataFolder;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.TemplateWizard;
 import org.openide.util.HelpCtx;
-import org.openide.util.Lookup;
 import org.openide.util.NbBundle;
 
 /**
@@ -71,7 +69,7 @@ import org.openide.util.NbBundle;
  */
 public class NewDocumentWizardIterator implements TemplateWizard.Iterator {
     
-    private WizardDescriptor.Panel[] panels;
+    private WizardDescriptor.Panel<WizardDescriptor>[] panels;
     private String[]                 panelNames;
     private boolean                  initialized;
     private int                      current;
@@ -83,12 +81,15 @@ public class NewDocumentWizardIterator implements TemplateWizard.Iterator {
         current = 0;
     }
     
-    public WizardDescriptor.Panel current() {
+    public WizardDescriptor.Panel<WizardDescriptor> current() {
         if (!initialized)
             throw new IllegalStateException("");
         
-        if (panels[current] instanceof JComponent)
-            ((JComponent) panels[current].getComponent()).putClientProperty("WizardPanel_contentSelectedIndex", new Integer(current));
+        Component c = panels[current].getComponent();
+        
+        if (c instanceof JComponent)
+            ((JComponent) c).putClientProperty("WizardPanel_contentSelectedIndex", new Integer(current));
+        
         return panels[current];
     }
     
@@ -106,9 +107,14 @@ public class NewDocumentWizardIterator implements TemplateWizard.Iterator {
         return current > 0;
     }
     
+    @SuppressWarnings("unchecked")
+    private WizardDescriptor.Panel<WizardDescriptor>[] createPanels() {
+        return new WizardDescriptor.Panel[2];
+    }
+    
     public void initialize(TemplateWizard wiz) {
         wiz.putProperty("WizardPanel_autoWizardStyle", Boolean.TRUE);
-        panels = new WizardDescriptor.Panel[2];
+        panels = createPanels();
         
         panels[0] = wiz.targetChooser();
         panels[1] = new ContentPanel();
@@ -188,7 +194,7 @@ public class NewDocumentWizardIterator implements TemplateWizard.Iterator {
         return "\\\\documentclass{article}\n";
     }
     
-    public Set instantiate(TemplateWizard wiz) throws IOException {
+    public Set<DataObject> instantiate(TemplateWizard wiz) throws IOException {
         if (!initialized)
             throw new IllegalStateException("");
         
@@ -198,7 +204,7 @@ public class NewDocumentWizardIterator implements TemplateWizard.Iterator {
         
         DataObject instatied = template.createFromTemplate(target, targetName);
         
-        EditorCookie ec = (EditorCookie) instatied.getCookie(EditorCookie.class);
+        EditorCookie ec = instatied.getCookie(EditorCookie.class);
         
         if (ec != null) {
             try {
@@ -273,7 +279,7 @@ public class NewDocumentWizardIterator implements TemplateWizard.Iterator {
     public void removeChangeListener(ChangeListener l) {
     }
     
-    private static class ContentPanel implements WizardDescriptor.Panel {
+    private static class ContentPanel implements WizardDescriptor.Panel<WizardDescriptor> {
         
         private PreambleForm panel;
         
@@ -305,47 +311,39 @@ public class NewDocumentWizardIterator implements TemplateWizard.Iterator {
             return true;
         }
         
-        public void readSettings(Object settings) {
-            if (settings instanceof WizardDescriptor) {
-                WizardDescriptor descr = (WizardDescriptor) settings;
-                
-                LaTeXWizardData data = (LaTeXWizardData) descr.getProperty("latex_settings");
-                
-                if (data == null)
-                    return ;
-                
-                panel.setDocumentClass(data.getDocclass());
-                panel.setFontSize(data.getFontSize());
-                panel.setPaperSize(data.getPaperSize());
-                panel.setInputEnc(data.getInputEnc());
-                panel.setAuthor(data.getAuthor());
-                panel.setTitle(data.getTitle());
-                panel.setOptions(data.getOptions());
+        public void readSettings(WizardDescriptor descr) {
+            LaTeXWizardData data = (LaTeXWizardData) descr.getProperty("latex_settings");
+
+            if (data == null) {
+                return;
             }
+            panel.setDocumentClass(data.getDocclass());
+            panel.setFontSize(data.getFontSize());
+            panel.setPaperSize(data.getPaperSize());
+            panel.setInputEnc(data.getInputEnc());
+            panel.setAuthor(data.getAuthor());
+            panel.setTitle(data.getTitle());
+            panel.setOptions(data.getOptions());
         }
         
         public void removeChangeListener(ChangeListener l) {
         }
         
-        public void storeSettings(Object settings) {
-            if (settings instanceof WizardDescriptor) {
-                WizardDescriptor descr = (WizardDescriptor) settings;
-                
-                LaTeXWizardData data = (LaTeXWizardData) descr.getProperty("latex_settings");
-                
-                if (data == null) {
-                    data = new LaTeXWizardData();
-                    descr.putProperty("latex_settings", data);
-                }
-                
-                data.setDocclass(panel.getDocumentClass());
-                data.setFontSize(panel.getFontSize());
-                data.setPaperSize(panel.getPaperSize());
-                data.setInputEnc(panel.getInputEnc());
-                data.setAuthor(panel.getAuthor());
-                data.setTitle(panel.getTitle());
-                data.setOptions(panel.getOptions());
+        public void storeSettings(WizardDescriptor descr) {
+            LaTeXWizardData data = (LaTeXWizardData) descr.getProperty("latex_settings");
+
+            if (data == null) {
+                data = new LaTeXWizardData();
+                descr.putProperty("latex_settings", data);
             }
+
+            data.setDocclass(panel.getDocumentClass());
+            data.setFontSize(panel.getFontSize());
+            data.setPaperSize(panel.getPaperSize());
+            data.setInputEnc(panel.getInputEnc());
+            data.setAuthor(panel.getAuthor());
+            data.setTitle(panel.getTitle());
+            data.setOptions(panel.getOptions());
         }
         
     }

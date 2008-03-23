@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the DocSup module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002,2003.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -45,7 +45,6 @@ package org.netbeans.modules.latex.ui;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.io.PrintStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.netbeans.editor.PrintContainer;
@@ -136,7 +135,7 @@ public class LaTeXPrintContainer implements PrintContainer {
         StringBuffer sbuff = new StringBuffer();
         
         for (int cntr = 0; cntr < buff.length; cntr++) {
-            String esc = (String) charToEscape.get(new Character(buff[cntr]));
+            String esc = charToEscape.get(new Character(buff[cntr]));
             
             if (esc == null)
                 sbuff.append(buff[cntr]);
@@ -147,10 +146,10 @@ public class LaTeXPrintContainer implements PrintContainer {
         return sbuff.toString();
     }
     
-    private static final Map charToEscape;
+    private static final Map<Character, String> charToEscape;
     
     static {
-        charToEscape = new HashMap();
+        charToEscape = new HashMap<Character, String>();
         
         charToEscape.put(new Character('['), "[");
         charToEscape.put(new Character('{'), "\\{");

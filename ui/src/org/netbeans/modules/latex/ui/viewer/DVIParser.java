@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -63,7 +63,7 @@ public class DVIParser {
     private static Map<Integer, Instruction> code2Instruction;
 
     static {
-        code2Instruction = new HashMap();
+        code2Instruction = new HashMap<Integer, Instruction>();
 
         for (int cntr = 0; cntr < 128; cntr++) {
             code2Instruction.put(cntr, new StaticLengthInstruction(0));
@@ -115,7 +115,7 @@ public class DVIParser {
         source = new RandomAccessFile(file, "r");
 
         boolean finished = false;
-        List<DVIPageDescription> result = new ArrayList();
+        List<DVIPageDescription> result = new ArrayList<DVIPageDescription>();
         List<FilePosition> positions = null;
         int pageNumber = 1;
         FileObject fileObject = FileUtil.toFileObject(file);
@@ -182,6 +182,7 @@ public class DVIParser {
             super(0);
         }
 
+        @Override
         public void skip(RandomAccessFile source) throws IOException {
             super.skip(source);
 //            System.err.println("EOP");

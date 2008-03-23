@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2004.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -48,7 +48,6 @@ import java.beans.XMLEncoder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.Iterator;
 import java.util.Map;
 import org.openide.ErrorManager;
 
@@ -75,7 +74,8 @@ public/*module private*/ final class ModuleSettings {
         return new File(System.getProperty("netbeans.user"));
     }
     
-    public Map readSettings() {
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> readSettings() {
         XMLDecoder dec = null;
         
         try {
@@ -92,7 +92,7 @@ public/*module private*/ final class ModuleSettings {
             Object read = dec.readObject();
             
             if (read instanceof Map)
-                return (Map) read;
+                return (Map<String, Object>) read;
             
             return null;
         } catch (Exception e) {
@@ -104,7 +104,7 @@ public/*module private*/ final class ModuleSettings {
         }
     }
     
-    public void writeSettings(Map settings) {
+    public void writeSettings(Map<String, Object> settings) {
         XMLEncoder enc = null;
         try {
             File postInstallFlag = new File(new File(getUserDir(), "config"), "latex-ui-settings.xml");

@@ -43,7 +43,6 @@ package org.netbeans.modules.latex.ui.palette;
 
 import java.util.Collections;
 import org.netbeans.modules.latex.model.IconsStorage;
-import org.netbeans.modules.latex.ui.TexCloneableEditor;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
@@ -64,11 +63,12 @@ public class CategoryNode extends AbstractNode {
         this.cathegory = cathegory;
     }
     
+    @Override
     public String getDisplayName() {
         return IconsStorage.getDefault().getCathegoryDisplayName(cathegory);
     }
     
-    private static final class CathegoryChildren extends Children.Keys {
+    private static final class CathegoryChildren extends Children.Keys<String> {
 
         private String cathegory;
         
@@ -76,16 +76,18 @@ public class CategoryNode extends AbstractNode {
             this.cathegory = cathegory;
         }
         
+        @Override
         protected void addNotify() {
             setKeys(IconsStorage.getDefault().getIconNamesForCathegory(cathegory));
         }
         
+        @Override
         protected void removeNotify() {
-            setKeys(Collections.EMPTY_LIST);
+            setKeys(Collections.<String>emptyList());
         }
         
-        protected Node[] createNodes(Object key) {
-            return new Node[] {new IconNode((String) key)};
+        protected Node[] createNodes(String key) {
+            return new Node[] {new IconNode(key)};
         }
         
     }

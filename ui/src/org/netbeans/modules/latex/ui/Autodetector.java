@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -43,7 +43,6 @@ package org.netbeans.modules.latex.ui;
 import java.awt.Frame;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -72,7 +71,6 @@ public class Autodetector {
     
     private static final boolean debug = false;
     
-    /** Creates a new instance of Autodetector */
     private Autodetector() {
     }
     
@@ -87,6 +85,7 @@ public class Autodetector {
 
                 if (!f.isShowing()) {
                     f.addWindowListener(new WindowAdapter() {
+                        @Override
                         public void windowOpened(WindowEvent e) {
                             RequestProcessor.getDefault().post(new Runnable() {
                                 public void run() {
@@ -115,8 +114,9 @@ public class Autodetector {
         final ProgressHandle handle = ProgressHandleFactory.createHandle("Autodetecting LaTeX Commands");
         
         new Thread() {
+            @Override
             public void run() {
-                Map results = new HashMap();
+                Map<String, Object> results = new HashMap<String, Object>();
                 
                 int count = 0;
                 
@@ -130,8 +130,8 @@ public class Autodetector {
                 
                 for (Iterator i = defaultLocations.keySet().iterator(); i.hasNext(); ) {
                     String key = (String) i.next();
-                    String[] locations = (String[] ) defaultLocations.get(key);
-                    List targetLocations = new ArrayList();
+                    String[] locations = defaultLocations.get(key);
+                    List<String> targetLocations = new ArrayList<String>();
                     boolean foundPerfect = false;
                     
                     for (int cntr = 0; cntr < locations.length; cntr++) {
@@ -155,7 +155,7 @@ public class Autodetector {
                         }
                     }
                     
-                    String[] targetLocationsArray = (String[] ) targetLocations.toArray(new String[0]);
+                    String[] targetLocationsArray = targetLocations.toArray(new String[0]);
                     
                     if (targetLocationsArray.length > 0) {
                         results.put(key, targetLocationsArray[0]);
@@ -165,7 +165,7 @@ public class Autodetector {
                 
                 handle.finish();
                 
-                Map m = ModuleSettings.getDefault().readSettings();
+                Map<String, Object> m = ModuleSettings.getDefault().readSettings();
                 
                 if (m != null) {
                     m.putAll(results);
@@ -200,6 +200,7 @@ public class Autodetector {
             final Process      p          = Runtime.getRuntime().exec(new String[] {file, argument});
             
             Thread out = new Thread() {
+                @Override
                 public void run() {
                     try {
                         InputStream  ins     = p.getInputStream();
@@ -219,6 +220,7 @@ public class Autodetector {
             out.start();
             
             Thread err = new Thread() {
+                @Override
                 public void run() {
                     try {
                         InputStream  ins     = p.getErrorStream();
@@ -240,6 +242,7 @@ public class Autodetector {
             p.getOutputStream().close();
             
             Thread waitFor = new Thread() {
+                @Override
                 public void run() {
                     try {
                         p.waitFor();
@@ -290,7 +293,7 @@ public class Autodetector {
             System.err.println("testProgram(" + type + ", " + program + ")");
         
         List/*<String>*/ arguments = (List) type2Arguments.get(type);
-        String awaitedContent = (String) content.get(type);
+        String awaitedContent = content.get(type);
         int result = NOT_FOUND;
         
         if (debug) {
