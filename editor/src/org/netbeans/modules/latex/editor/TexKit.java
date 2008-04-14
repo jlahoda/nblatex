@@ -49,6 +49,8 @@ import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
 import org.netbeans.api.lexer.Language;
+import org.netbeans.api.lexer.TokenHierarchy;
+import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.editor.BaseKit;
 import org.netbeans.editor.Settings;
@@ -56,6 +58,7 @@ import org.netbeans.editor.SettingsNames;
 import org.netbeans.editor.Syntax;
 import org.netbeans.editor.SyntaxSupport;
 import org.netbeans.modules.editor.NbEditorKit;
+import org.netbeans.modules.latex.model.lexer.TexTokenId;
 import org.openide.util.Exceptions;
 
 /**
@@ -137,7 +140,22 @@ public class TexKit extends NbEditorKit {
                         }
 
                         if (end - start > rightMargin && caret == end) {
+                            boolean isComment = false;
+                            
+                            TokenHierarchy<Document> h = TokenHierarchy.get(target.getDocument());
+                            TokenSequence<TexTokenId> ts = h.tokenSequence(TexLanguage.description());
+                            
+                            if (ts != null) {
+                                ts.move(caret);
+                                
+                                isComment = ts.movePrevious() && ts.token().id() == TexTokenId.COMMENT;
+                            }
+                            
                             ((InsertBreakAction) kit.getActionByName(insertBreakAction)).actionPerformed(evt, target);
+                            
+                            if (isComment) {
+                                target.getDocument().insertString(target.getCaretPosition(), "%", null);
+                            }
                             return ;
                         }
                     } catch (BadLocationException ex) {
