@@ -56,6 +56,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import javax.swing.*;
+import org.openide.awt.Mnemonics;
 
 /**
  *
@@ -269,13 +270,22 @@ public class Editor extends JComponent implements PropertyChangeListener {
                     if (actual == null)
                         menu.addSeparator();
                     else
-                        menu.add(nodeMenu[cntr]);
+                        add(menu, nodeMenu[cntr]);
                 }
             }
             
             return menu;
         } else
             return createPopupMenu(pos);
+    }
+    
+    private void add(JPopupMenu menu, Action a) {
+        JMenuItem i = menu.add(a);
+        
+        i.setIcon(null);
+        i.setDisabledIcon(null);
+        
+        Mnemonics.setLocalizedText(i, i.getText());
     }
     
     public void invalidate() {

@@ -44,6 +44,7 @@
 package org.netbeans.modules.latex.gui.nb;
 
 import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
 import java.beans.IntrospectionException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -59,6 +60,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractAction;
 import javax.swing.JScrollPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -93,6 +95,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
     private SourcePosition start;
     private SourcePosition end;
     private Editor         editor;
+    private DeleteNodeAction delete;
 
     public void writeExternal(ObjectOutput oo) throws IOException {
         super.writeExternal(oo);
@@ -173,6 +176,8 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
         
         setIcon(Utilities.loadImage("org/netbeans/modules/latex/resource/autedit_icon.gif"));
         setDisplayName(el.getCaption());
+        
+        getActionMap().put("delete", delete = new DeleteNodeAction());
     }
     
     private VauElementTopComponent(VauStructuralElement el) {
@@ -366,7 +371,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
     
     public void propertyChange(PropertyChangeEvent evt) {
         if (Editor.PROP_SELECTION.equals(evt.getPropertyName())) {
-            List     selected = editor.getSelection();
+            List<org.netbeans.modules.latex.gui.Node> selected = editor.getSelection();
             Node[]   result   = new Node[selected.size()];
             
             for (int cntr = 0; cntr < selected.size(); cntr++) {
@@ -375,6 +380,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
             }
             
             setActivatedNodes(result);
+            delete.setEnabled(result.length > 0);
         }
     }
 
@@ -389,4 +395,16 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
         return PERSISTENCE_ONLY_OPENED;
     }
     
+    private final class DeleteNodeAction extends AbstractAction {
+
+        public void actionPerformed(ActionEvent e) {
+            for (org.netbeans.modules.latex.gui.Node s : editor.getSelection()) {
+                s.remove();
+            }
+            
+            storage.redrawAll();
+            editor.clearSelection();
+        }
+        
+    }
 }

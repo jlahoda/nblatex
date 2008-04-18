@@ -64,6 +64,7 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JOptionPane;
 import org.netbeans.modules.latex.model.IconsStorage;
+import org.openide.actions.DeleteAction;
 
 /**
  *
@@ -330,7 +331,7 @@ public class StateNode extends PositionNode {
             new ToggleFinalAction(),
             new ToggleInitialAction(),
             null,
-            new RemoveAction(),
+            DeleteAction.get(DeleteAction.class),
             null,
             Editor.getSystemMenuFlag(),
             null,
