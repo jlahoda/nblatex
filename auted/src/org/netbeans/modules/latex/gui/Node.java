@@ -45,7 +45,6 @@ package org.netbeans.modules.latex.gui;
 
 import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeEvent;
@@ -56,10 +55,10 @@ import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.text.NumberFormat;
 import java.util.Locale;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import org.openide.util.WeakSet;
 
 /**
  *
@@ -70,14 +69,14 @@ public abstract class Node implements Serializable {
     private PropertyChangeSupport pcs;
     private String id;
     
-    private static Map ids = new WeakHashMap();
+    private static Set<String> ids = new WeakSet<String>();
     
     private static boolean isUsed(String id) {
-        return ids.values().contains(id);
+        return ids.contains(id);
     }
     
     private static synchronized void addId(String id) {
-        ids.put(id, id);
+        ids.add(id);
     }
     
     private static int idCount = 0;
@@ -171,20 +170,20 @@ public abstract class Node implements Serializable {
         return new Action[0];
     }
     
-    private transient WeakReference menu;
+    private transient WeakReference<Action[]> menu;
     
     public synchronized Action[] getPopupMenu() {
         Action[] m;
         
         if (menu == null) {
             m = createPopupMenu();
-            menu = new WeakReference(m);
+            menu = new WeakReference<Action[]>(m);
         } else {
-            m = (Action[] ) menu.get();
+            m = menu.get();
             
             if (m == null) {
                 m = createPopupMenu();
-                menu = new WeakReference(m);
+                menu = new WeakReference<Action[]>(m);
             }
         }
         
