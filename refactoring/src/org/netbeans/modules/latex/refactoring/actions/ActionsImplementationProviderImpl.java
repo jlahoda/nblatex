@@ -88,6 +88,10 @@ public class ActionsImplementationProviderImpl extends ActionsImplementationProv
         
         FileObject f = n.getLookup().lookup(FileObject.class);
         
+        if (f == null) {
+            return false;
+        }
+        
         return "text/x-tex".equals(FileUtil.getMIMEType(f));
     }
 
