@@ -65,7 +65,7 @@ public class Editor extends JComponent implements PropertyChangeListener {
     
     public static final String PROP_SELECTION = "selection";
     private NodeStorage storage;
-    private List        selection;
+    private List<Node>  selection;
     private Rectangle2D selector = null;
     
     /** Creates a new instance of Editor */
@@ -82,7 +82,7 @@ public class Editor extends JComponent implements PropertyChangeListener {
         addMouseListener(listener);
         addMouseMotionListener(listener);
         
-        selection = new ArrayList();
+        selection = new ArrayList<Node>();
         
         setBackground(Color.WHITE);
     }
@@ -117,14 +117,14 @@ public class Editor extends JComponent implements PropertyChangeListener {
         
         storage.draw((Graphics2D) g);
         
-        Iterator iter = selection.iterator();
+        Iterator<Node> iter = selection.iterator();
         
         while (iter.hasNext()) {
-            drawSelectionBoard(g, (Node) iter.next());
+            drawSelectionBoard(g, iter.next());
         }
         
         if (selection.size() == 1) {
-            drawControlPoints(g, (Node) selection.get(0));
+            drawControlPoints(g, selection.get(0));
         }
         
         drawSelector((Graphics2D) g);
@@ -520,7 +520,7 @@ public class Editor extends JComponent implements PropertyChangeListener {
         firePropertyChange(PROP_SELECTION, null, selection);
     }
     
-    public List getSelection() {
+    public List<Node> getSelection() {
         return Collections.unmodifiableList(selection);
     }
     
