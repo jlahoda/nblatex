@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -85,6 +85,7 @@ import org.openide.text.NbDocument;
 import org.openide.util.Utilities;
 import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
+import org.openide.windows.TopComponentGroup;
 import org.openide.windows.WindowManager;
 
 public class VauElementTopComponent extends TopComponent implements PropertyChangeListener {
@@ -241,7 +242,30 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
         if (!closed)
             synchronize();
     }
-    
+
+    @Override
+    protected void componentShowing() {
+        super.componentShowing();
+        
+        TopComponentGroup group = WindowManager.getDefault().findTopComponentGroup("AutEd");
+        if (group == null) {
+            return;
+        }
+        
+        group.open();
+    }
+
+    @Override
+    protected void componentHidden() {
+        super.componentHidden();
+        
+        TopComponentGroup group = WindowManager.getDefault().findTopComponentGroup("AutEd");
+        if (group == null) {
+            return;
+        }
+        
+        group.close();
+    }
     
     /*On Windows, common PrintWriter print \n\r as a newline. The NB Document
      *should contain only \n (on all platforms). The method synchronize uses output
