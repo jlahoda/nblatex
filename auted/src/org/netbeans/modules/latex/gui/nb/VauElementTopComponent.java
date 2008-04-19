@@ -180,6 +180,9 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
         
         getActionMap().put("delete", delete = new DeleteNodeAction());
     }
+
+    public VauElementTopComponent() {
+    }
     
     private VauElementTopComponent(VauStructuralElement el) {
         initialize(el);
@@ -213,7 +216,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
         unsetGuarded();
         closed = true;
     }
-    
+        
     public void componentOpened() {
         setGuarded();
     }
