@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <!--
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
@@ -40,41 +40,12 @@ However, if you add GPL Version 2 code and therefore, elected the GPL
 Version 2 license, then the option applies only if the new code is
 made subject to such option by the copyright holder.
 -->
-<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.0//EN" "http://www.netbeans.org/dtds/filesystem-1_0.dtd">
+<!DOCTYPE group PUBLIC
+  "-//NetBeans//DTD Group Properties 2.0//EN"
+  "http://www.netbeans.org/dtds/group-properties2_0.dtd">
 
-<filesystem>
-
-   <folder name="latex">
-      <folder name="commands2">
-        <file name="vaucanson.xml" url="vaucanson.xml">
-            <attr name="command-package" stringvalue="true" />
-        </file>
-        <file name="vaucanson-g.xml" url="vaucanson-g.xml">
-            <attr name="command-package" stringvalue="true" />
-        </file>
-        <file name="vaucansonx.xml" url="vaucansonx.xml">
-            <attr name="command-package" stringvalue="true" />
-        </file>
-        <file name="vaucanson-generic.xml" url="vaucanson-generic.xml" />
-      </folder>
-      
-      <folder name="structural">
-        <folder name="nodes">
-            <file name="org-netbeans-modules-latex-gui-nb-VauNodeProvider.instance" />
-        </folder>
-        <folder name="parsers">
-            <file name="org-netbeans-modules-latex-gui-nb-VauParser.instance" />
-        </folder>
-      </folder>
-   </folder>
-
-   <folder name="Windows2">
-      <folder name="Groups">
-         <file name="AutEd.wsgrp" url="AutEdGroupWsgrp.xml"/>
-         <folder name="AutEd">
-            <file name="properties.wstcgrp" url="PropertiesWstcgrp.xml"/>
-         </folder>
-      </folder>
-   </folder>
-
-</filesystem>
+<group version="2.0">
+    <module name="org.netbeans.modules.latex.auted" spec="1.0" />
+    <name unique="AutEd" />
+    <state opened="false" />
+</group>
