@@ -46,6 +46,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.Document;
 import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.modules.latex.hints.HintProvider.Data;
@@ -69,6 +71,8 @@ public class SuggestionsProcessor implements CancellableTask<CompilationInfo> {
     }
 
     public void run(final CompilationInfo info) throws Exception {
+        long start = System.currentTimeMillis();
+        
         List<ErrorDescription> suggestions = compute(info);
         
         if (suggestions == null) {
@@ -76,6 +80,10 @@ public class SuggestionsProcessor implements CancellableTask<CompilationInfo> {
         }
         
         HintsController.setErrors(info.getFileObject(), SuggestionsProcessor.class.getName(), suggestions);
+        
+        long end = System.currentTimeMillis();
+        
+        Logger.getLogger("TIMER").log(Level.FINE, "Suggestions Processor", new Object[] {info.getFileObject(), (end - start)});
     }
     
     private List<ErrorDescription> compute(CompilationInfo info) throws Exception {

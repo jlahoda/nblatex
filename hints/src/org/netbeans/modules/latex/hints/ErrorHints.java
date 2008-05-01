@@ -51,6 +51,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.Document;
 import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.napi.gsfret.source.CompilationInfo;
@@ -75,15 +77,17 @@ public class ErrorHints implements CancellableTask<CompilationInfo> {
     public void cancel() {
     }
 
-    public void run(final CompilationInfo parameter) throws Exception {
-        final Document doc = parameter.getDocument();
+    public void run(final CompilationInfo info) throws Exception {
+        long start = System.currentTimeMillis();
+        
+        final Document doc = info.getDocument();
         
         if (doc == null) return ;
         
-        LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        LaTeXParserResult lpr = LaTeXParserResult.get(info);
         
         Map<FileObject, List<ParseError>> sortedErrors = sortErrors(lpr.getErrors());
-        List<ParseError> errors = sortedErrors.get(parameter.getFileObject());
+        List<ParseError> errors = sortedErrors.get(info.getFileObject());
         
         if (errors == null) errors = Collections.<ParseError>emptyList();
         
@@ -96,7 +100,7 @@ public class ErrorHints implements CancellableTask<CompilationInfo> {
             FixProvider p = code2StringProvider.get(e.getCode());
             
             if (p != null) {
-                List<Fix> providedFixes = p.resolveFixes(parameter, e);
+                List<Fix> providedFixes = p.resolveFixes(info, e);
                 
                 if (providedFixes != null) {
                     fixes.addAll(providedFixes);
@@ -112,13 +116,17 @@ public class ErrorHints implements CancellableTask<CompilationInfo> {
                     if (e.getEnd() == null) {
                         editorErrors.add(ErrorDescriptionFactory.createErrorDescription(s, e.getDisplayName(), fixes, doc, e.getStart().getLine()));
                     } else {
-                        editorErrors.add(ErrorDescriptionFactory.createErrorDescription(s, e.getDisplayName(), fixes, parameter.getFileObject(), e.getStart().getOffsetValue(), e.getEnd().getOffsetValue()));
+                        editorErrors.add(ErrorDescriptionFactory.createErrorDescription(s, e.getDisplayName(), fixes, info.getFileObject(), e.getStart().getOffsetValue(), e.getEnd().getOffsetValue()));
                     }
                 }
             });
         }
         
-        HintsController.setErrors(parameter.getFileObject(), ErrorHints.class.getName(), editorErrors);
+        HintsController.setErrors(info.getFileObject(), ErrorHints.class.getName(), editorErrors);
+        
+        long end = System.currentTimeMillis();
+        
+        Logger.getLogger("TIMER").log(Level.FINE, "Error Hints Processor", new Object[] {info.getFileObject(), (end - start)});
     }
 
     private Map<FileObject, List<ParseError>> sortErrors(Collection<ParseError> errors) {

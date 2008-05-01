@@ -47,6 +47,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.Document;
 import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.modules.latex.hints.HintProvider.Data;
@@ -80,6 +82,8 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
     }
 
     public void run(final CompilationInfo info) throws Exception {
+        long start = System.currentTimeMillis();
+        
         List<ErrorDescription> hints = compute(info, providers, cancel);
         
         if (hints == null) {
@@ -87,6 +91,10 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
         }
         
         HintsController.setErrors(info.getFileObject(), HintsProcessor.class.getName(), hints);
+        
+        long end = System.currentTimeMillis();
+        
+        Logger.getLogger("TIMER").log(Level.FINE, "Hints Processor", new Object[] {info.getFileObject(), (end - start)});
     }
     
     static List<ErrorDescription> compute(final CompilationInfo info, final List<HintProvider> providers, final AtomicBoolean cancel) throws Exception {
