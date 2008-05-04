@@ -70,6 +70,7 @@ import org.openide.util.WeakSet;
  */
 public class SpellcheckerDataCollector implements CancellableTask<CompilationInfo> {
 
+    private static final Logger LOG = Logger.getLogger(SpellcheckerDataCollector.class.getName());
     private AtomicBoolean cancel = new AtomicBoolean();
     
     public void cancel() {
@@ -135,12 +136,19 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
                         if (cancel.get()) {
                             return;
                         }
+                        
+                        long start = System.currentTimeMillis();
+                        
                         try {
                             for (Token t : node.getNodeTokens()) {
                                 acceptedTokens.add(t);
                             }
                         } catch (IOException e) {
                             Exceptions.printStackTrace(e);
+                        } finally {
+                            long end = System.currentTimeMillis();
+                            
+                            LOG.log(Level.FINE, "Locked the document for {0}ms", end - start);
                         }
                     }
                 });
