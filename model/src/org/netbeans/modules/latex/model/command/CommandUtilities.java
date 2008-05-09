@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -79,7 +79,7 @@ public interface CommandUtilities {
      *
      *  @throws IOException if a document cannot be opened, or some other problem occurs.
      */
-    public abstract List getCommands(SourcePosition pos) throws IOException;
+    public abstract List<Command> getCommands(SourcePosition pos) throws IOException;
 
     /** Returns a command with given name at the given position. If the command cannot be
      *  found, returns null.
@@ -101,7 +101,7 @@ public interface CommandUtilities {
      *
      *  @throws IOException if a document cannot be opened, or some other problem occurs.
      */
-    public abstract List getEnvironments(SourcePosition pos) throws IOException;
+    public abstract List<Environment> getEnvironments(SourcePosition pos) throws IOException;
 
     /** Returns an environment with given name at the given position. If the environment cannot be
      *  found, returns null.
