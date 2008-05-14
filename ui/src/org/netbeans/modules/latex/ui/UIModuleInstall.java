@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2006.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -47,6 +47,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.modules.latex.model.command.DebuggingSupport;
@@ -90,6 +91,30 @@ public class UIModuleInstall extends ModuleInstall {
         }
 
         super.restored();
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public void validate() throws IllegalStateException {
+        try {
+            java.lang.Class main = java.lang.Class.forName("org.netbeans.core.startup.Main", false,  //NOI18N
+                    Thread.currentThread().getContextClassLoader());
+            Method getModuleSystem = main.getMethod("getModuleSystem", new Class[0]); //NOI18N
+            Object moduleSystem = getModuleSystem.invoke(null, new Object[0]);
+            Method getManager = moduleSystem.getClass().getMethod("getManager", new Class[0]); //NOI18N
+            Object moduleManager = getManager.invoke(moduleSystem, new Object[0]);
+            Method moduleMeth = moduleManager.getClass().getMethod("get", new Class[] {String.class}); //NOI18N
+            Object persistence = moduleMeth.invoke(moduleManager, "org.netbeans.modules.jumpto"); //NOI18N
+            if (persistence != null) {
+                Field frField = persistence.getClass().getSuperclass().getDeclaredField("friendNames"); //NOI18N
+                frField.setAccessible(true);
+                Set friends = (Set)frField.get(persistence);
+                friends.add("org.netbeans.modules.latex.ui"); //NOI18N
+            }
+        } catch (Exception ex) {
+            new IllegalStateException("Cannot fix dependencies for org.netbeans.modules.latex.ui.", ex); //NOI18N
+        }
+        super.validate();
     }
     
 }
