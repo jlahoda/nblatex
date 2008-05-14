@@ -51,7 +51,7 @@ import java.awt.Dimension;
  */
 public class UIProperties {
 
-    private boolean antialiasingEnabled = false;
+    private boolean antialiasingEnabled = true;
 
     private static UIProperties instance = null;
 
