@@ -69,4 +69,12 @@ made subject to such option by the copyright holder.
 ]]>
         </code>
     </codetemplate>
+    <codetemplate abbreviation="env" contexts="PAR">
+        <code>
+<![CDATA[\begin{${name}}
+${cursor}
+\end{${name}}
+]]>
+        </code>
+    </codetemplate>
 </codetemplates>
