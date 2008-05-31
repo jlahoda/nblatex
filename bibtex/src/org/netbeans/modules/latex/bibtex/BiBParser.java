@@ -96,7 +96,9 @@ public class BiBParser {
         if (!ts.moveNext())
             return true;
         
-        ts.movePrevious();
+        if (!ts.movePrevious()) {
+            ts.moveStart();
+        }
         
         return false;
     }

@@ -305,4 +305,34 @@ public class IncrementalParserTest extends TestCase {
         }));
     }
     
+    public void testParsingFromStart() throws Exception {
+        performTest(getTestFile(),
+        new Description(
+            "@INPROCEEDINGS{FB_03,\n" +
+            "    author = {X. Foo and Y. {Bar}},\n"+
+            "    title = {Do anything:{test} Continued},\n"+
+            "    booktitle = \"Proc. of the 3rd Conference on LaTeX editors\",\n"+
+            "    year = \"2003\",\n" +
+            "    pages = \"142-143\",\n"+
+            "}\n",
+        new Change[] {
+        new ValidateChange(new Validator() {
+            public void validate(Document doc) throws BadLocationException, IOException {
+                BiBTeXModel model = BiBTeXModel.getModel(Utilities.getDefault().getFile(doc));
+                
+                assertEquals(1, model.getEntries().size());
+                
+                Entry e1 = (Entry) model.getEntries().get(0);
+                
+                assertNotNull(e1);
+                
+                assertTrue(e1 instanceof PublicationEntry);
+                
+                assertEquals("FB_03", ((PublicationEntry) e1).getTag());
+            }
+        })
+        
+        }));
+    }
+    
 }
