@@ -158,7 +158,7 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
                         } finally {
                             long end = System.currentTimeMillis();
                             
-                            LOG.log(Level.INFO, "Locked the document for {0}ms", end - start);
+                            LOG.log(Level.FINE, "Locked the document for {0}ms", end - start);
                         }
                     }
                 });
