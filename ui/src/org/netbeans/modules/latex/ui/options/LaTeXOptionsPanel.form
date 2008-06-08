@@ -132,7 +132,9 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="allowHardWrap" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="717" max="32767" attributes="0"/>
+                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <Component id="allowBracketCompletion" min="-2" max="-2" attributes="0"/>
+                  <EmptySpace pref="538" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -140,7 +142,10 @@
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="allowHardWrap" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="allowHardWrap" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="allowBracketCompletion" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
@@ -150,6 +155,11 @@
         <Component class="javax.swing.JCheckBox" name="allowHardWrap">
           <Properties>
             <Property name="text" type="java.lang.String" value="Allow Hard Wrap"/>
+          </Properties>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="allowBracketCompletion">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Allow Bracket Completion"/>
           </Properties>
         </Component>
       </SubComponents>

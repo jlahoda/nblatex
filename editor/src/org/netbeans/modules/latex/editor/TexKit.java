@@ -165,6 +165,17 @@ public class TexKit extends NbEditorKit {
             }
             
             super.actionPerformed(evt, target);
+            
+            try {
+                int offset = target.getCaretPosition();
+                
+                BracketCompleter.typed(target.getDocument(), offset,cmd);
+                
+                target.setCaretPosition(offset);
+            } catch (BadLocationException ex) {
+                Exceptions.printStackTrace(ex);
+            }
+            
         }
         
     }
