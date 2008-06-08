@@ -971,7 +971,8 @@ public final class CommandParser {
         Environment   env = findEnvironment(beginText);
         
         if (env == null) {
-            ParseError error = ParseError.create(ParseError.Severity.WARNING, "unknown.environment", "Unknown environment: " + beginText, anode.getStartingPosition(), anode.getEndingPosition(), beginText);
+            Node tag = anode != null ? anode : begin;
+            ParseError error = ParseError.create(ParseError.Severity.WARNING, "unknown.environment", "Unknown environment: " + beginText, tag.getStartingPosition(), tag.getEndingPosition(), beginText);
             errors.add(error);
             env = BlockNodeImpl.NULL_ENVIRONMENT;
         }
