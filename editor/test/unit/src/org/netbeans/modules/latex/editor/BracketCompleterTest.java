@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -40,31 +40,55 @@
  */
 
 package org.netbeans.modules.latex.editor;
-import org.openide.util.NbPreferences;
+
+import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
+import javax.swing.text.PlainDocument;
+import junit.framework.TestCase;
+import org.netbeans.api.lexer.Language;
 
 /**
  *
  * @author Jan Lahoda
  */
-public final class LaTeXSettings {
+public class BracketCompleterTest extends TestCase {
+    
+    public BracketCompleterTest(String testName) {
+        super(testName);
+    }            
 
-    private static final String HARD_WRAP_ALLOWED = "hardWrapAllowed";
-    private static final String BRACKET_COMPLETION_ALLOWED = "bracketCompletionAllowed";
-    
-    public static boolean isHardWrapAllowed() {
-        return NbPreferences.forModule(LaTeXSettings.class).getBoolean(HARD_WRAP_ALLOWED, true);
-    }
-    
-    public static void setHardWrapAllowed(boolean value) {
-        NbPreferences.forModule(LaTeXSettings.class).putBoolean(HARD_WRAP_ALLOWED, value);
+    public void testAddedBracket1() throws BadLocationException {
+        doTestBrackets("{|", "{}");
     }
 
-    public static boolean isBracketCompletionAllowed() {
-        return NbPreferences.forModule(LaTeXSettings.class).getBoolean(BRACKET_COMPLETION_ALLOWED, true);
+    public void testAddedBracket2() throws BadLocationException {
+        doTestBrackets("{|}", "{}");
     }
     
-    public static void setBracketCompletionAllowed(boolean value) {
-        NbPreferences.forModule(LaTeXSettings.class).putBoolean(BRACKET_COMPLETION_ALLOWED, value);
+    public void testAddedBracket3() throws BadLocationException {
+        doTestBrackets("\\{|", "\\{\\}");
+    }
+
+    public void testAddedBracket4() throws BadLocationException {
+        doTestBrackets("\\{|\\}", "\\{\\}");
     }
     
+    public void testAddedBracket5() throws BadLocationException {
+        doTestBrackets("$|", "$$");
+    }
+    
+    private void doTestBrackets(String text, String golden) throws BadLocationException {
+        int offset = text.indexOf('|');
+        
+        text = text.replace("|", "");
+        Document doc = new PlainDocument();
+
+        doc.putProperty(Language.class, TexLanguage.description());
+        doc.insertString(0, text, null);
+
+        BracketCompleter.typed(doc, offset, "" + text.charAt(offset - 1));
+
+        assertEquals(golden, doc.getText(0, doc.getLength()));
+    }
+
 }

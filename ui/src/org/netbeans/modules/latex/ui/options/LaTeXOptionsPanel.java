@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -213,6 +213,7 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
             }
         }
         allowHardWrap.setSelected(LaTeXSettings.isHardWrapAllowed());
+        allowBracketCompletion.setSelected(LaTeXSettings.isBracketCompletionAllowed());
     }
     
     public void commit() {
@@ -234,6 +235,7 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
         ModuleSettings.getDefault().writeSettings(settings);
         
         LaTeXSettings.setHardWrapAllowed(allowHardWrap.isSelected());
+        LaTeXSettings.setBracketCompletionAllowed(allowBracketCompletion.isSelected());
     }
     
     /** This method is called from within the constructor to
@@ -250,6 +252,7 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
         jButton1 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         allowHardWrap = new javax.swing.JCheckBox();
+        allowBracketCompletion = new javax.swing.JCheckBox();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Commands", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP));
         jPanel1.setOpaque(false);
@@ -302,6 +305,8 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(allowHardWrap, "Allow Hard Wrap");
 
+        org.openide.awt.Mnemonics.setLocalizedText(allowBracketCompletion, "Allow Bracket Completion");
+
         org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -309,13 +314,17 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
             .add(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .add(allowHardWrap)
-                .addContainerGap(717, Short.MAX_VALUE))
+                .add(18, 18, 18)
+                .add(allowBracketCompletion)
+                .addContainerGap(538, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(allowHardWrap)
+                .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
+                    .add(allowHardWrap)
+                    .add(allowBracketCompletion))
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -358,6 +367,7 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox allowBracketCompletion;
     private javax.swing.JCheckBox allowHardWrap;
     private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;
