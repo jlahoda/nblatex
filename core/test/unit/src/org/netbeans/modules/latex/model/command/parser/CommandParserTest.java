@@ -138,6 +138,7 @@ public class CommandParserTest extends NbTestCase {
             dataDir.getFileObject("testInclude.tex"),
             dataDir.getFileObject("inc1.tex"),
             dataDir.getFileObject("includes/inc2.tex"),
+            dataDir.getFileObject("includes/inc2a.tex"),
         })), new HashSet(node.getFiles()));
     }
     
