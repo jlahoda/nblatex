@@ -89,6 +89,7 @@ import org.openide.nodes.Children;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 import org.openide.util.ChangeSupport;
+import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.RequestProcessor;
 import org.openide.util.lookup.Lookups;
@@ -116,7 +117,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
     private static final Icon LaTeXGUIProjectICON;
     
     static {
-        LaTeXGUIProjectIMAGE = org.openide.util.Utilities.loadImage("org/netbeans/modules/latex/guiproject/resources/latex_gui_project_icon.png");//NOI18N
+        LaTeXGUIProjectIMAGE = ImageUtilities.loadImage("org/netbeans/modules/latex/guiproject/resources/latex_gui_project_icon.png");//NOI18N
         LaTeXGUIProjectICON  = new ImageIcon(LaTeXGUIProjectIMAGE);
     }
     
