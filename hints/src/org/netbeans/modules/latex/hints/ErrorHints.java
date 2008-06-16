@@ -114,7 +114,7 @@ public class ErrorHints implements CancellableTask<CompilationInfo> {
             doc.render(new Runnable() {
                 public void run() {
                     if (e.getEnd() == null) {
-                        editorErrors.add(ErrorDescriptionFactory.createErrorDescription(s, e.getDisplayName(), fixes, doc, e.getStart().getLine()));
+                        editorErrors.add(ErrorDescriptionFactory.createErrorDescription(s, e.getDisplayName(), fixes, doc, e.getStart().getLine() + 1));
                     } else {
                         editorErrors.add(ErrorDescriptionFactory.createErrorDescription(s, e.getDisplayName(), fixes, info.getFileObject(), e.getStart().getOffsetValue(), e.getEnd().getOffsetValue()));
                     }
