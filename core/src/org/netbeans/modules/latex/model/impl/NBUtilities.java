@@ -134,52 +134,8 @@ public class NBUtilities extends Utilities implements PropertyChangeListener {
             return relativeFolder.getChildren();
     }
     
-    private FileObject getChild(FileObject parent, String child) {
-        int dot = child.indexOf('.');
-        
-        if (dot != (-1)) {
-            return parent.getFileObject(child.substring(0, dot), child.substring(dot + 1));
-        } else {
-            return parent.getFileObject(child, null);
-        }
-    }
-    
     public Object getRelativeFileName(Object file, String relativeFile) throws IOException {
-        FileObject fileFO = ((FileObject) file).getParent();
-        int        sep    = relativeFile.indexOf(File.separatorChar);
-        
-        while (sep != (-1) && fileFO != null) {
-            String dirSpec;
-
-            if (sep >= relativeFile.length() - 1) {
-                dirSpec = relativeFile;
-                relativeFile = "";
-            } else {
-                dirSpec = relativeFile.substring(0, sep + 1);
-                relativeFile = relativeFile.substring(sep + 1);
-            }
-            
-            sep    = relativeFile.indexOf(File.separatorChar);
-            
-            if ("../".equals(dirSpec)) {
-                fileFO = fileFO.getParent();
-                continue;
-            }
-            
-            if ("./".equals(dirSpec)) {
-                continue;
-            }
-            
-            fileFO = getChild(fileFO, dirSpec);
-        }
-        
-        if ("".equals(relativeFile))
-            return fileFO;
-        
-        if (fileFO == null)
-            return null;
-        
-        return getChild(fileFO, relativeFile);
+        return ((FileObject) file).getParent().getFileObject(relativeFile);
     }
     
 //    public Object   findFile(File file) throws IOException {
