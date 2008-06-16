@@ -42,19 +42,20 @@
 package org.netbeans.modules.latex.editor;
 
 import java.awt.event.ActionEvent;
+import java.util.prefs.Preferences;
 import javax.swing.Action;
 import javax.swing.JEditorPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.TextAction;
+import org.netbeans.api.editor.mimelookup.MimeLookup;
+import org.netbeans.api.editor.settings.SimpleValueNames;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
 import org.netbeans.editor.BaseKit;
-import org.netbeans.editor.Settings;
-import org.netbeans.editor.SettingsNames;
 import org.netbeans.editor.Syntax;
 import org.netbeans.editor.SyntaxSupport;
 import org.netbeans.modules.editor.NbEditorKit;
@@ -133,12 +134,8 @@ public class TexKit extends NbEditorKit {
                         int start = org.netbeans.editor.Utilities.getRowStart(target, caret);
                         int end = org.netbeans.editor.Utilities.getRowEnd(target, caret);
                         final BaseKit kit = org.netbeans.editor.Utilities.getKit(target);
-                        Integer rightMargin = (Integer) Settings.getValue(kit.getClass(), SettingsNames.TEXT_LIMIT_WIDTH);
+                        int rightMargin = (Integer) MimeLookup.getLookup(TEX_MIME_TYPE).lookup(Preferences.class).getInt(SimpleValueNames.TEXT_LIMIT_WIDTH, 80);
                         
-                        if (rightMargin == null) {
-                            rightMargin = 80;
-                        }
-
                         if (end - start > rightMargin && caret == end) {
                             boolean isComment = false;
                             
