@@ -104,9 +104,12 @@ public class UnitUtilities extends ProxyLookup {
         URL[] layers = new URL[additionalLayers.length + 1];
         
         layers[0] = Utilities.class.getResource("/org/netbeans/modules/latex/model/resources/mf-layer.xml");
+	
+	Assert.assertNotNull(layers[0]);
         
         for (int cntr = 0; cntr < additionalLayers.length; cntr++) {
             layers[cntr + 1] = Utilities.class.getResource(additionalLayers[cntr]);
+	    Assert.assertNotNull(additionalLayers[cntr], layers[cntr + 1]);
         }
         
         XMLFileSystem system = new XMLFileSystem();
