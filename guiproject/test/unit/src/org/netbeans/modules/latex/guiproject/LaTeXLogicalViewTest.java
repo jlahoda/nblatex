@@ -109,7 +109,7 @@ public class LaTeXLogicalViewTest extends ProjectTestCase {
         assertNull("Node found althought it should not be: " + found, found);
     }
     
-    public void testProjectFiles() throws IOException {
+    public void DISABLEDtestProjectFiles() throws IOException {
         projectFilesTestImpl(prj1Impl, project1Files, project2Files);
         projectFilesTestImpl(prj2Impl, project2Files, project1Files);
     }
