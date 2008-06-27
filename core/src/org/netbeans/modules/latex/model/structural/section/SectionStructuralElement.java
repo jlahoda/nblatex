@@ -57,11 +57,13 @@ public class SectionStructuralElement extends StructuralElement {
     private CommandNode node;
     private int         priority;
     private int         type;
+    private int[]       nums;
     
-    public SectionStructuralElement(CommandNode node, int priority, int type) {
+    public SectionStructuralElement(CommandNode node, int priority, int type, int[] nums) {
         this.node = node;
         this.priority = priority;
         this.type = type;
+        this.nums = nums;
     }
     
     public int getPriority() {
@@ -70,7 +72,7 @@ public class SectionStructuralElement extends StructuralElement {
     
     public String getName() {
         if (node.getArgumentCount() > 0)
-            return node.getArgument(0).getText().toString(); //!!!there is no assurance that there will be argument number 0!
+            return numsToString() + " " + node.getArgument(0).getText().toString(); //!!!there is no assurance that there will be argument number 0!
         else
             return "";
     }
@@ -83,12 +85,29 @@ public class SectionStructuralElement extends StructuralElement {
         return node;
     }
     
-    void update(CommandNode node) {
+    void update(CommandNode node, int[] nums) {
         this.node = node;
+        this.nums = nums;
         fireNameChanged();
     }
     
     private void fireNameChanged() {
         pcs.firePropertyChange(NAME, null, null);
+    }
+
+    private String numsToString() {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        
+        for (int i : nums) {
+            if (!first) {
+                sb.append(".");
+            }
+
+            sb.append(i);
+            first = false;
+        }
+
+        return sb.toString();
     }
 }

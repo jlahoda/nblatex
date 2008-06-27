@@ -43,6 +43,8 @@
  */
 package org.netbeans.modules.latex.model.structural.section;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.SourcePosition;
@@ -54,8 +56,9 @@ import org.netbeans.modules.latex.model.structural.StructuralElement;
  * @author Jan Lahoda
  */
 public class SectionDelegatedParser extends DelegatedParser {
+
+    private int[] numbers;
     
-    /** Creates a new instance of SectionDelegatedParser */
     public SectionDelegatedParser() {
     }
     
@@ -86,7 +89,7 @@ public class SectionDelegatedParser extends DelegatedParser {
             
             int type = getType(cnode);
             
-            return new SectionStructuralElement(cnode, 1000*(type + 1), type);
+            return new SectionStructuralElement(cnode, 1000*(type + 1), type, incrementNumbers(type));
         } else
             return null;
     }
@@ -95,7 +98,17 @@ public class SectionDelegatedParser extends DelegatedParser {
     public String[] getSupportedAttributes() {
         return new String[] {"#section-command"};
     }
+
+    @Override
+    public void reset() {
+        numbers = new int[sectionNames.length];
+    }
     
+    @Override
+    public void parsingFinished() {
+        numbers = null;
+    }
+
     private static String[] sectionNames = new String[] {
         "\\chapter",
         "\\section",
@@ -130,8 +143,10 @@ public class SectionDelegatedParser extends DelegatedParser {
             throw new IllegalStateException("");
         
         assert node instanceof CommandNode;
+
+        CommandNode cnode = (CommandNode) node;
         
-        ((SectionStructuralElement) element).update((CommandNode) node);
+        ((SectionStructuralElement) element).update(cnode, incrementNumbers(getType(cnode)));
         return element;
     }
     
@@ -148,6 +163,36 @@ public class SectionDelegatedParser extends DelegatedParser {
             return null;
     }
 
+    private int[] incrementNumbers(int type) {
+        for (int cntr = type + 1; cntr < numbers.length; cntr++) {
+            numbers[cntr] = 0;
+        }
+
+        numbers[type]++;
+
+        List<Integer> l = new ArrayList<Integer>(numbers.length);
+        
+        for (int i : numbers) {
+            l.add(i);
+        }
+
+        while (l.get(0) == 0) {
+            l.remove(0);
+        }
+
+        while (l.get(l.size() - 1) == 0) {
+            l.remove(l.size() - 1);
+        }
+
+        int[] res = new int[l.size()];
+
+        for (int cntr = 0; cntr < l.size(); cntr++) {
+            res[cntr] = l.get(cntr);
+        }
+
+        return res;
+    }
+    
     private static class SectionKey {
         private int type;
         private Class nodeClass;
