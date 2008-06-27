@@ -122,7 +122,7 @@ public class StructuralParserTest extends NbTestCase {
                 StructuralElement root = LaTeXParserResult.get(parameter).getStructuralRoot();
                 
                 section[0] = root.getSubElements().get(1);
-                assertEquals("Test", StructuralNodeFactory.createNode(section[0]).getDisplayName());
+                assertEquals("2 Test", StructuralNodeFactory.createNode(section[0]).getDisplayName());
             }
         }, true);
         
@@ -138,7 +138,7 @@ public class StructuralParserTest extends NbTestCase {
                 StructuralElement root = LaTeXParserResult.get(parameter).getStructuralRoot();
                 
                 assertTrue(section[0] == root.getSubElements().get(1));
-                assertEquals("Test", ((SectionStructuralElement) section[0]).getName());
+                assertEquals("2 Test", ((SectionStructuralElement) section[0]).getName());
             }
         }, true);
     }
