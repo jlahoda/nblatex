@@ -1,6 +1,6 @@
-syntax: glob
-*/build
-build
-dist
-*/nbproject/private
-nbproject/private
+.*/build
+^build$
+^dist$
+.*/nbproject/private
+^nbproject/private$
+^nbbuild$
