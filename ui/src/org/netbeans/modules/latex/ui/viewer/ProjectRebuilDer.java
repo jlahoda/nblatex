@@ -66,6 +66,7 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileRenameEvent;
 import org.openide.text.NbDocument;
 import org.openide.util.Lookup;
+import org.openide.util.RequestProcessor;
 
 /**
  *
@@ -74,6 +75,8 @@ import org.openide.util.Lookup;
 public class ProjectRebuilDer implements FileChangeListener {
     
     public static final ProjectRebuilDer INSTANCE = new ProjectRebuilDer();
+
+    private static final int DELAY = 500;
     
     private Project p;
     private DocumentTopComponent dtc;
@@ -188,13 +191,17 @@ public class ProjectRebuilDer implements FileChangeListener {
             return;
         }
         
-        ActionProvider ap = p.getLookup().lookup(ActionProvider.class);
+        final ActionProvider ap = p.getLookup().lookup(ActionProvider.class);
 
         if (ap == null) {
             return;
         }
-        
-        ap.invokeAction(ActionProvider.COMMAND_BUILD, Lookup.EMPTY);
+
+        WORKER.post(new Runnable() {
+            public void run() {
+                ap.invokeAction(ActionProvider.COMMAND_BUILD, Lookup.EMPTY);
+            }
+        }, DELAY);
     }
 
     public void fileFolderCreated(FileEvent fe) {}
@@ -233,4 +240,5 @@ public class ProjectRebuilDer implements FileChangeListener {
         this.files.addAll(added);
     }
 
+    private static final RequestProcessor WORKER = new RequestProcessor("LaTeX Compile on Save", 1);
 }
