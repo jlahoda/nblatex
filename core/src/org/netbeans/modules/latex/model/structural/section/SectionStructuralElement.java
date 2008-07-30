@@ -72,9 +72,13 @@ public class SectionStructuralElement extends StructuralElement {
     
     public String getName() {
         if (node.getArgumentCount() > 0)
-            return numsToString() + " " + node.getArgument(0).getText().toString(); //!!!there is no assurance that there will be argument number 0!
+            return numsToString() + " " + getPlainName(); //!!!there is no assurance that there will be argument number 0!
         else
             return "";
+    }
+
+    public String getPlainName() {
+        return node.getArgument(0).getText().toString();
     }
     
     public int getType() {
