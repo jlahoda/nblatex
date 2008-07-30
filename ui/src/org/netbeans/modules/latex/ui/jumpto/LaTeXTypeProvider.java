@@ -134,9 +134,13 @@ public class LaTeXTypeProvider implements TypeProvider {
     private String getName(StructuralElement e) {
         if (e instanceof LabelStructuralElement) {
             return ((LabelStructuralElement) e).getLabel();
-        } else {
-            return StructuralNodeFactory.createNode(e).getDisplayName();
         }
+
+        if (e instanceof SectionStructuralElement) {
+            return ((SectionStructuralElement) e).getPlainName();
+        }
+        
+        return StructuralNodeFactory.createNode(e).getDisplayName();
     }
     private void gatherStructuralDescriptions(FileObject mainFile, StructuralElement e, Result result, String path, String prefix) {
         String name = getName(e);
