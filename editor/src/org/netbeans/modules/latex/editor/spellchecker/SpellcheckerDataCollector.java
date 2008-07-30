@@ -258,37 +258,43 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
     }
     
     private static final class FindChildren extends DefaultTraverseHandler {
-        
+
+        private boolean secondLevel;
         private List<Node> children = new LinkedList<Node>();
         
         @Override
         public boolean commandStart(CommandNode node) {
-            children.add(node);
-            return false;
+            if (secondLevel)
+                children.add(node);
+            return secondLevel = !secondLevel;
         }
 
         @Override
         public boolean argumentStart(ArgumentNode node) {
-            children.add(node);
-            return false;
+            if (secondLevel)
+                children.add(node);
+            return secondLevel = !secondLevel;
         }
 
         @Override
         public boolean blockStart(BlockNode node) {
-            children.add(node);
-            return false;
+            if (secondLevel)
+                children.add(node);
+            return secondLevel = !secondLevel;
         }
 
         @Override
         public boolean textStart(TextNode node) {
-            children.add(node);
-            return false;
+            if (secondLevel)
+                children.add(node);
+            return secondLevel = !secondLevel;
         }
 
         @Override
         public boolean mathStart(MathNode node) {
-            children.add(node);
-            return false;
+            if (secondLevel)
+                children.add(node);
+            return secondLevel = !secondLevel;
         }
     }
     
