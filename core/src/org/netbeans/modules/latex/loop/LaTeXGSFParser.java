@@ -64,6 +64,7 @@ import org.netbeans.modules.gsf.api.ParseEvent;
 import org.netbeans.modules.gsf.api.Parser.Job;
 import org.netbeans.modules.gsf.api.ParserFile;
 import org.netbeans.modules.gsf.api.ParserResult;
+import org.netbeans.modules.gsf.api.ParserResult.UpdateState;
 import org.netbeans.modules.gsf.api.PositionManager;
 import org.netbeans.modules.gsf.api.SemanticAnalyzer;
 import org.netbeans.modules.gsf.api.SourceFileReader;
@@ -241,7 +242,7 @@ public class LaTeXGSFParser implements IncrementalParser {
                                   || checkFullReparse(reader.read(file),                  history.getStart(), history.getEditedEnd());
 
             if (!fullReparse) {
-                previousResult.setUpdateState(ParserResult.UpdateState.NO_SEMANTIC_CHANGE);
+                previousResult.setUpdateState(UpdateState.NO_SEMANTIC_CHANGE);
                 long end = System.currentTimeMillis();
                 Logger.getLogger("TIMER").log(Level.FINE, "LaTeX Incremental Reparse", new Object[]{file.getFileObject(), (end - start)});
                 return previousResult;
@@ -251,6 +252,8 @@ public class LaTeXGSFParser implements IncrementalParser {
         }
 
         LOG.log(Level.INFO, "Full Reparse");
+
+        previousResult.setUpdateState(UpdateState.FAILED);
         
         return parseFile(file);
     }
