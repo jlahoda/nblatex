@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -41,35 +41,41 @@
 package org.netbeans.modules.latex.loop;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.lexer.TokenHierarchy;
+import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.modules.gsf.api.CompilationInfo;
+import org.netbeans.modules.gsf.api.EditHistory;
 import org.netbeans.modules.gsf.api.Element;
 import org.netbeans.modules.gsf.api.ElementHandle;
+import org.netbeans.modules.gsf.api.IncrementalParser;
 import org.netbeans.modules.gsf.api.OccurrencesFinder;
 import org.netbeans.modules.gsf.api.OffsetRange;
 import org.netbeans.modules.gsf.api.ParseEvent;
-import org.netbeans.modules.gsf.api.ParseListener;
-import org.netbeans.modules.gsf.api.Parser;
+import org.netbeans.modules.gsf.api.Parser.Job;
 import org.netbeans.modules.gsf.api.ParserFile;
 import org.netbeans.modules.gsf.api.ParserResult;
 import org.netbeans.modules.gsf.api.PositionManager;
 import org.netbeans.modules.gsf.api.SemanticAnalyzer;
 import org.netbeans.modules.gsf.api.SourceFileReader;
+import org.netbeans.modules.gsf.api.TranslatedSource;
+import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.ParseError;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.LaTeXSourceFactory;
-import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.impl.CommandUtilitiesImpl;
 import org.netbeans.modules.latex.model.command.parser.CommandParser;
+import org.netbeans.modules.latex.model.lexer.TexTokenId;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
 import org.netbeans.modules.latex.model.structural.parser.StructuralParserImpl;
 import org.openide.filesystems.FileObject;
@@ -80,8 +86,10 @@ import org.openide.util.Lookup;
  *
  * @author Jan Lahoda
  */
-public class LaTeXGSFParser implements Parser {
+public class LaTeXGSFParser implements IncrementalParser {
 
+    private static final boolean INCREMENTAL_REPARSE = Boolean.getBoolean("latex.incremental.reparse");
+    private static final Logger  LOG                 = Logger.getLogger(LaTeXGSFParser.class.getName());
     private static final Map<FileObject, StructuralParserImpl> file2Root = new WeakHashMap<FileObject, StructuralParserImpl>();
     
     public LaTeXGSFParser() {
@@ -90,34 +98,11 @@ public class LaTeXGSFParser implements Parser {
     public void parseFiles(Job job) {
         assert job.files.size() == 1;
         
-        try {
-            List<ParseError> errors = new LinkedList<ParseError>();
-            FileObject file = job.files.get(0).getFileObject();
-            FileObject main = null;
-            
-            for (LaTeXSourceFactory f : Lookup.getDefault().lookupAll(LaTeXSourceFactory.class)) {
-                if (f.supports(file)) {
-                    main = f.findMainFile(file);
-                    if (main != null)
-                        break;
-                }
-            }
-            
-            assert main != null;
-            
-            final DocumentNode dn = reparseImpl(main, errors);
-            
-            StructuralParserImpl p = file2Root.get(main);
-            
-            if (p == null) {
-                file2Root.put(main, p = new StructuralParserImpl());
-            }
-            
-            StructuralElement structuralRoot = p.parse(dn, errors);
-            
-            job.listener.finished(new ParseEvent(ParseEvent.Kind.PARSE, job.files.get(0), new LaTeXParserResult(this, job.files.get(0), main, dn, structuralRoot, new CommandUtilitiesImpl(dn), errors)));
-        } catch (IOException e) {
-            Exceptions.printStackTrace(e);
+        ParserFile parseFile = job.files.get(0);
+        LaTeXParserResult r = parseFile(parseFile);
+
+        if (r != null) {
+            job.listener.finished(new ParseEvent(ParseEvent.Kind.PARSE, parseFile, r));
         }
     }
 
@@ -158,6 +143,33 @@ public class LaTeXGSFParser implements Parser {
 
     public Element resolveHandle(CompilationInfo info, ElementHandle handle) {
         return null;
+    }
+
+    private LaTeXParserResult parseFile(ParserFile parseFile) {
+        try {
+            List<ParseError> errors = new LinkedList<ParseError>();
+            FileObject file = parseFile.getFileObject();
+            FileObject main = null;
+            for (LaTeXSourceFactory f : Lookup.getDefault().lookupAll(LaTeXSourceFactory.class)) {
+                if (f.supports(file)) {
+                    main = f.findMainFile(file);
+                    if (main != null) {
+                        break;
+                    }
+                }
+            }
+            assert main != null;
+            final DocumentNode dn = reparseImpl(main, errors);
+            StructuralParserImpl p = file2Root.get(main);
+            if (p == null) {
+                file2Root.put(main, p = new StructuralParserImpl());
+            }
+            StructuralElement structuralRoot = p.parse(dn, errors);
+            return new LaTeXParserResult(this, parseFile, main, dn, structuralRoot, new CommandUtilitiesImpl(dn), errors);
+        } catch (IOException e) {
+            Exceptions.printStackTrace(e);
+            return null;
+        }
     }
 
     private DocumentNode reparseImpl(FileObject main, List<ParseError> errors) throws IOException {
@@ -218,4 +230,45 @@ public class LaTeXGSFParser implements Parser {
         return document;
     }
 
+    public ParserResult parse(ParserFile file, SourceFileReader reader, TranslatedSource translatedSource, EditHistory history, ParserResult previousResult) {
+        if (previousResult == null || previousResult.getInfo() == null || !INCREMENTAL_REPARSE) {
+            return parseFile(file);
+        }
+        
+        try {
+            long start = System.currentTimeMillis();
+            boolean fullReparse =    checkFullReparse(previousResult.getInfo().getText(), history.getStart(), history.getOriginalEnd())
+                                  || checkFullReparse(reader.read(file),                  history.getStart(), history.getEditedEnd());
+
+            if (!fullReparse) {
+                previousResult.setUpdateState(ParserResult.UpdateState.NO_SEMANTIC_CHANGE);
+                long end = System.currentTimeMillis();
+                Logger.getLogger("TIMER").log(Level.FINE, "LaTeX Incremental Reparse", new Object[]{file.getFileObject(), (end - start)});
+                return previousResult;
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+
+        LOG.log(Level.INFO, "Full Reparse");
+        
+        return parseFile(file);
+    }
+
+    private boolean checkFullReparse(CharSequence text, int start, int end) {
+        TokenHierarchy h = TokenHierarchy.create(text, TexLanguage.description());
+        TokenSequence ts = h.tokenSequence();
+        
+        ts.move(start);
+        while (ts.moveNext() && ts.offset() < end) {
+            if (!DO_NOT_PARSE_TOKENS.contains(ts.token().id())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static final Set<TexTokenId> DO_NOT_PARSE_TOKENS = EnumSet.of(TexTokenId.COMMENT, TexTokenId.WHITESPACE, TexTokenId.WORD);
+    
 }
