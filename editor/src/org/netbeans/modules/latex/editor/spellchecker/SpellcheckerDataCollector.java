@@ -85,6 +85,7 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
     
     public void cancel() {
         cancel.set(true);
+        LOG.fine("cancelled");
     }
 
     public void run(CompilationInfo parameter) throws Exception {
@@ -93,13 +94,17 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
         long startTime = System.currentTimeMillis();
         
         try {
-        LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
-        Document doc = parameter.getDocument();
-        VisitorImpl vi = new VisitorImpl(cancel, doc);
-        
-        lpr.getDocument().traverse(vi);
-        
-        LaTeXTokenListProvider.findTokenListImpl(doc).setAcceptedTokens(vi.acceptedTokens);
+            LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+            Document doc = parameter.getDocument();
+            VisitorImpl vi = new VisitorImpl(cancel, doc);
+
+            lpr.getDocument().traverse(vi);
+
+            if (cancel.get()) {
+                return ;
+            }
+            
+            LaTeXTokenListProvider.findTokenListImpl(doc).setAcceptedTokens(vi.acceptedTokens);
         } finally {
             long endTime = System.currentTimeMillis();
             
@@ -193,7 +198,7 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
         n.traverse(fc);
 
         while (!cancel.get() && ts.offset() < end.getOffsetValue()) {
-            if (!isInChild(start.getFile(), new FakePosition(ts.offset()), fc.children)) {
+            if (!isInChild(start.getFile(), new FakePosition(ts.offset()), cancel, fc.children)) {
                 result.add(ts.token());
             }
 
@@ -233,9 +238,9 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
         return node.getStartingPosition().getOffsetValue() < pos.getOffset() && pos.getOffset() < node.getEndingPosition().getOffsetValue();
     }
     
-    private static boolean isInChild(Object file, Position pos, List<Node> children) {
+    private static boolean isInChild(Object file, Position pos, AtomicBoolean cancel, List<Node> children) {
         for (Node n : children) {
-            if (isIn(file, pos, n)) {
+            if (cancel.get() || isIn(file, pos, n)) {
                 return true;
             }
         }
