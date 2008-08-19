@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -76,6 +76,7 @@ import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Environment;
 import org.netbeans.modules.latex.model.command.MathNode;
+import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.TraverseHandler;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
 import org.netbeans.spi.editor.highlighting.support.PositionsBag;
@@ -92,6 +93,8 @@ import org.openide.util.Exceptions;
  */
 public class SemanticColoring implements CancellableTask<CompilationInfo> {
 
+    private static final Logger LOG = Logger.getLogger(SemanticColoring.class.getName());
+    
     private AtomicBoolean cancelled = new AtomicBoolean();
     private FileObject file;
     
@@ -128,6 +131,14 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
         }
         
         DocumentNode dn = LaTeXParserResult.get(parameter).getDocument();
+        Node rootNode = dn.getRootForFile(parameter.getFileObject());
+        
+        if (rootNode == null) {
+            LOG.log(Level.SEVERE, "No root for: {0}", FileUtil.getFileDisplayName(parameter.getFileObject()));
+            getDelegate(document).setHighlights(new PositionsBag(null));
+            return;
+        }
+
         final Map<Token, List<AttributeSet>> token2Attributes = new HashMap<Token, List<AttributeSet>>();
         final Map<String, List<Token>> possiblyUnusedLabel2Tokens = new HashMap<String, List<Token>>();
         final Set<String> seenLabels = new HashSet<String>();
@@ -139,7 +150,7 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
                 }
                 
                 if (node.getStartingPosition().getDocument() != document)
-                    return true;
+                    return false;
                 
                 document.render(new Runnable() {
                     public void run() {
@@ -167,7 +178,7 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
                 }
                 
                 if (node.getStartingPosition().getDocument() != document)
-                    return true;
+                    return false;
                 
                 AttributeSet attrs = null;
                 @SuppressWarnings("unchecked")
@@ -271,7 +282,7 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
                     return false;
                 }
 
-                return true;
+                return node.getStartingPosition().getDocument() == document;
             }
             
             public void blockEnd(BlockNode node) {}
@@ -283,7 +294,7 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
                 }
                 
                 if (node.getStartingPosition().getDocument() != document)
-                    return true;
+                    return false;
                 
                 final AttributeSet attrs = getColoringForName(TexColoringNames.MATH);
                 

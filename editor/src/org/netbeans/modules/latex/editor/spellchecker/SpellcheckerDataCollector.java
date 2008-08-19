@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -71,6 +71,7 @@ import org.netbeans.modules.latex.model.command.SourcePosition;
 import org.netbeans.modules.latex.model.command.TextNode;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.util.Exceptions;
 import org.openide.util.WeakSet;
 
@@ -97,8 +98,15 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
             LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
             Document doc = parameter.getDocument();
             VisitorImpl vi = new VisitorImpl(cancel, doc);
+            Node rootNode = lpr.getDocument().getRootForFile(parameter.getFileObject());
 
-            lpr.getDocument().traverse(vi);
+            if (rootNode == null) {
+                LOG.log(Level.SEVERE, "No root for: {0}", FileUtil.getFileDisplayName(parameter.getFileObject()));
+                LaTeXTokenListProvider.findTokenListImpl(doc).setAcceptedTokens(Collections.<Token>emptySet());
+                return ;
+            }
+            
+            rootNode.traverse(vi);
 
             if (cancel.get()) {
                 return ;
@@ -167,9 +175,10 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
                         }
                     }
                 });
+                return !cancel.get();
             }
             
-            return !cancel.get();
+            return false;
         }
         
     }
