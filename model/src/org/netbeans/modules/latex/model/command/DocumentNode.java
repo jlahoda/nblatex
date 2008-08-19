@@ -54,6 +54,8 @@ public interface DocumentNode extends TextNode {
 
     public Collection<FileObject>  getFiles();
 
+    public Node  getRootForFile(FileObject file);
+
     public boolean     isUpToDate();
 
 //    public void     performUpToDate(Runnable r);

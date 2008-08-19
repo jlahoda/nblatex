@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -55,6 +55,7 @@ import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.modules.latex.model.command.Command;
 import org.netbeans.modules.latex.model.command.CommandCollection;
 import org.netbeans.modules.latex.model.command.DocumentNode;
+import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.TraverseHandler;
 import org.netbeans.modules.latex.test.TestCertificate;
 import org.openide.filesystems.FileObject;
@@ -68,6 +69,7 @@ import org.openide.filesystems.FileUtil;
 public class NBDocumentNodeImpl extends TextNodeImpl implements DocumentNode {
     
     private Map<FileObject, TokenHierarchy<Void>> file2Text;
+    private final Map<FileObject, Node> file2Node;
     private boolean      uptoDate;
     
     private FileSystem  memoryFS;
@@ -80,6 +82,7 @@ public class NBDocumentNodeImpl extends TextNodeImpl implements DocumentNode {
         
         this.uptoDate = true;
         this.file2Text = new HashMap<FileObject, TokenHierarchy<Void>>();
+        this.file2Node = new HashMap<FileObject, Node>();
         
         CommandCollection coll = new CommandCollection();
         
@@ -103,7 +106,7 @@ public class NBDocumentNodeImpl extends TextNodeImpl implements DocumentNode {
         return memoryFS;
     }
     
-    public DocumentNode getDocumentNode() {
+    public NBDocumentNodeImpl getDocumentNode() {
         return this;
     }
     
@@ -151,6 +154,14 @@ public class NBDocumentNodeImpl extends TextNodeImpl implements DocumentNode {
     
     public TokenHierarchy<Void> findTokenHierarchy(FileObject file) {
         return file2Text.get(file);
+    }
+
+    public Node getRootForFile(FileObject file) {
+        return file2Node.get(file);
+    }
+
+    public void setRootForFile(FileObject file, Node node) {
+        file2Node.put(file, node);
     }
     
 }

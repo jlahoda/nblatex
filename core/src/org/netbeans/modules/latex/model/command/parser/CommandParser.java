@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -116,10 +116,12 @@ public final class CommandParser {
         NBDocumentNodeImpl result = topLevelNode = new NBDocumentNodeImpl();
         ParserInput input = openFile(mainFile);
         
+        result.setRootForFile(mainFile, result);
+        
         currentCommandDefiningNode = topLevelNode;
         
         parseTextNode(input, topLevelNode);
-        
+
         closeFile(input);
         
         this.errors = null;
@@ -197,7 +199,7 @@ public final class CommandParser {
         return node.hasAttribute("free-text-end");
     }
     
-    private TextNodeImpl parseTextNode(ParserInput input, TextNodeImpl node) throws IOException {
+    private TextNodeImpl parseTextNode(ParserInput input, final TextNodeImpl node) throws IOException {
 //        return parseGroup(input, node, false, false, false, true, true);
 //        NodeImpl lastCommandDefiningNode = currentCommandDefiningNode;
 
@@ -613,7 +615,11 @@ public final class CommandParser {
                     ParserInput newInput = openFile(fileName);
                     
                     if (newInput != null) {
-                        ((InputNodeImpl) cni).setContent(parseTextNode(newInput, new TextNodeImpl(cni, currentCommandDefiningNode)));
+                        TextNodeImpl content = new TextNodeImpl(cni, currentCommandDefiningNode);
+                        
+                        content.getDocumentNode().setRootForFile(newInput.getFile(), content);
+
+                        ((InputNodeImpl) cni).setContent(parseTextNode(newInput,content));
                         
                         closeFile(newInput);
                     } else {
