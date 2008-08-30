@@ -230,36 +230,50 @@ made subject to such option by the copyright holder.
         </command>
         <command name="\FOR">
             <attribute name="par" value="true" />
+            <attribute name="bracket-polarity" value="LEFT" />
+            <attribute name="bracket-type" value="algorithmic-FOR" />
             <argument type="free">
                 <attribute name="#text" value="true" />
             </argument>
         </command>
         <command name="\FORALL">
             <attribute name="par" value="true" />
+            <attribute name="bracket-polarity" value="LEFT" />
+            <attribute name="bracket-type" value="algorithmic-FOR" />
             <argument type="free">
                 <attribute name="#text" value="true" />
             </argument>
         </command>
         <command name="\ENDFOR">
             <attribute name="par" value="true" />
+            <attribute name="bracket-polarity" value="RIGHT" />
+            <attribute name="bracket-type" value="algorithmic-FOR" />
         </command>
         <command name="\IF">
             <attribute name="par" value="true" />
+            <attribute name="bracket-polarity" value="LEFT" />
+            <attribute name="bracket-type" value="algorithmic-IF" />
             <argument type="free">
                 <attribute name="#text" value="true" />
             </argument>
         </command>
         <command name="\ENDIF">
             <attribute name="par" value="true" />
+            <attribute name="bracket-polarity" value="RIGHT" />
+            <attribute name="bracket-type" value="algorithmic-IF" />
         </command>
         <command name="\WHILE">
             <attribute name="par" value="true" />
+            <attribute name="bracket-polarity" value="LEFT" />
+            <attribute name="bracket-type" value="algorithmic-WHILE" />
             <argument type="free">
                 <attribute name="#text" value="true" />
             </argument>
         </command>
         <command name="\ENDWHILE">
             <attribute name="par" value="true" />
+            <attribute name="bracket-polarity" value="RIGHT" />
+            <attribute name="bracket-type" value="algorithmic-WHILE" />
         </command>
     </commands>
 </environment>

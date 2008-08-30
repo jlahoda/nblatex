@@ -40,9 +40,13 @@ Version 2 license, then the option applies only if the new code is
 made subject to such option by the copyright holder.
 -->
 <command name="\{">
+    <attribute name="bracket-polarity" value="LEFT" />
+    <attribute name="bracket-type" value="\{" />
 </command>
 
 <command name="\}">
+    <attribute name="bracket-polarity" value="RIGHT" />
+    <attribute name="bracket-type" value="\{" />
 </command>
 
 <command name="\\">
