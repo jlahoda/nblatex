@@ -144,7 +144,13 @@ Contributor(s): Jan Lahoda
                     <attr name="position" intvalue="100"/>
                 </file> 
             </folder>
-        </folder>
+
+            <folder name="BracesMatchers">
+                <file name="org-netbeans-modules-latex-editor-braces-BraceMatcherImpl$FactoryImpl.instance">
+                    <attr name="position" intvalue="0" />
+                </file>
+            </folder>
+       </folder>
           
          <folder name="x-bibtex">
             <attr name="SystemFileSystem.localizingBundle" stringvalue="org.netbeans.modules.latex.editor.Bundle"/>
