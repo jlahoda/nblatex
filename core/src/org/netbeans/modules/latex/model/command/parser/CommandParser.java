@@ -198,7 +198,7 @@ public final class CommandParser {
     private boolean isFreeTextEndNode(Node node) {
         return node.hasAttribute("free-text-end");
     }
-    
+
     private TextNodeImpl parseTextNode(ParserInput input, final TextNodeImpl node) throws IOException {
 //        return parseGroup(input, node, false, false, false, true, true);
 //        NodeImpl lastCommandDefiningNode = currentCommandDefiningNode;
@@ -360,11 +360,16 @@ public final class CommandParser {
                     if ("verbatim-env".equals(arg.getAttribute("type"))) {
                         handleAddArgument(cni, currentArgument, parseVerbatimEnvArgument(input,  ani));
                     } else {
-                        errors.add(createError("Unknown special argument (internal error).", input.getPosition()));
+                        if ("left-right-command".equals(arg.getAttribute("type"))) {
+                            handleAddArgument(cni, currentArgument, parseLeftRightArgument(input, ani));
+                        } else {
+                            errors.add(createError("Unknown special argument (internal error).", input.getPosition()));
+                        }
                     }
                 }
                 
                 currentArgument++;
+                endingPosition = ani.getEndingPosition();
                 continue;
             }
             
@@ -723,6 +728,16 @@ public final class CommandParser {
         
         anode.setEndingPosition(input.getPosition());
         
+        return anode;
+    }
+    
+    private ArgumentNodeImpl parseLeftRightArgument(ParserInput input, ArgumentNodeImpl anode) throws IOException {
+        //XXX: should check the bracket symbol...
+        anode.setStartingPosition(input.getPosition());
+        if (input.hasNext())
+            input.next();
+        anode.setEndingPosition(input.getPosition());
+
         return anode;
     }
     

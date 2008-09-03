@@ -130,7 +130,7 @@ public class ComputeBraces {
             List<int[]> result = new LinkedList<int[]>();
 
             for (CommandNode f : matchingBrackets(lpr, (CommandNode) n)) {
-                result.add(new int[] {f.getStartingPosition().getOffsetValue(), f.getStartingPosition().getOffsetValue() + f.getCommand().getCommand().length()});
+                result.add(span(f));
             }
 
             return result;
@@ -140,6 +140,13 @@ public class ComputeBraces {
     }
 
     private static int[] span(Node n) {
+        if (n instanceof CommandNode && "command-name".equals(n.getAttribute("bracket-span"))) {
+            CommandNode f = (CommandNode) n;
+            return new int[] {
+                f.getStartingPosition().getOffsetValue(),
+                f.getStartingPosition().getOffsetValue() + f.getCommand().getCommand().length()
+            };
+        }
         return new int[] {
             n.getStartingPosition().getOffsetValue(),
             n.getEndingPosition().getOffsetValue(),
@@ -177,6 +184,10 @@ public class ComputeBraces {
                         s.push(n);
                         break;
                     case RIGHT:
+                        if (s.isEmpty()) {
+                            break;
+                        }
+                        
                         CommandNode node = s.pop();
 
                         if (node == cnode) {

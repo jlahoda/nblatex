@@ -897,9 +897,21 @@ made subject to such option by the copyright holder.
 </command>
 
 <command name="\left">
+    <attribute name="bracket-polarity" value="LEFT" />
+    <attribute name="bracket-type" value="left-right-command" />
+    <argument type="special">
+        <attribute name="#code" value="true" />
+        <attribute name="type" value="left-right-command" />
+    </argument>
 </command>
 
 <command name="\right">
+    <attribute name="bracket-polarity" value="RIGHT" />
+    <attribute name="bracket-type" value="left-right-command" />
+    <argument type="special">
+        <attribute name="#code" value="true" />
+        <attribute name="type" value="left-right-command" />
+    </argument>
 </command>
 
 <command name="\inf">
