@@ -232,6 +232,7 @@ made subject to such option by the copyright holder.
             <attribute name="par" value="true" />
             <attribute name="bracket-polarity" value="LEFT" />
             <attribute name="bracket-type" value="algorithmic-FOR" />
+            <attribute name="bracket-span" value="command-name" />
             <argument type="free">
                 <attribute name="#text" value="true" />
             </argument>
@@ -240,6 +241,7 @@ made subject to such option by the copyright holder.
             <attribute name="par" value="true" />
             <attribute name="bracket-polarity" value="LEFT" />
             <attribute name="bracket-type" value="algorithmic-FOR" />
+            <attribute name="bracket-span" value="command-name" />
             <argument type="free">
                 <attribute name="#text" value="true" />
             </argument>
@@ -248,11 +250,13 @@ made subject to such option by the copyright holder.
             <attribute name="par" value="true" />
             <attribute name="bracket-polarity" value="RIGHT" />
             <attribute name="bracket-type" value="algorithmic-FOR" />
+            <attribute name="bracket-span" value="command-name" />
         </command>
         <command name="\IF">
             <attribute name="par" value="true" />
             <attribute name="bracket-polarity" value="LEFT" />
             <attribute name="bracket-type" value="algorithmic-IF" />
+            <attribute name="bracket-span" value="command-name" />
             <argument type="free">
                 <attribute name="#text" value="true" />
             </argument>
@@ -261,11 +265,13 @@ made subject to such option by the copyright holder.
             <attribute name="par" value="true" />
             <attribute name="bracket-polarity" value="RIGHT" />
             <attribute name="bracket-type" value="algorithmic-IF" />
+            <attribute name="bracket-span" value="command-name" />
         </command>
         <command name="\WHILE">
             <attribute name="par" value="true" />
             <attribute name="bracket-polarity" value="LEFT" />
             <attribute name="bracket-type" value="algorithmic-WHILE" />
+            <attribute name="bracket-span" value="command-name" />
             <argument type="free">
                 <attribute name="#text" value="true" />
             </argument>
@@ -274,6 +280,7 @@ made subject to such option by the copyright holder.
             <attribute name="par" value="true" />
             <attribute name="bracket-polarity" value="RIGHT" />
             <attribute name="bracket-type" value="algorithmic-WHILE" />
+            <attribute name="bracket-span" value="command-name" />
         </command>
     </commands>
 </environment>

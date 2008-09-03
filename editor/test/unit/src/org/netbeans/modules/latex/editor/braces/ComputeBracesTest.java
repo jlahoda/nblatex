@@ -124,7 +124,7 @@ public class ComputeBracesTest extends NbTestCase {
                   "\\end{algorithmic}\n" +
                   "\\end{document}\n");
     }
-    
+
     public void testAlgorithmForLoop2() throws Exception {
         performer("\\documentclass{article}\n" +
                   "\\usepackage{algorithm}\n" +
@@ -146,6 +146,22 @@ public class ComputeBracesTest extends NbTestCase {
                   "|1\\FO&R|1{}\n" +
                   "\\ENDIF{}\n" +
                   "|2\\ENDFOR|2" +
+                  "\\end{algorithmic}\n" +
+                  "\\end{document}\n");
+    }
+
+    public void testLeftRightCommand() throws Exception {
+        performer("\\documentclass{article}\n" +
+                  "\\begin{document}\n" +
+                  "$|1\\le&ft{|1ggg|2\\right.|2$\n" +
+                  "\\end{algorithmic}\n" +
+                  "\\end{document}\n");
+    }
+
+    public void testUnbalancedCommandBrackets() throws Exception {
+        performer("\\documentclass{article}\n" +
+                  "\\begin{document}\n" +
+                  "$|1\\ri&ght.|1$\n" +
                   "\\end{algorithmic}\n" +
                   "\\end{document}\n");
     }
@@ -177,7 +193,7 @@ public class ComputeBracesTest extends NbTestCase {
                 MatcherContext mc = SpiAccessor.get().createCaretContext(doc, caret[0], true, -1);
                 List<int[]> result = ComputeBraces.doComputeBraces(lpr, mc, new AtomicBoolean(), new AtomicBoolean());
 
-                assertEquals(result, braces);
+                assertEquals(braces, result);
             }
         }, true);
     }
@@ -259,7 +275,7 @@ public class ComputeBracesTest extends NbTestCase {
             int[] gN = g.next();
             int[] oN = o.next();
 
-            assertTrue(Arrays.equals(gN, oN));
+            assertArrayEquals(gN, oN);
         }
         
         assertTrue(g.hasNext() == o.hasNext());
