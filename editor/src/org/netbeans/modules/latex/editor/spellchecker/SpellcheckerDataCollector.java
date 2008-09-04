@@ -49,7 +49,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.Document;
-import javax.swing.text.Position;
 import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
@@ -65,14 +64,13 @@ import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.BlockNode;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.DefaultTraverseHandler;
+import org.netbeans.modules.latex.model.command.InputNode;
 import org.netbeans.modules.latex.model.command.MathNode;
 import org.netbeans.modules.latex.model.command.Node;
-import org.netbeans.modules.latex.model.command.SourcePosition;
 import org.netbeans.modules.latex.model.command.TextNode;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Exceptions;
 import org.openide.util.WeakSet;
 
 /**
@@ -97,7 +95,6 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
         try {
             LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
             Document doc = parameter.getDocument();
-            VisitorImpl vi = new VisitorImpl(cancel, doc);
             Node rootNode = lpr.getDocument().getRootForFile(parameter.getFileObject());
 
             if (rootNode == null) {
@@ -105,14 +102,14 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
                 LaTeXTokenListProvider.findTokenListImpl(doc).setAcceptedTokens(Collections.<Token>emptySet());
                 return ;
             }
-            
-            rootNode.traverse(vi);
+
+            Set<Token> acceptedTokens = getAcceptedTokens(doc, cancel, rootNode);
 
             if (cancel.get()) {
                 return ;
             }
             
-            LaTeXTokenListProvider.findTokenListImpl(doc).setAcceptedTokens(vi.acceptedTokens);
+            LaTeXTokenListProvider.findTokenListImpl(doc).setAcceptedTokens(acceptedTokens);
         } finally {
             long endTime = System.currentTimeMillis();
             
@@ -120,15 +117,31 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
         }
     }
 
+    static Set<Token> getAcceptedTokens(Document doc, AtomicBoolean cancel, Node root) {
+        VisitorImpl vi = new VisitorImpl(cancel, doc);
+
+        root.traverse(vi);
+
+        return vi.acceptedTokens;
+    }
+
     private static final class VisitorImpl extends DefaultTraverseHandler {
 
-        private AtomicBoolean cancel;
-        private Document doc;
-        private Set<Token> acceptedTokens = new WeakSet<Token>();
+        private final AtomicBoolean cancel;
+        private final Document doc;
+        private final Set<Token> acceptedTokens = new WeakSet<Token>();
+        private TokenSequence ts;
 
         public VisitorImpl(AtomicBoolean cancel, Document doc) {
             this.cancel = cancel;
             this.doc = doc;
+
+            this.doc.render(new Runnable() {
+                public void run() {
+                    ts = TokenHierarchy.get(VisitorImpl.this.doc).tokenSequence();
+                    ts.moveNext();
+                }
+            });
         }
         
         @Override
@@ -153,74 +166,65 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
 
         @Override
         public boolean textStart(final TextNode node) {
-            if (node.getStartingPosition().getDocument() == doc) {
-                doc.render(new Runnable() {
-                    public void run() {
-                        if (cancel.get()) {
-                            return;
-                        }
-                        
-                        long start = System.currentTimeMillis();
-                        
-                        try {
-                            for (Token t : getNodeTokens(cancel, node)) {
-                                acceptedTokens.add(t);
+            moveToOffset(node.getStartingPosition().getOffsetValue());
+
+            Iterable<Node> children = getChildren(node);
+            final AtomicBoolean end = new AtomicBoolean();
+
+            while (getOffset() < node.getEndingPosition().getOffsetValue() && !cancel.get() && !end.get()) {
+                Node c = findChild(node.getStartingPosition().getFile(), getOffset(), cancel, children);
+
+                if (c == null) {
+                    doc.render(new Runnable() {
+                        public void run() {
+                            if (!cancel.get()) {
+                                Token token = ts.token();
+
+                                if (token.id() == TexTokenId.WORD) {
+                                    acceptedTokens.add(token);
+                                }
+
+                                end.set(!ts.moveNext());
                             }
-                        } catch (IOException e) {
-                            Exceptions.printStackTrace(e);
-                        } finally {
-                            long end = System.currentTimeMillis();
-                            
-                            LOG.log(Level.FINE, "Locked the document for {0}ms", end - start);
                         }
-                    }
-                });
-                return !cancel.get();
+                    });
+                } else {
+                    c.traverse(this);
+
+                    moveToOffset(c.getEndingPosition().getOffsetValue());
+                }
             }
             
             return false;
         }
-        
-    }
-    
-    //XXX: copied from NodeImpl to improve performance:
-    private static Iterable<? extends Token<TexTokenId>> getNodeTokens(AtomicBoolean cancel, Node n) throws IOException {
-        SourcePosition start = n.getStartingPosition();
-        SourcePosition end = n.getEndingPosition();
 
-        if (!Utilities.getDefault().compareFiles(start.getFile(), end.getFile())) {
-            throw new IllegalStateException(
-                    "Whole Node should be in one file, but this condition is not fullfilled now. Start file=" + start.getFile() + ", end file=" + end.getFile() + ".");
+        @Override
+        public boolean commandStart(CommandNode node) {
+            return!(node instanceof InputNode);
         }
 
-        TokenSequence<TexTokenId> ts = getTS(start.getFile());
-        List<Token<TexTokenId>> result = new LinkedList<Token<TexTokenId>>();
-
-        ts.move(start.getOffsetValue());
-
-        if (!ts.moveNext()) {
-            return result;
-        }
-
-        FindChildren fc = new FindChildren();
-        
-        n.traverse(fc);
-
-        while (!cancel.get() && ts.offset() < end.getOffsetValue()) {
-            if (!isInChild(start.getFile(), new FakePosition(ts.offset()), cancel, fc.children)) {
-                result.add(ts.token());
-            }
-
-            if (!ts.moveNext()) {
-                break;
-            }
-        }
-
-        if (cancel.get()) {
-            return Collections.<Token<TexTokenId>>emptyList();
+        private void moveToOffset(final int offset) {
+            doc.render(new Runnable() {
+                public void run() {
+                    while (ts.offset() < offset && !cancel.get() && ts.moveNext())
+                        ;
+                }
+            });
         }
         
-        return result;
+        private int getOffset() {
+            final int[] result = new int[1];
+            doc.render(new Runnable() {
+                public void run() {
+                    if (!cancel.get()) {
+                        result[0] = ts.offset();
+                    }
+                }
+            });
+
+            return result[0];
+        }
+        
     }
     
     private static TokenSequence<TexTokenId> getTS(Object file) throws IOException {
@@ -238,78 +242,74 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
         return ts;
     }
     
-    private static boolean isIn(Object file, Position pos, Node node) {
+    private static boolean isIn(Object file, int pos, Node node) {
         assert Utilities.getDefault().compareFiles(node.getStartingPosition().getFile(), node.getEndingPosition().getFile());
         
         if (!Utilities.getDefault().compareFiles(file, node.getStartingPosition().getFile()))
             return false;
         
-        return node.getStartingPosition().getOffsetValue() < pos.getOffset() && pos.getOffset() < node.getEndingPosition().getOffsetValue();
+        return node.getStartingPosition().getOffsetValue() <= pos && pos < node.getEndingPosition().getOffsetValue();
     }
     
-    private static boolean isInChild(Object file, Position pos, AtomicBoolean cancel, List<Node> children) {
+    private static Node findChild(Object file, int pos, AtomicBoolean cancel, Iterable<Node> children) {
         for (Node n : children) {
-            if (cancel.get() || isIn(file, pos, n)) {
-                return true;
+            if (cancel.get()) {
+                return null;
+            }
+            if (isIn(file, pos, n)) {
+                return n;
             }
         }
         
-        return false;
+        return null;
     }
-    
-    private static final class FakePosition implements Position {
 
-        private final int offset;
+    public static Iterable<Node> getChildren(Node n) {
+        final class FindChildren extends DefaultTraverseHandler {
+            private boolean secondLevel;
+            private List<Node> children = new LinkedList<Node>();
 
-        public FakePosition(int offset) {
-            this.offset = offset;
+            @Override
+            public boolean commandStart(CommandNode node) {
+                if (secondLevel)
+                    children.add(node);
+                return secondLevel = !secondLevel;
+            }
+
+            @Override
+            public boolean argumentStart(ArgumentNode node) {
+                if (secondLevel)
+                    children.add(node);
+                return secondLevel = !secondLevel;
+            }
+
+            @Override
+            public boolean blockStart(BlockNode node) {
+                if (secondLevel)
+                    children.add(node);
+                return secondLevel = !secondLevel;
+            }
+
+            @Override
+            public boolean textStart(TextNode node) {
+                if (secondLevel)
+                    children.add(node);
+                return secondLevel = !secondLevel;
+            }
+
+            @Override
+            public boolean mathStart(MathNode node) {
+                if (secondLevel)
+                    children.add(node);
+                return secondLevel = !secondLevel;
+            }
         }
+
+        FindChildren fc = new FindChildren();
         
-        public int getOffset() {
-            return this.offset;
-        }
-        
-    }
-    
-    private static final class FindChildren extends DefaultTraverseHandler {
+        n.traverse(fc);
 
-        private boolean secondLevel;
-        private List<Node> children = new LinkedList<Node>();
-        
-        @Override
-        public boolean commandStart(CommandNode node) {
-            if (secondLevel)
-                children.add(node);
-            return secondLevel = !secondLevel;
-        }
-
-        @Override
-        public boolean argumentStart(ArgumentNode node) {
-            if (secondLevel)
-                children.add(node);
-            return secondLevel = !secondLevel;
-        }
-
-        @Override
-        public boolean blockStart(BlockNode node) {
-            if (secondLevel)
-                children.add(node);
-            return secondLevel = !secondLevel;
-        }
-
-        @Override
-        public boolean textStart(TextNode node) {
-            if (secondLevel)
-                children.add(node);
-            return secondLevel = !secondLevel;
-        }
-
-        @Override
-        public boolean mathStart(MathNode node) {
-            if (secondLevel)
-                children.add(node);
-            return secondLevel = !secondLevel;
-        }
+        return fc.children;
     }
     
     public static final class Factory extends EditorAwareSourceTaskFactory {
