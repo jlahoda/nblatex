@@ -124,16 +124,19 @@ public class BraceMatcherImpl implements BracesMatcher {
                     privateCancel.set(true);
                 }
                 public  void run(CompilationInfo parameter) throws Exception {
-                    if (privateCancel.get()) {
-                        RunOnceFactory.add(parameter.getFileObject(), this);
-                        return;
-                    }
+                    privateCancel.set(false);
+                    
                     if (cancel.get()) {
                         return;
                     }
 
                     result.addAll(ComputeBraces.doComputeBraces(LaTeXParserResult.get(parameter), context, cancel, privateCancel));
 
+                    if (privateCancel.get() && !cancel.get()) {
+                        RunOnceFactory.add(parameter.getFileObject(), this);
+                        return;
+                    }
+                    
                     synchronized (wait) {
                         finished.set(true);
                         wait.notifyAll();
