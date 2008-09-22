@@ -98,7 +98,12 @@ public class TexDataObject extends MultiDataObject {
         });
          */
     }
-    
+
+    @Override
+    public Lookup getLookup() {
+        return getCookieSet().getLookup();
+    }
+
     public HelpCtx getHelpCtx() {
         return HelpCtx.DEFAULT_HELP;
         // If you add context help, change to:
