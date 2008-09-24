@@ -45,28 +45,24 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.AttributeSet;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.text.Position;
-import javax.swing.text.SimpleAttributeSet;
 import org.netbeans.api.editor.mimelookup.MimeLookup;
 import org.netbeans.api.editor.mimelookup.MimePath;
 import org.netbeans.api.editor.settings.AttributesUtilities;
 import org.netbeans.api.editor.settings.FontColorSettings;
 import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.api.lexer.Token;
+import org.netbeans.api.lexer.TokenHierarchy;
+import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.modules.latex.editor.TexColoringNames;
+import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.ArgumentContainingNode;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
@@ -79,12 +75,11 @@ import org.netbeans.modules.latex.model.command.MathNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.TraverseHandler;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
-import org.netbeans.spi.editor.highlighting.support.PositionsBag;
+import org.netbeans.spi.editor.highlighting.support.OffsetsBag;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
-import org.openide.text.NbDocument;
 import org.openide.util.Exceptions;
 
 /**
@@ -135,12 +130,12 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
         
         if (rootNode == null) {
             LOG.log(Level.SEVERE, "No root for: {0}", FileUtil.getFileDisplayName(parameter.getFileObject()));
-            getDelegate(document).setHighlights(new PositionsBag(null));
+            getDelegate(document).setHighlights(new OffsetsBag(null));
             return;
         }
 
-        final Map<Token, List<AttributeSet>> token2Attributes = new HashMap<Token, List<AttributeSet>>();
-        final Map<String, List<Token>> possiblyUnusedLabel2Tokens = new HashMap<String, List<Token>>();
+        final OffsetsBag coloring = new OffsetsBag(document, true);
+        final Map<String, int[]> possiblyUnusedLabel2Tokens = new HashMap<String, int[]>();
         final Set<String> seenLabels = new HashSet<String>();
         
         dn.traverse(new TraverseHandler() {
@@ -156,11 +151,10 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
                     public void run() {
                         try {
                             Token cmd = (Token) node.getNodeTokens().iterator().next();
-                            if (node.isValid()) {
-                                add(token2Attributes, cmd, getColoringForName(TexColoringNames.COMMAND_CORRECT));
-                            } else {
-                                add(token2Attributes, cmd, getColoringForName(TexColoringNames.COMMAND_INCORRECT));
-                            }
+                            AttributeSet coloringSet =   node.isValid()
+                                                       ? getColoringForName(TexColoringNames.COMMAND_CORRECT)
+                                                       : getColoringForName(TexColoringNames.COMMAND_INCORRECT);
+                            coloring.addHighlight(cmd.offset(null), cmd.offset(null) + cmd.length(), coloringSet);
                         } catch (IOException e) {
                             Exceptions.printStackTrace(e);
                         }
@@ -181,8 +175,6 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
                     return false;
                 
                 AttributeSet attrs = null;
-                @SuppressWarnings("unchecked")
-                final List<Token>[] tokenList = new List[1];
                 
                 if (node.getArgument().hasAttribute(Command.Param.ATTR_NO_PARSE)) {
                     attrs = getColoringForName(TexColoringNames.DEFINITION);
@@ -191,7 +183,8 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
                         String label = node.getText().toString();
 
                         if (!seenLabels.contains(label)) {
-                            possiblyUnusedLabel2Tokens.put(label, tokenList[0] = new LinkedList<Token>());
+                            possiblyUnusedLabel2Tokens.put(label, new int[] {node.getStartingPosition().getOffsetValue(),
+                                                                             node.getEndingPosition().getOffsetValue()});
                         }
                     } else {
                         if (node.getArgument().hasAttribute("#ref")) { // NOI18N
@@ -243,34 +236,35 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
                         }
                     }
                 }
-               
-                final AttributeSet attrsFin = attrs;
-                
-                document.render(new Runnable() {
-                    public void run() {
-                        try {
-                            boolean first = true;
 
-                            for (Iterator<? extends Token> it = node.getNodeTokens().iterator(); it.hasNext();) {
-                                Token t = it.next();
+                if (attrs != null) {
+                    final AttributeSet attrsFin = attrs;
 
-                                if (first && t.id() == TexTokenId.COMP_BRACKET_LEFT) {
-                                    continue;
-                                }
-                                if (t.id() == TexTokenId.COMP_BRACKET_RIGHT && !it.hasNext()) {
-                                    continue;
-                                }
-                                add(token2Attributes, t, attrsFin);
-                                if (tokenList[0] != null) {
-                                    tokenList[0].add(t);
-                                }
-                                first = false;
+                    document.render(new Runnable() {
+                        public void run() {
+                            int start = node.getStartingPosition().getOffsetValue();
+                            int end   = node.getEndingPosition().getOffsetValue();
+
+                            TokenSequence<TexTokenId> ts = TokenHierarchy.get(document).tokenSequence(TexLanguage.description());
+
+                            ts.move(start);
+
+                            if (ts.moveNext() && ts.token().id() == TexTokenId.COMP_BRACKET_LEFT) {
+                                start += ts.token().length();
                             }
-                        } catch (IOException e) {
-                            Exceptions.printStackTrace(e);
+
+                            ts.move(end);
+
+                            if (ts.movePrevious() && ts.token().id() == TexTokenId.COMP_BRACKET_RIGHT) {
+                                end -= ts.token().length();
+                            }
+
+                            if (start < end) { //hmmmmm
+                                coloring.addHighlight(start, end, attrsFin);
+                            }
                         }
-                    }
-                });
+                    });
+                }
                 
                 return true;
             }
@@ -300,13 +294,8 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
                 
                 document.render(new Runnable() {
                     public void run() {
-                        try {
-                            for (Token t : node.getDeepNodeTokens()) {
-                                add(token2Attributes, t, attrs);
-                            }
-                        } catch (IOException e) {
-                            Exceptions.printStackTrace(e);
-                        }
+                        coloring.addHighlight(node.getStartingPosition().getOffsetValue(),
+                                              node.getEndingPosition().getOffsetValue(), attrs);
                     }
                 });
                 
@@ -314,50 +303,22 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
             }
         });
 
-        final PositionsBag bag = new PositionsBag(null);
-//        long start = System.currentTimeMillis();
-        
         final AttributeSet unused = AttributesUtilities.createImmutable(getColoringForName(TexColoringNames.UNUSED), AttributesUtilities.createImmutable("unused-browseable", Boolean.TRUE)); // NOI18N
 
         document.render(new Runnable() {
             public void run() {
-                try {
-                    for (List<Token> tokens : possiblyUnusedLabel2Tokens.values()) {
-                        for (Token t : tokens) {
-                            add(token2Attributes, t, unused);
-                        }
-                    }
-
-                    for (Entry<Token, List<AttributeSet>> e : token2Attributes.entrySet()) {
-                        Token t = e.getKey();
-                        AttributeSet c = AttributesUtilities.createComposite(e.getValue().toArray(new AttributeSet[0]));
-
-                        //XXX:
-                        if (c == null || c == SimpleAttributeSet.EMPTY) {
-                            continue;
-                        }
-
-                        bag.addHighlight(NbDocument.createPosition(document, t.offset(null), Position.Bias.Backward), NbDocument.createPosition(document, t.offset(null) + t.length(), Position.Bias.Forward), c);
-                    }
-                } catch (BadLocationException e) {
-                    Exceptions.printStackTrace(e);
+                for (int[] span : possiblyUnusedLabel2Tokens.values()) {
+                    coloring.addHighlight(span[0], span[1], unused);
                 }
             }
         });
 
-        getDelegate(document).setHighlights(bag);
+        if (cancelled.get())
+            return ;
+
+        getDelegate(document).setHighlights(coloring);
     }
 
-    private void add(Map<Token, List<AttributeSet>> token2Attributes, Token t, AttributeSet att) {
-        List<AttributeSet> l = token2Attributes.get(t);
-        
-        if (l == null) {
-            token2Attributes.put(t, l = new LinkedList<AttributeSet>());
-        }
-        
-        l.add(att);
-    }
-    
     private AttributeSet getColoringForName(String name) {
         FontColorSettings fontColorSettings = MimeLookup.getLookup(MimePath.get("text/x-tex")).lookup(FontColorSettings.class);
         
@@ -374,11 +335,11 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
         "mod-ext-subparagraph"
     ));
 
-    public static PositionsBag getDelegate(Document doc) {
-        PositionsBag bag = (PositionsBag) doc.getProperty(SemanticColoring.class);
+    public static OffsetsBag getDelegate(Document doc) {
+        OffsetsBag bag = (OffsetsBag) doc.getProperty(SemanticColoring.class);
         
         if (bag == null) {
-            doc.putProperty(SemanticColoring.class, bag = new PositionsBag(doc));
+            doc.putProperty(SemanticColoring.class, bag = new OffsetsBag(doc));
         }
         
         return bag;
