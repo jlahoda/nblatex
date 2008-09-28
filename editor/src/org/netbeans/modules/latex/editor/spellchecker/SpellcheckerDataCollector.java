@@ -191,7 +191,9 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
                 } else {
                     c.traverse(this);
 
-                    moveToOffset(c.getEndingPosition().getOffsetValue());
+                    if (!moveToOffset(c.getEndingPosition().getOffsetValue() + 1)) {
+                        return false;
+                    }
                 }
             }
             
@@ -203,13 +205,19 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
             return!(node instanceof InputNode);
         }
 
-        private void moveToOffset(final int offset) {
+        private boolean moveToOffset(final int offset) {
+            final boolean[] success = new boolean[1];
             doc.render(new Runnable() {
                 public void run() {
-                    while (ts.offset() < offset && !cancel.get() && ts.moveNext())
+                    boolean mn = true;
+                    while (ts.offset() < offset && !cancel.get() && (mn = ts.moveNext()))
                         ;
+
+                    success[0] = mn;
                 }
             });
+
+            return success[0];
         }
         
         private int getOffset() {
