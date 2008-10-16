@@ -89,7 +89,7 @@ import org.openide.util.Lookup;
  */
 public class LaTeXGSFParser implements IncrementalParser {
 
-    private static final boolean INCREMENTAL_REPARSE = Boolean.getBoolean("latex.incremental.reparse");
+    private static final boolean INCREMENTAL_REPARSE = !Boolean.getBoolean("latex.no.incremental.reparse");
     private static final Logger  LOG                 = Logger.getLogger(LaTeXGSFParser.class.getName());
     private static final Map<FileObject, StructuralParserImpl> file2Root = new WeakHashMap<FileObject, StructuralParserImpl>();
     
