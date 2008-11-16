@@ -1,7 +1,7 @@
 <!--
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
 
 
 The contents of this file are subject to the terms of either the GNU
@@ -25,7 +25,7 @@ your own identifying information:
 Contributor(s):
 
 The Original Software is the LaTeX module. The Initial Developer of the Original
-Software is Jan Lahoda. Portions Copyright 2003-2004 Sun
+Software is Jan Lahoda. Portions Copyright 2003-2008 Sun
 Microsystems, Inc. All Rights Reserved.
 
 If you wish your version of this file to be governed by only the CDDL
@@ -71,10 +71,12 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -93,10 +95,12 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -111,6 +115,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -125,6 +130,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -139,6 +145,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -153,6 +160,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -167,6 +175,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -181,6 +190,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -195,6 +205,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
   </command>
 
@@ -250,10 +261,12 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -275,10 +288,12 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -296,6 +311,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -349,6 +365,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -367,10 +384,12 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -385,10 +404,12 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -410,6 +431,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
   </command>
 
@@ -420,6 +442,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -449,10 +472,12 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -471,10 +496,12 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -594,10 +621,12 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -647,6 +676,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
   </command>
 
@@ -660,10 +690,12 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
 
     <argument type="mandatory">
@@ -709,6 +741,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
   </command>
 
@@ -761,6 +794,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
   </command>
 
@@ -778,6 +812,7 @@ made subject to such option by the copyright holder.
 
     <argument type="mandatory">
       <attribute name="#code" value="true" />
+      <attribute name="#vc-state-name" value="true" />
     </argument>
   </command>
 
