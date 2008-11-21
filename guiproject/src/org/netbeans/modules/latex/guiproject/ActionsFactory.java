@@ -46,6 +46,10 @@ package org.netbeans.modules.latex.guiproject;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -57,6 +61,8 @@ import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.modules.latex.guiproject.build.BuildConfiguration;
 import org.netbeans.modules.latex.guiproject.build.Builder;
@@ -70,6 +76,7 @@ import org.openide.awt.StatusDisplayer;
 import org.openide.execution.ExecutionEngine;
 import org.openide.filesystems.FileUtil;
 import org.openide.modules.InstalledFileLocator;
+import org.openide.util.ChangeSupport;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.RequestProcessor;
@@ -195,12 +202,9 @@ public class ActionsFactory implements ActionProvider {
         return MainProjectSensitiveActions.mainProjectCommandAction(LaTeXGUIProject.COMMAND_SHOW, "Show Main Project Resulting Document", null);
     }
 
-    private static final class RerunAction extends AbstractAction {
+    private static final class RerunAction extends AbstractAction implements ChangeListener {
 
-        private LaTeXGUIProject project;
-        private List<Builder> toRepeat;
-        private InputOutput inout;
-        private String name;
+        private BuildExecutionSupportItemImpl item;
         
         public RerunAction() {
             putValue(SMALL_ICON, new ImageIcon(ActionsFactory.class.getResource("/org/netbeans/modules/latex/guiproject/resources/rerun.png")));
@@ -208,63 +212,17 @@ public class ActionsFactory implements ActionProvider {
         }
 
         public void actionPerformed(ActionEvent e) {
-            setEnabled(false);
-            class Exec implements Runnable {
-                public void run() {
-                    InputOutput inout;
-                    synchronized (RerunAction.this) {
-                        inout = RerunAction.this.inout;
-                    }
-                    LifecycleManager.getDefault().saveAll();
-
-                    try {
-                        
-                        inout.getOut().reset();
-                        inout.select();
-
-                        boolean succeeded = false;
-
-                        for (Builder b : toRepeat) {
-                            succeeded = b.build(project, inout);
-
-                            if (!succeeded) {
-                                break;
-                            }
-                        }
-
-                        if (succeeded) {
-                            inout.getOut().println("Build passed.");
-                            StatusDisplayer.getDefault().setStatusText("Build passed.");
-                        } else {
-                            inout.getOut().println("Build failed, more info should be provided above.");
-                            StatusDisplayer.getDefault().setStatusText("Build failed.");
-                        }
-                        
-                        REFRESH_FS.schedule(0);
-                    } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
-                    } finally {
-                        inout.getOut().close();
-                        inout.getErr().close();
-                        synchronized (ActionsFactory.class) {
-                            freeTabs.put(inout, name);
-                        }
-                        
-                        setEnabled(true);
-                    }
-                }
-            }
-            
-            ExecutionEngine.getDefault().execute(name, new Exec(), inout);
+            item.repeatExecution();
         }
         
         synchronized void runAndRemember(LaTeXGUIProject project, String name, List<Builder> toRepeat, InputOutput inout) {
-            this.project = project;
-            this.name = name;
-            this.toRepeat = toRepeat;
-            this.inout = inout;
-            
+            item = new BuildExecutionSupportItemImpl(project, toRepeat, inout, name);
+            item.addChangeListener(this);
             actionPerformed(null);
+        }
+
+        public void stateChanged(ChangeEvent e) {
+            setEnabled(item != null && !item.isRunning());
         }
     }
     
@@ -288,5 +246,155 @@ public class ActionsFactory implements ActionProvider {
             FileUtil.refreshFor(File.listRoots()); 
         }
     });
+
+    private static final class BuildExecutionSupportItemImpl implements InvocationHandler {
+
+        private final LaTeXGUIProject project;
+        private final List<Builder> toRepeat;
+        private final InputOutput inout;
+        private final String name;
+
+        private final ChangeSupport cs = new ChangeSupport(this);
+        private boolean running;
+
+        private /*final*/ Object realItem;
+
+        public BuildExecutionSupportItemImpl(LaTeXGUIProject project, List<Builder> toRepeat, InputOutput inout, String name) {
+            this.project = project;
+            this.toRepeat = toRepeat;
+            this.inout = inout;
+            this.name = name;
+
+            prepareRealItem();
+        }
+
+        public String getDisplayName() {
+            return name;
+        }
+
+        public void repeatExecution() {
+            class Exec implements Runnable {
+                public void run() {
+                    InputOutput inout;
+                    synchronized (BuildExecutionSupportItemImpl.this) {
+                        inout = BuildExecutionSupportItemImpl.this.inout;
+                    }
+                    LifecycleManager.getDefault().saveAll();
+
+                    try {
+
+                        inout.getOut().reset();
+                        inout.select();
+
+                        boolean succeeded = false;
+
+                        for (Builder b : toRepeat) {
+                            succeeded = b.build(project, inout);
+
+                            if (!succeeded) {
+                                break;
+                            }
+                        }
+
+                        if (succeeded) {
+                            inout.getOut().println("Build passed.");
+                            StatusDisplayer.getDefault().setStatusText("Build passed.");
+                        } else {
+                            inout.getOut().println("Build failed, more info should be provided above.");
+                            StatusDisplayer.getDefault().setStatusText("Build failed.");
+                        }
+
+                        REFRESH_FS.schedule(0);
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                    } finally {
+                        inout.getOut().close();
+                        inout.getErr().close();
+                        synchronized (ActionsFactory.class) {
+                            freeTabs.put(inout, name);
+                        }
+
+                        setRunning(false);
+                    }
+                }
+            }
+
+            setRunning(true);
+            ExecutionEngine.getDefault().execute(name, new Exec(), inout);
+        }
+
+        private synchronized void setRunning(boolean v) {
+            this.running = v;
+            if (v) {
+                register("registerRunningItem");
+            } else {
+                register("registerFinishedItem");
+            }
+            cs.fireChange();
+        }
+
+        public synchronized boolean isRunning() {
+            return running;
+        }
+
+        public void stopRunning() {
+            //TODO implement me...
+        }
+
+        public void addChangeListener(ChangeListener cl) {
+            cs.addChangeListener(cl);
+        }
+
+        public void removeChangeListener(ChangeListener cl) {
+            cs.removeChangeListener(cl);
+        }
+
+        private void prepareRealItem() {
+            try {
+                ClassLoader cl = BuildExecutionSupportItemImpl.class.getClassLoader();
+                Class classItem = Class.forName("org.netbeans.spi.project.ui.support.BuildExecutionSupport$Item", false, cl);
+
+                realItem = Proxy.newProxyInstance(cl, new Class[] {classItem}, this);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(ActionsFactory.class.getName()).log(Level.FINE, null, ex);
+            }
+        }
+
+        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+            if ("hashCode".equals(method.getName()) && args.length == 0) {
+                return this.hashCode();
+            }
+
+            if ("equals".equals(method.getName()) && args.length == 1 && method.getParameterTypes()[0] == Object.class) {
+                return this.equals(Proxy.getInvocationHandler(args[0]));
+            }
+
+            Method dm = BuildExecutionSupportItemImpl.class.getDeclaredMethod(method.getName());
+
+            return dm.invoke(this);
+        }
+
+        private void register(String methodName) {
+            try {
+                ClassLoader cl = BuildExecutionSupportItemImpl.class.getClassLoader();
+                Class support = Class.forName("org.netbeans.spi.project.ui.support.BuildExecutionSupport", false, cl);
+                Class classItem = Class.forName("org.netbeans.spi.project.ui.support.BuildExecutionSupport$Item", false, cl);
+
+                support.getDeclaredMethod(methodName, classItem).invoke(null, realItem);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(ActionsFactory.class.getName()).log(Level.FINE, null, ex);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(ActionsFactory.class.getName()).log(Level.FINE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(ActionsFactory.class.getName()).log(Level.FINE, null, ex);
+            } catch (NoSuchMethodException ex) {
+                Logger.getLogger(ActionsFactory.class.getName()).log(Level.FINE, null, ex);
+            } catch (SecurityException ex) {
+                Logger.getLogger(ActionsFactory.class.getName()).log(Level.FINE, null, ex);
+            } catch (ClassNotFoundException ex) {
+                Logger.getLogger(ActionsFactory.class.getName()).log(Level.FINE, null, ex);
+            }
+        }
+    }
     
 }
