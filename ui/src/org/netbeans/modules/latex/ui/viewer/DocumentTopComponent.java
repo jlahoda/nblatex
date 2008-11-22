@@ -82,7 +82,8 @@ import org.openide.filesystems.FileEvent;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
-import org.openide.text.Line;
+import org.openide.text.Line.ShowOpenType;
+import org.openide.text.Line.ShowVisibilityType;
 import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.openide.util.RequestProcessor;
@@ -510,7 +511,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
                 DataObject d = DataObject.find(e.getFile());
                 LineCookie lc = (LineCookie) d.getCookie(LineCookie.class);
                 
-                lc.getLineSet().getCurrent(e.getLine() - 1).show(Line.SHOW_GOTO);
+                lc.getLineSet().getCurrent(e.getLine() - 1).show(ShowOpenType.OPEN, ShowVisibilityType.FOCUS);
             } catch (IOException ex) {
                 Exceptions.printStackTrace(ex);
             }

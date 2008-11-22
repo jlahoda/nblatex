@@ -49,7 +49,8 @@ import org.openide.cookies.LineCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
-import org.openide.text.Line;
+import org.openide.text.Line.ShowOpenType;
+import org.openide.text.Line.ShowVisibilityType;
 import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.NodeAction;
@@ -86,7 +87,7 @@ public class GoToSourceAction extends NodeAction {
             
             int line = position.getLine();
             
-            lc.getLineSet().getCurrent(line).show(Line.SHOW_GOTO);
+            lc.getLineSet().getCurrent(line).show(ShowOpenType.OPEN, ShowVisibilityType.FOCUS);
         } catch (IOException e) {
             Exceptions.printStackTrace(e);
         }
