@@ -44,14 +44,10 @@
 package org.netbeans.modules.latex.model.structural.parser;
 
 import java.beans.IntrospectionException;
-import java.beans.PropertyChangeEvent;
 import java.util.ArrayList;
 import java.util.List;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
 import org.netbeans.modules.latex.model.structural.StructuralNode;
-import org.openide.ErrorManager;
-import org.openide.nodes.AbstractNode;
-import org.openide.nodes.Children;
 import org.openide.nodes.Node;
 import org.openide.util.Exceptions;
 

@@ -75,7 +75,6 @@ import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.Queue;
 import org.netbeans.modules.latex.model.command.SourcePosition;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
-import org.openide.ErrorManager;
 import org.openide.cookies.SaveCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -385,9 +384,8 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
             bn = new BeanNode(node);
             vauNode2BeanNode.put(node, bn);
             } catch (IntrospectionException e) {
-                IllegalArgumentException exc = new IllegalArgumentException();
+                IllegalArgumentException exc = new IllegalArgumentException(e);
                 
-                ErrorManager.getDefault().annotate(exc, e);
                 Exceptions.attachLocalizedMessage(exc, e.getMessage());
                 
                 throw exc;

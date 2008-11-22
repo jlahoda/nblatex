@@ -43,26 +43,15 @@
  */
 package org.netbeans.modules.latex.model.command.impl;
 
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import javax.swing.text.Position;
-import org.netbeans.modules.latex.model.Utilities;
 
-import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.TraverseHandler;
 import org.netbeans.modules.latex.model.command.Command;
-import org.netbeans.modules.latex.model.command.Command.Param;
 import org.netbeans.modules.latex.model.command.CommandCollection;
-import org.netbeans.modules.latex.model.command.SourcePosition;
 import org.netbeans.modules.latex.test.TestCertificate;
-import org.openide.ErrorManager;
 
 /**
  *

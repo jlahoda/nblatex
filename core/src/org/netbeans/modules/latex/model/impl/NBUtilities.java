@@ -219,17 +219,11 @@ public class NBUtilities extends Utilities implements PropertyChangeListener {
             
             return pane;
         } catch (NoSuchFieldException nsfe) {
-            IllegalStateException ex = new IllegalStateException("Cannot access pane field.");
-            ErrorManager.getDefault().annotate(ex, nsfe);
-            throw ex;
+            throw new IllegalStateException("Cannot access pane field.", nsfe);
         } catch (IllegalArgumentException nsfe) {
-            IllegalStateException ex = new IllegalStateException("Cannot access pane field.");
-            ErrorManager.getDefault().annotate(ex, nsfe);
-            throw ex;
+            throw new IllegalStateException("Cannot access pane field.", nsfe);
         } catch (IllegalAccessException nsfe) {
-            IllegalStateException ex = new IllegalStateException("Cannot access pane field.");
-            ErrorManager.getDefault().annotate(ex, nsfe);
-            throw ex;
+            throw new IllegalStateException("Cannot access pane field.", nsfe);
         }
     }
 
