@@ -93,6 +93,6 @@ public class SectionStructuralElementNode extends StructuralNode {
 //    }
     
     public SourcePosition getOpeningPosition() {
-        return ((SectionStructuralElement) getBean()).getNode().getStartingPosition();
+        return ((SectionStructuralElement) getBean()).getStartingPosition();
     }
 }

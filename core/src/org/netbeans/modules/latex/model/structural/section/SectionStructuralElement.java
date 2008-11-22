@@ -44,6 +44,7 @@
 package org.netbeans.modules.latex.model.structural.section;
 
 import org.netbeans.modules.latex.model.command.CommandNode;
+import org.netbeans.modules.latex.model.command.SourcePosition;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
 
 /**
@@ -54,44 +55,49 @@ public class SectionStructuralElement extends StructuralElement {
 
     public static final String NAME = "name";
 
-    private CommandNode node;
+    private String plainName;
+    private SourcePosition start;
     private int         priority;
     private int         type;
     private int[]       nums;
     
     public SectionStructuralElement(CommandNode node, int priority, int type, int[] nums) {
-        this.node = node;
         this.priority = priority;
         this.type = type;
-        this.nums = nums;
+        update(node, nums);
     }
     
     public int getPriority() {
         return priority;
     }
     
-    public String getName() {
-        if (node.getArgumentCount() > 0)
-            return numsToString() + " " + getPlainName(); //!!!there is no assurance that there will be argument number 0!
-        else
-            return "";
+    public synchronized String getName() {
+        return numsToString() + " " + plainName;
     }
 
-    public String getPlainName() {
-        return node.getArgument(0).getText().toString();
-    }
-    
     public int getType() {
         return type;
     }
-    
-    public CommandNode getNode() {
-        return node;
+
+    public String getPlainName() {
+        return plainName;
+    }
+
+    public synchronized SourcePosition getStartingPosition() {
+        return start;
     }
     
-    void update(CommandNode node, int[] nums) {
-        this.node = node;
+    synchronized final void update(CommandNode node, int[] nums) {
         this.nums = nums;
+
+        if (node.getArgumentCount() > 0) {
+            this.plainName = node.getArgument(0).getText().toString(); //!!!there is no assurance that there will be argument number 0!
+        } else {
+            this.plainName = "";
+        }
+
+        this.start = node.getStartingPosition();
+        
         fireNameChanged();
     }
     
