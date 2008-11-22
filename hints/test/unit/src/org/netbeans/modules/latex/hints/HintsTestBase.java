@@ -109,6 +109,12 @@ public abstract class HintsTestBase extends NbTestCase {
     }
     
     protected void testAnalyze(String code, String auxFileName, String auxFileConent, boolean tag, final String... errors) throws Exception {
+        clearWorkDir();
+        
+        workdir = FileUtil.toFileObject(getWorkDir());
+
+        assertNotNull(workdir);
+
         FileObject     testFileObject = getTestFile("test.tex");
         
         copyStringToFile(testFileObject, code);
@@ -165,12 +171,6 @@ public abstract class HintsTestBase extends NbTestCase {
     }
     
     private FileObject getTestFile(String testFile) throws IOException, InterruptedException {
-        clearWorkDir();
-        
-        workdir = FileUtil.toFileObject(getWorkDir());
-        
-        assertNotNull(workdir);
-        
         FileObject test = workdir.createData(testFile);
         
         assertNotNull(test);
