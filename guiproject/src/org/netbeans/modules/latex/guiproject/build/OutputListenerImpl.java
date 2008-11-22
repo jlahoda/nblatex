@@ -49,6 +49,8 @@ import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.text.Annotatable;
 import org.openide.text.Annotation;
 import org.openide.text.Line;
+import org.openide.text.Line.ShowOpenType;
+import org.openide.text.Line.ShowVisibilityType;
 import org.openide.util.Exceptions;
 import org.openide.windows.OutputEvent;
 import org.openide.windows.OutputListener;
@@ -75,7 +77,7 @@ public final class OutputListenerImpl implements OutputListener {
                 Line l = lc.getLineSet().getOriginal(line - 1);
                 
                 if (!l.isDeleted()) {
-                    l.show(Line.SHOW_GOTO);
+                    l.show(ShowOpenType.OPEN, ShowVisibilityType.FOCUS);
                     ErrorAnnotation.getInstance().attach(l, message);
                 }
             }
@@ -94,7 +96,7 @@ public final class OutputListenerImpl implements OutputListener {
                 Line l = lc.getLineSet().getOriginal(line - 1);
                 
                 if (!l.isDeleted()) {
-                    l.show(Line.SHOW_GOTO);
+                    l.show(ShowOpenType.OPEN, ShowVisibilityType.FOCUS);
                     ErrorAnnotation.getInstance().attach(l, message);
                 }
             }

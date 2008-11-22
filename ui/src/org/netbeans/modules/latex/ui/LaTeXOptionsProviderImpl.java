@@ -58,6 +58,8 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.text.Line;
+import org.openide.text.Line.ShowOpenType;
+import org.openide.text.Line.ShowVisibilityType;
 
 /**
  *
@@ -178,7 +180,7 @@ public final class LaTeXOptionsProviderImpl extends OptionProcessor {
             
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
-                    line.show(Line.SHOW_GOTO, column);
+                    line.show(ShowOpenType.OPEN, ShowVisibilityType.FOCUS, column);
                 }
             });
         } catch (IOException e) {

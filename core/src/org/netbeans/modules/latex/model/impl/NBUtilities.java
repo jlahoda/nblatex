@@ -70,6 +70,8 @@ import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.text.CloneableEditor;
 import org.openide.text.Line;
+import org.openide.text.Line.ShowOpenType;
+import org.openide.text.Line.ShowVisibilityType;
 import org.openide.windows.TopComponent;
 
 /**
@@ -256,7 +258,7 @@ public class NBUtilities extends Utilities implements PropertyChangeListener {
             LineCookie lc = (LineCookie) od.getCookie(LineCookie.class);
             Line line = lc.getLineSet().getCurrent(position.getLine());
             
-            line.show(Line.SHOW_GOTO);
+            line.show(ShowOpenType.OPEN, ShowVisibilityType.FOCUS);
         } catch (IOException e) {
             Logger.getLogger("global").log(Level.INFO,null, e);
         }
