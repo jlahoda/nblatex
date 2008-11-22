@@ -44,12 +44,12 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -89,7 +89,7 @@ public class UsagesRootNode extends AbstractNode {
                 
                 return new Node[] {new UsagesFileNode(od.getNodeDelegate(), file2Node.get(key))};
             } catch (IOException e) {
-                ErrorManager.getDefault().notify(e);
+                Exceptions.printStackTrace(e);
                 return new Node[0];
             }
         }

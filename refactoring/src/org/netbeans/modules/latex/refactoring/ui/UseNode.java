@@ -48,11 +48,11 @@ import org.netbeans.editor.BaseDocument;
 import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.SourcePosition;
-import org.openide.ErrorManager;
 import org.openide.actions.OpenAction;
 import org.openide.cookies.OpenCookie;
 import org.openide.nodes.AbstractNode;
 import org.openide.nodes.Children;
+import org.openide.util.Exceptions;
 import org.openide.xml.XMLUtil;
 
 /**
@@ -93,10 +93,10 @@ public class UseNode extends AbstractNode {
             
             return "<html>" + XMLUtil.toElementContent(prefix) + "<b>" + XMLUtil.toElementContent(text) + "</b>" + XMLUtil.toElementContent(suffix);
         } catch (BadLocationException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
             return node.getFullText().toString();
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
             return node.getFullText().toString();
         }
     }

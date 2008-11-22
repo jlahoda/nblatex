@@ -54,10 +54,10 @@ import org.netbeans.api.project.ProjectManager;
 import org.netbeans.core.startup.Main;
 import org.netbeans.junit.NbTestCase;
 import org.netbeans.modules.latex.UnitUtilities;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 import org.xml.sax.SAXException;
 
 /**
@@ -91,7 +91,7 @@ public class ProjectTestCase extends NbTestCase {
                 try {
                     out.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
             
@@ -99,7 +99,7 @@ public class ProjectTestCase extends NbTestCase {
                 try {
                     ins.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
         }

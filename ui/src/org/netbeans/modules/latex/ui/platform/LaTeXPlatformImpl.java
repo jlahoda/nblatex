@@ -54,10 +54,10 @@ import org.netbeans.modules.latex.model.platform.LaTeXPlatform;
 import org.netbeans.modules.latex.model.platform.Viewer;
 import org.netbeans.modules.latex.ui.ModuleSettings;
 import org.netbeans.modules.latex.ui.viewer.ViewerImpl;
-import org.openide.ErrorManager;
 import org.openide.execution.NbProcessDescriptor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileStateInvalidException;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 
 /**
@@ -171,9 +171,9 @@ public class LaTeXPlatformImpl implements LaTeXPlatform {
 
             return result;
         } catch (FileStateInvalidException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         } catch (URISyntaxException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
 
         return Collections.emptyList();

@@ -52,10 +52,11 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
-import org.openide.ErrorManager;
 import org.openide.util.RequestProcessor;
 import org.openide.util.Utilities;
 import org.openide.windows.WindowManager;
@@ -212,7 +213,7 @@ public class Autodetector {
                                 System.err.print((char) read);
                         }
                     } catch (IOException e) {
-                        ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                        Logger.getLogger("global").log(Level.INFO,null, e);
                     }
                 }
             };
@@ -232,7 +233,7 @@ public class Autodetector {
                                 System.err.print((char) read);
                         }
                     } catch (IOException e) {
-                        ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                        Logger.getLogger("global").log(Level.INFO,null, e);
                     }
                 }
             };
@@ -247,7 +248,7 @@ public class Autodetector {
                     try {
                         p.waitFor();
                     } catch (InterruptedException e) {
-                        ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                        Logger.getLogger("global").log(Level.INFO,null, e);
                     }
                 }
             };
@@ -257,7 +258,7 @@ public class Autodetector {
             try {
                 waitFor.join(20000); //For safety, we give 20 second until the program is completed.
             } catch (InterruptedException e) {
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                Logger.getLogger("global").log(Level.INFO,null, e);
                 p.destroy();
                 waitFor.join();
             }

@@ -49,7 +49,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.Map;
-import org.openide.ErrorManager;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 
 /**module private class
  *
@@ -96,7 +98,7 @@ public/*module private*/ final class ModuleSettings {
             
             return null;
         } catch (Exception e) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+            Logger.getLogger("global").log(Level.INFO,null, e);
             return null;
         } finally {
             if (dec != null)
@@ -113,7 +115,7 @@ public/*module private*/ final class ModuleSettings {
             
             enc.writeObject(settings);
         } catch (Exception e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         } finally {
             if (enc != null)
                 enc.close();

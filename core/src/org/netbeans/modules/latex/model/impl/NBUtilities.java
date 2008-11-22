@@ -52,6 +52,8 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JEditorPane;
 import javax.swing.text.Document;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
@@ -256,7 +258,7 @@ public class NBUtilities extends Utilities implements PropertyChangeListener {
             
             line.show(Line.SHOW_GOTO);
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+            Logger.getLogger("global").log(Level.INFO,null, e);
         }
     }
 

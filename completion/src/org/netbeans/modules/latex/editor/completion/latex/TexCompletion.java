@@ -49,6 +49,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
@@ -90,7 +92,6 @@ import org.netbeans.spi.editor.completion.support.AsyncCompletionQuery;
 import org.netbeans.spi.editor.completion.support.AsyncCompletionTask;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.SourcePosition;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
@@ -128,7 +129,7 @@ public class TexCompletion implements CompletionProvider {
                 }
             }
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
     }
     
@@ -156,7 +157,7 @@ public class TexCompletion implements CompletionProvider {
             
             return null;
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
             return null;
         }
     }
@@ -171,7 +172,7 @@ public class TexCompletion implements CompletionProvider {
             
             return (BlockNode) node;
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
             return null;
         }
     }
@@ -332,7 +333,7 @@ public class TexCompletion implements CompletionProvider {
                     if (prefix.length() == 0)
                         set.addItem(new TexCompletionItem.NewFileCompletionItem(start, lpr.getMainFile()));
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
 
@@ -440,7 +441,7 @@ public class TexCompletion implements CompletionProvider {
                         set.addItem(new EnvironmentCompletionItem(start, env));
                 }
             } catch (IOException e) {
-                ErrorManager.getDefault().notify(e);
+                Exceptions.printStackTrace(e);
             }
         }
         

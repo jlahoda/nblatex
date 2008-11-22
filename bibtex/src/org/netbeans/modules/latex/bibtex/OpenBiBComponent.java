@@ -56,6 +56,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ActionMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
@@ -72,7 +74,6 @@ import javax.swing.text.DefaultEditorKit;
 import org.netbeans.modules.latex.bibtex.loaders.BiBTexDataObject;
 import org.netbeans.modules.latex.bibtex.nodes.PublicationEntryNode;
 import org.netbeans.modules.latex.bibtex.table.SortingTable;
-import org.openide.ErrorManager;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
 import org.openide.explorer.ExplorerManager.Provider;
@@ -84,6 +85,7 @@ import org.openide.nodes.NodeReorderEvent;
 import org.openide.nodes.Node.Property;
 import org.openide.nodes.Node.PropertySet;
 import org.openide.nodes.PropertySupport.ReadOnly;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.WeakListeners;
 import org.openide.windows.Mode;
@@ -234,7 +236,7 @@ public class OpenBiBComponent extends TopComponent implements ListSelectionListe
         try {
             getExplorerManager().setSelectedNodes(toSet);
         } catch (PropertyVetoException ex) {
-            ErrorManager.getDefault().notify(ex);
+            Exceptions.printStackTrace(ex);
         }
     }
     
@@ -243,7 +245,7 @@ public class OpenBiBComponent extends TopComponent implements ListSelectionListe
     }
     
     private void showMessage(String message) {
-        ErrorManager.getDefault().log(ErrorManager.ERROR, message);
+        Logger.getLogger("global").log(Level.SEVERE, message);
     }
     
     public void propertyChange(PropertyChangeEvent evt) {
@@ -275,7 +277,7 @@ public class OpenBiBComponent extends TopComponent implements ListSelectionListe
         try {
             getExplorerManager().setSelectedNodes(new Node[0]);//TODO: this probably can be made better...
         } catch (PropertyVetoException ex) {
-            ErrorManager.getDefault().notify(ex);
+            Exceptions.printStackTrace(ex);
         }
     }
     
@@ -413,9 +415,9 @@ public class OpenBiBComponent extends TopComponent implements ListSelectionListe
 //                System.err.println("p.getValue().getClass()= " + p.getValue().getClass());
                 return p.getValue();
             } catch (IllegalAccessException e) {
-                ErrorManager.getDefault().notify(e);
+                Exceptions.printStackTrace(e);
             } catch (InvocationTargetException e) {
-                ErrorManager.getDefault().notify(e);
+                Exceptions.printStackTrace(e);
             }
             
             return null; //!!!
@@ -434,9 +436,9 @@ public class OpenBiBComponent extends TopComponent implements ListSelectionListe
             try {
                 p.setValue(o);
             } catch (IllegalAccessException e) {
-                ErrorManager.getDefault().notify(e);
+                Exceptions.printStackTrace(e);
             } catch (InvocationTargetException e) {
-                ErrorManager.getDefault().notify(e);
+                Exceptions.printStackTrace(e);
             }
         }
         

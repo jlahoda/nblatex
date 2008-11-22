@@ -61,7 +61,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.openide.ErrorManager;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -153,7 +153,7 @@ import org.openide.ErrorManager;
         try {
             new PreprocessHelp().createHelpJar(new File(helpDir, "latex2e_176.html"), getHelpFile());
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
     }
     

@@ -47,8 +47,8 @@ import java.beans.IntrospectionException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import org.openide.ErrorManager;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.Lookups;
 
@@ -81,7 +81,7 @@ public final class StructuralNodeFactory {
             
             return new StructuralNode<StructuralElement>(el);
         } catch (IntrospectionException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
         
         return null;

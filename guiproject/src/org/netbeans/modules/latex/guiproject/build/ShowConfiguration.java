@@ -44,6 +44,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.StyledDocument;
@@ -127,7 +129,7 @@ public final class ShowConfiguration implements Builder {
                 viewer.show(toShow, findCurrentPosition(p));
             }
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+            Logger.getLogger("global").log(Level.INFO,null, e);
         }
 
         return true;

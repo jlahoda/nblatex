@@ -42,12 +42,12 @@
 package org.netbeans.modules.latex.bibtex.nodes;
 
 import org.netbeans.modules.latex.model.bibtex.PublicationEntry;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node.Property;
 import org.openide.nodes.PropertySupport;
 import org.openide.nodes.Sheet;
 import org.openide.nodes.Sheet.Set;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 
 /**
@@ -96,7 +96,7 @@ public class PublicationEntryNode extends BiBEntryNode {
             author.setDisplayName(NbBundle.getBundle(PublicationEntryNode.class).getString("LBL_Author"));
             properties.put(author);
         }  catch (NoSuchMethodException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
         
         return sheet;

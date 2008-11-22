@@ -82,6 +82,7 @@ import org.openide.loaders.DataObject;
 import org.openide.nodes.BeanNode;
 import org.openide.nodes.Node;
 import org.openide.text.NbDocument;
+import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
 import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
@@ -227,7 +228,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
             
             NbDocument.markGuarded(sdoc, start.getOffsetValue(), end.getOffsetValue() - start.getOffsetValue());
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
     }
     
@@ -237,7 +238,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
             
             NbDocument.unmarkGuarded(sdoc, start.getOffsetValue(), end.getOffsetValue() - start.getOffsetValue());
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
     }
     
@@ -316,7 +317,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
                         doc.remove(start.getOffsetValue(), 1);
                         setGuarded();
                     } catch (BadLocationException e) {
-                        ErrorManager.getDefault().notify(e);
+                        Exceptions.printStackTrace(e);
                     }
                 }
             });
@@ -327,7 +328,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
                     c.save();
             }
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
         //            element.synchronize();
     }
@@ -387,7 +388,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
                 IllegalArgumentException exc = new IllegalArgumentException();
                 
                 ErrorManager.getDefault().annotate(exc, e);
-                ErrorManager.getDefault().annotate(exc, e.getMessage());
+                Exceptions.attachLocalizedMessage(exc, e.getMessage());
                 
                 throw exc;
             }

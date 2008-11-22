@@ -44,7 +44,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import org.openide.ErrorManager;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
@@ -77,7 +78,7 @@ public final class SearchInfoImpl implements SearchInfo {
                 DataObject od = DataObject.find(file);
                 result.add(od);
             } catch (DataObjectNotFoundException ex) {
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+                Logger.getLogger("global").log(Level.INFO,null, ex);
             }
         }
         

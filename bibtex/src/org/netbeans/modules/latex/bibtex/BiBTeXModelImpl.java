@@ -49,10 +49,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.swing.event.DocumentEvent;
@@ -66,8 +64,8 @@ import org.netbeans.modules.latex.model.bibtex.BiBTeXModelChangeListener;
 import org.netbeans.modules.latex.model.bibtex.BiBTeXModelChangedEvent;
 import org.netbeans.modules.latex.model.bibtex.Entry;
 import org.netbeans.modules.latex.model.command.SourcePosition;
-import org.openide.ErrorManager;
 import org.openide.text.NbDocument;
+import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 import org.openide.util.WeakListeners;
 
@@ -203,7 +201,7 @@ public class BiBTeXModelImpl extends BiBTeXModel implements PropertyChangeListen
             }
             fireEntriesAdded(new ArrayList(entries));
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
     }
     
@@ -269,14 +267,14 @@ public class BiBTeXModelImpl extends BiBTeXModel implements PropertyChangeListen
                             if (last != null)
                                 last.setEndPosition(new SourcePosition(doc, startOffset));
                         } catch (BadLocationException ex) {
-                            ErrorManager.getDefault().notify(ex);
+                            Exceptions.printStackTrace(ex);
                         }
                     }
                 });
             } catch (BadLocationException ex) {
-                ErrorManager.getDefault().notify(ex);
+                Exceptions.printStackTrace(ex);
             } catch (IOException ex) {
-                ErrorManager.getDefault().notify(ex);
+                Exceptions.printStackTrace(ex);
             }
             
             entries.add(e);
@@ -329,14 +327,14 @@ public class BiBTeXModelImpl extends BiBTeXModel implements PropertyChangeListen
                                 e.setStartPosition(new SourcePosition(doc, startOffset));
                                 e.setEndPosition(new SourcePosition(doc, startOffset + toWrite.length() - 1));
                             } catch (BadLocationException ex) {
-                                ErrorManager.getDefault().notify(ex);
+                                Exceptions.printStackTrace(ex);
                             }
                         }
                     });
                 } catch (BadLocationException ex) {
-                    ErrorManager.getDefault().notify(ex);
+                    Exceptions.printStackTrace(ex);
                 } catch (IOException ex) {
-                    ErrorManager.getDefault().notify(ex);
+                    Exceptions.printStackTrace(ex);
                 }
             }
         } finally {
@@ -373,14 +371,14 @@ public class BiBTeXModelImpl extends BiBTeXModel implements PropertyChangeListen
                             
                             doc.remove(startOffset, length);
                         } catch (BadLocationException ex) {
-                            ErrorManager.getDefault().notify(ex);
+                            Exceptions.printStackTrace(ex);
                         }
                     }
                 });
             } catch (BadLocationException ex) {
-                ErrorManager.getDefault().notify(ex);
+                Exceptions.printStackTrace(ex);
             } catch (IOException ex) {
-                ErrorManager.getDefault().notify(ex);
+                Exceptions.printStackTrace(ex);
             }
             
             fireEntriesRemoved(Collections.singletonList(e));
@@ -464,7 +462,7 @@ public class BiBTeXModelImpl extends BiBTeXModel implements PropertyChangeListen
                         return ;
                     }
                 } catch (IOException ex) {
-                    ErrorManager.getDefault().notify(ex);
+                    Exceptions.printStackTrace(ex);
 //                    System.err.println("Will be full reparse.");
                     ex.printStackTrace();
                     documentChange();
@@ -558,7 +556,7 @@ public class BiBTeXModelImpl extends BiBTeXModel implements PropertyChangeListen
                         fireEntriesAdded(toAdd);
                     }
                 } catch (IOException ex) {
-                    ErrorManager.getDefault().notify(ex);
+                    Exceptions.printStackTrace(ex);
 //                    System.err.println("Will be full reparse.");
                     ex.printStackTrace();
                     documentChange();
@@ -658,7 +656,7 @@ public class BiBTeXModelImpl extends BiBTeXModel implements PropertyChangeListen
                             return ;
                         }
                     } catch (IOException ex) {
-                        ErrorManager.getDefault().notify(ex);
+                        Exceptions.printStackTrace(ex);
 //                        System.err.println("Will be full reparse.");
                         ex.printStackTrace();
                         documentChange();

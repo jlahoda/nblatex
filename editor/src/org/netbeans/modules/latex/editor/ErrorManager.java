@@ -42,6 +42,9 @@
  * Contributor(s): Jan Lahoda.
  */
 package org.netbeans.modules.latex.editor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -111,11 +114,11 @@ public abstract class ErrorManager {
     private static class IDEErrorManager extends ErrorManager {
         
         public Throwable annotate(Throwable t, String annotation) {
-            return org.openide.ErrorManager.getDefault().annotate(t, annotation);
+            return Exceptions.attachLocalizedMessage(t, annotation);
         }
         
         public void notify(Throwable t) {
-            org.openide.ErrorManager.getDefault().notify(t);
+            Exceptions.printStackTrace(t);
         }
         
         public Throwable annotate(Throwable t, Throwable th) {
@@ -123,7 +126,7 @@ public abstract class ErrorManager {
         }
 
         public void notifyInformational(Throwable t) {
-            org.openide.ErrorManager.getDefault().notify(org.openide.ErrorManager.INFORMATIONAL, t);
+            Logger.getLogger("global").log(Level.INFO,null, t);
         }
         
     }

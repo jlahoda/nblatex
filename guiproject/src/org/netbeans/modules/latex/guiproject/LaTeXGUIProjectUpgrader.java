@@ -43,26 +43,18 @@
  */
 package org.netbeans.modules.latex.guiproject;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.MessageFormat;
-import java.util.Iterator;
-import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.project.ProjectUtils;
 import org.openide.DialogDisplayer;
-import org.openide.ErrorManager;
 import org.openide.NotifyDescriptor;
 import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
-import org.openide.loaders.DataObject;
 import org.openide.modules.SpecificationVersion;
 import org.openide.util.NbBundle;
-import org.openide.xml.XMLUtil;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 
 /**This class is used to check whether the upgrade of the project metadata should
  * be perfomed, and to perform the appropriate action to upgrade the project.
@@ -116,7 +108,7 @@ public final class LaTeXGUIProjectUpgrader {
             
             if (propertiesFile == null) {
                 //strange...
-                ErrorManager.getDefault().log(ErrorManager.INFORMATIONAL, "During checking for upgrade of project data, properties file not found!");
+                Logger.getLogger("global").log(Level.FINE, "During checking for upgrade of project data, properties file not found!");
                 return ;
             }
             
@@ -132,7 +124,7 @@ public final class LaTeXGUIProjectUpgrader {
                 try {
                     version = new SpecificationVersion(versionString);
                 } catch (NumberFormatException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                     version = actualVersion;
                 }
             } else {
@@ -160,13 +152,13 @@ public final class LaTeXGUIProjectUpgrader {
                 }
             }
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+            Logger.getLogger("global").log(Level.INFO,null, e);
         } finally {
             if (out != null) {
                 try {
                     out.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
             
@@ -174,7 +166,7 @@ public final class LaTeXGUIProjectUpgrader {
                 try {
                     ins.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
             

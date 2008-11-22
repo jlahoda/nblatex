@@ -49,6 +49,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.Document;
 import org.netbeans.modules.latex.gui.AngleEdgeNode;
 import org.netbeans.modules.latex.gui.EdgeNode;
@@ -432,7 +434,7 @@ public final class VauParserImpl {
                     node.setLabelPosition(labelPosition);
                 } catch (NumberFormatException e) {
                     ErrorManager.getDefault().annotate(e, ErrorManager.INFORMATIONAL, "VauParserImpl.AbstractEdgeParser, trying to parse: " + command.getArgument(0).getFullText().toString() + " for command: " + command.getCommand().getCommand(), null, null, null);
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
             
@@ -537,7 +539,7 @@ public final class VauParserImpl {
                     lineEdge.setLabelPosition(labelPosition);
                 } catch (NumberFormatException e) {
                     ErrorManager.getDefault().annotate(e, ErrorManager.INFORMATIONAL, "VauParserImpl.AbstractEdgeParser, trying to parse: " + command.getArgument(0).getFullText().toString() + " for command: " + command.getCommand().getCommand(), null, null, null);
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
 

@@ -46,9 +46,10 @@ package org.netbeans.modules.latex.guiproject;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.FileOwnerQueryImplementation;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 
@@ -64,7 +65,7 @@ public final class LaTeXFileOwnerQuery implements FileOwnerQueryImplementation {
     }
 
     public Project getOwner(URI file) {
-        ErrorManager.getDefault().log(ErrorManager.INFORMATIONAL, "LaTeXFileOwnerQuery.getOwner(URI) not implemented.");
+        Logger.getLogger("global").log(Level.FINE, "LaTeXFileOwnerQuery.getOwner(URI) not implemented.");
         return null;
     }
 
