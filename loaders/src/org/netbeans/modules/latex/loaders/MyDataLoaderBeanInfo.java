@@ -49,7 +49,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.SimpleBeanInfo;
 
-import org.openide.ErrorManager;
+import org.openide.util.Exceptions;
 import org.openide.util.Utilities;
 
 /** Description of {@link MyDataLoader}.
@@ -78,7 +78,7 @@ public class MyDataLoaderBeanInfo extends SimpleBeanInfo {
             // I.e. MultiFileLoader.class or UniFileLoader.class.
             return new BeanInfo[] {Introspector.getBeanInfo(MyDataLoader.class.getSuperclass())};
         } catch (IntrospectionException ie) {
-            ErrorManager.getDefault().notify(ie);
+            Exceptions.printStackTrace(ie);
             return null;
         }
     }

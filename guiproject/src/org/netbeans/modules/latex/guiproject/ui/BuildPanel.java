@@ -56,12 +56,11 @@ import javax.swing.ListCellRenderer;
 import org.netbeans.modules.latex.guiproject.LaTeXGUIProject;
 import org.netbeans.modules.latex.guiproject.Utilities;
 import org.netbeans.modules.latex.guiproject.build.BuildConfiguration;
-import org.netbeans.modules.latex.guiproject.build.BuildConfigurationProvider;
 import org.netbeans.modules.latex.guiproject.build.RunTypes;
 import org.netbeans.modules.latex.guiproject.build.ShowConfiguration;
 import org.netbeans.spi.project.ui.support.ProjectCustomizer.Category;
-import org.openide.ErrorManager;
 import org.openide.awt.HtmlRenderer;
+import org.openide.util.Exceptions;
 import org.openide.xml.XMLUtil;
 
 /**
@@ -328,7 +327,7 @@ public class BuildPanel extends javax.swing.JPanel implements StorableSettingsPr
                 try {
                     displayName = "<html><font color='FF0000'>" + XMLUtil.toElementContent(configuration.getDisplayName());
                 } catch (CharConversionException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
 
@@ -354,7 +353,7 @@ public class BuildPanel extends javax.swing.JPanel implements StorableSettingsPr
                     try {
                         displayName = "<html><font color='FF0000'>" + XMLUtil.toElementContent(configuration.getDisplayName());
                     } catch (CharConversionException e) {
-                        ErrorManager.getDefault().notify(e);
+                        Exceptions.printStackTrace(e);
                     }
                 }
             }

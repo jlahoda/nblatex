@@ -56,12 +56,9 @@ import org.netbeans.napi.gsfret.source.CompilationController;
 import org.netbeans.napi.gsfret.source.Phase;
 import org.netbeans.napi.gsfret.source.Source;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
-import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.command.BlockNode;
 import org.netbeans.modules.latex.model.command.CommandPackage;
-import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
-import org.openide.ErrorManager;
 import org.openide.text.NbDocument;
 import org.openide.util.Exceptions;
 
@@ -149,7 +146,7 @@ public abstract class ToolbarEnvironmentAction extends AbstractAction {
                             doc.insertString(dot - removeLen, "\\begin{" + wantedType.getEnvironment() + "}" + selection + "\\end{" + wantedType.getEnvironment() + "}", null);
                         }
                     } catch (BadLocationException e) {
-                        ErrorManager.getDefault().notify(e);
+                        Exceptions.printStackTrace(e);
                         return ;
                     }
                 }
@@ -157,7 +154,7 @@ public abstract class ToolbarEnvironmentAction extends AbstractAction {
         } catch (IOException e) {
             Exceptions.printStackTrace(e);
         } catch (BadLocationException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
             return ;
         }
         

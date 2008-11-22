@@ -48,7 +48,6 @@ import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.swing.ImageIcon;
-import javax.swing.ImageIcon;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
@@ -59,7 +58,6 @@ import org.netbeans.api.editor.completion.Completion;
 import org.netbeans.modules.latex.editor.completion.latex.TexCompletionJavaDoc;
 import org.netbeans.modules.latex.model.IconsStorage;
 import org.netbeans.modules.latex.model.IconsStorage.ChangeableIcon;
-import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.bibtex.PublicationEntry;
 import org.netbeans.modules.latex.model.command.Command;
 import org.netbeans.modules.latex.model.command.Environment;
@@ -67,14 +65,13 @@ import org.netbeans.spi.editor.completion.CompletionItem;
 import org.netbeans.spi.editor.completion.CompletionTask;
 import org.netbeans.spi.editor.completion.support.CompletionUtilities;
 import org.openide.DialogDisplayer;
-import org.openide.ErrorManager;
 import org.openide.NotifyDescriptor;
-import org.openide.cookies.EditorCookie;
 import org.openide.cookies.OpenCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.text.NbDocument;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -110,7 +107,7 @@ public abstract class TexCompletionItem implements CompletionItem {
                     doc.remove(substituteOffset/* - 1*/, component.getCaretPosition() - substituteOffset/* + 1*/);
                     doc.insertString(substituteOffset/* - 1*/, getText(), null);
                 } catch (BadLocationException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
         });
@@ -466,7 +463,7 @@ public abstract class TexCompletionItem implements CompletionItem {
                             doc.remove(getSubstituteOffset() - 1, component.getCaretPosition() - getSubstituteOffset() + 1);
                             doc.insertString(getSubstituteOffset() - 1, relativeFileFinal + "}", null);
                         } catch (BadLocationException e) {
-                            ErrorManager.getDefault().notify(e);
+                            Exceptions.printStackTrace(e);
                         }
                     }
                 });
@@ -476,7 +473,7 @@ public abstract class TexCompletionItem implements CompletionItem {
 
                 ec.open();
             } catch (IOException e) {
-                ErrorManager.getDefault().notify(e);
+                Exceptions.printStackTrace(e);
             }
         }
 

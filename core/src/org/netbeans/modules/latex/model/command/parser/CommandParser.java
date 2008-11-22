@@ -45,13 +45,13 @@ package org.netbeans.modules.latex.model.command.parser;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import javax.swing.text.Document;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.modules.latex.model.ParseError;
 import org.netbeans.modules.latex.model.Utilities;
@@ -79,11 +79,9 @@ import org.netbeans.modules.latex.model.command.impl.NodeImpl;
 import org.netbeans.modules.latex.model.command.impl.ParagraphNodeImpl;
 import org.netbeans.modules.latex.model.command.impl.TextNodeImpl;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileSystem;
-import org.openide.util.Exceptions;
 
 /** LaTeX command parser. Generates tree of commands. The model is in
  *  {@link org.netbeans.modules.latex.model.command}.
@@ -978,7 +976,7 @@ public final class CommandParser {
                     errors.add(createError("Cannot correctly start environment \"" + env.getName() + "\" (internal error).", pos));
                 }
             } catch (IOException e) {
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                Logger.getLogger("global").log(Level.INFO,null, e);
                 errors.add(createError("Cannot correctly start environment \"" + env.getName() + "\" (internal error).", pos));
             }
         }

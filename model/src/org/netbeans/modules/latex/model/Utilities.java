@@ -51,11 +51,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JEditorPane;
 import javax.swing.text.Document;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Source;
 import org.netbeans.modules.latex.model.bibtex.BiBTeXModel;
 import org.netbeans.modules.latex.model.bibtex.Entry;
 import org.netbeans.modules.latex.model.bibtex.PublicationEntry;
@@ -68,9 +67,6 @@ import org.netbeans.modules.latex.model.command.Environment;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.SourcePosition;
 import org.netbeans.modules.latex.model.command.TraverseHandler;
-import org.openide.ErrorManager;
-import org.openide.filesystems.FileObject;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 
 /**General Utilities (usefull mainly when used together with command and
@@ -292,9 +288,9 @@ public abstract class Utilities {
                         try {
                             result.addAll(getDefault().getReferences(file, bibFileName));
                         } catch (IOException e) {
-                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                            Logger.getLogger("global").log(Level.INFO,null, e);
                         } catch (IllegalArgumentException e) {
-                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                            Logger.getLogger("global").log(Level.INFO,null, e);
                         }
                     }
                 }

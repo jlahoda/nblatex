@@ -50,10 +50,10 @@ import java.util.Map;
 import org.netbeans.modules.latex.model.platform.FilePosition;
 import org.netbeans.modules.latex.model.platform.LaTeXPlatform;
 import org.netbeans.modules.latex.model.platform.Viewer;
-import org.openide.ErrorManager;
 import org.openide.execution.NbProcessDescriptor;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 import org.openide.util.MapFormat;
 
 /**
@@ -145,9 +145,9 @@ public class ProcessViewerImpl implements Viewer {
 
             return process.waitFor() == 0;
         } catch (InterruptedException ex) {
-            ErrorManager.getDefault().notify(ex);
+            Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
-            ErrorManager.getDefault().notify(ex);
+            Exceptions.printStackTrace(ex);
             return false;
         }
         
@@ -179,12 +179,12 @@ public class ProcessViewerImpl implements Viewer {
                     out.write(read);
                 }
             } catch (IOException ex) {
-                ErrorManager.getDefault().notify(ex);
+                Exceptions.printStackTrace(ex);
             } finally {
                 try {
                     out.flush();
                 } catch (IOException ex) {
-                    ErrorManager.getDefault().notify(ex);
+                    Exceptions.printStackTrace(ex);
                 }
             }
         }

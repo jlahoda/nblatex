@@ -58,6 +58,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -89,6 +91,7 @@ import org.openide.nodes.Children;
 import org.openide.nodes.FilterNode;
 import org.openide.nodes.Node;
 import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.RequestProcessor;
@@ -351,7 +354,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
                     fileSystemListeners.put(fs, fsl);
                 } catch (FileStateInvalidException e) {
                     ErrorManager err = ErrorManager.getDefault();
-                    err.annotate(e, "Can not get " + fo + " filesystem, ignoring...");  // NO18N
+                    Exceptions.attachLocalizedMessage(e, "Can not get " + fo + " filesystem, ignoring...");  // NO18N
                     err.notify(ErrorManager.INFORMATIONAL, e);
                 }
             }
@@ -366,7 +369,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
                     FileObject fo = files.iterator().next();
                     s = fo.getFileSystem ().getStatus ().annotateName (s, files);
                 } catch (FileStateInvalidException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
 
@@ -391,7 +394,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
                         }
                     }
                 } catch (FileStateInvalidException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
             return getDisplayName();
@@ -406,7 +409,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
                     FileObject fo = files.iterator().next();
                     img = fo.getFileSystem ().getStatus ().annotateIcon (img, type, files);
                 } catch (FileStateInvalidException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
 
@@ -421,7 +424,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
                     FileObject fo = files.iterator().next();
                     img = fo.getFileSystem ().getStatus ().annotateIcon (img, type, files);
                 } catch (FileStateInvalidException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
 
@@ -509,7 +512,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
 
                 return new Node[]{new SourceFileNode(od.getNodeDelegate(), key)};
             } catch (DataObjectNotFoundException e) {
-                ErrorManager.getDefault().notify(e);
+                Exceptions.printStackTrace(e);
                 return new Node[0];
             }
         }

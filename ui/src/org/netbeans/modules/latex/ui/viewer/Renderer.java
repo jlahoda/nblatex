@@ -42,14 +42,13 @@ package org.netbeans.modules.latex.ui.viewer;
 
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.image.FilteredImageSource;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.ImageIcon;
 import org.netbeans.modules.latex.ui.IconsCreator;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -112,9 +111,9 @@ public class Renderer {
             
             return new ImageIcon(img).getImage();
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         } catch (InterruptedException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
 
         return null;

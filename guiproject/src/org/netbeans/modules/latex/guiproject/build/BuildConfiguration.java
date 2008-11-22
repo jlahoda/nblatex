@@ -252,7 +252,7 @@ public final class BuildConfiguration implements Builder {
                 
                 toDelete.delete();
             } catch (IOException e) {
-                ErrorManager.getDefault().notify(e);
+                Exceptions.printStackTrace(e);
             }
         }
         
@@ -298,9 +298,9 @@ public final class BuildConfiguration implements Builder {
             }
             return result;
         } catch (InterruptedException ex) {
-            ErrorManager.getDefault().notify(ex);
+            Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
-            ErrorManager.getDefault().notify(ex);
+            Exceptions.printStackTrace(ex);
             return false;
         }
         

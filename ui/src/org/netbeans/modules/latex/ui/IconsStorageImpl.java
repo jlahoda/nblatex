@@ -62,6 +62,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.MissingResourceException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.Icon;
@@ -71,8 +73,8 @@ import org.netbeans.modules.latex.model.IconsStorage;
 import org.netbeans.modules.latex.model.IconsStorage.ChangeableIcon;
 import org.netbeans.modules.latex.model.Queue;
 
-import org.openide.ErrorManager;
 import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 import org.openide.util.Utilities;
@@ -179,7 +181,7 @@ public final class IconsStorageImpl extends IconsStorage {
         if (m.find()) {
             cathegory = m.group(1);
         } else {
-            ErrorManager.getDefault().log(ErrorManager.INFORMATIONAL, "latex.IconsStorageImpl: default cathegory for \"" + iconDescription + "\"");
+            Logger.getLogger("global").log(Level.FINE, "latex.IconsStorageImpl: default cathegory for \"" + iconDescription + "\"");
         }
         
         List<String> names = cathegory2Names.get(cathegory);
@@ -219,7 +221,7 @@ public final class IconsStorageImpl extends IconsStorage {
             
             return icons.toArray(new String[0]);
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
             return new String[0];
         }
     }
@@ -228,7 +230,7 @@ public final class IconsStorageImpl extends IconsStorage {
         try {
             return NbBundle.getBundle(IconsStorageImpl.class).getString("CATLBL_" + catName);
         } catch (MissingResourceException e) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+            Logger.getLogger("global").log(Level.INFO,null, e);
             return catName;
         }
     }
@@ -248,7 +250,7 @@ public final class IconsStorageImpl extends IconsStorage {
                         try {
                             iconsToCreate.wait();
                         } catch (InterruptedException e) {
-                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                            Logger.getLogger("global").log(Level.INFO,null, e);
                         }
                     }
                     
@@ -315,7 +317,7 @@ public final class IconsStorageImpl extends IconsStorage {
                 i = new ImageIcon(Toolkit.getDefaultToolkit().createImage(new FilteredImageSource(img.getSource(), new MakeTransparentImage())));
             }
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
             i = null;
         }
         
@@ -422,7 +424,7 @@ public final class IconsStorageImpl extends IconsStorage {
             configurationChanged();
             return true;
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+            Logger.getLogger("global").log(Level.INFO,null, e);
             return false;
         }
     }

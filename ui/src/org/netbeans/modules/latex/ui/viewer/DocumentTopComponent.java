@@ -59,6 +59,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
@@ -73,7 +75,6 @@ import javax.swing.SwingUtilities;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.latex.model.platform.FilePosition;
-import org.openide.ErrorManager;
 import org.openide.cookies.LineCookie;
 import org.openide.filesystems.FileChangeAdapter;
 import org.openide.filesystems.FileChangeListener;
@@ -82,6 +83,7 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.text.Line;
+import org.openide.util.Exceptions;
 import org.openide.util.NbPreferences;
 import org.openide.util.RequestProcessor;
 import org.openide.util.Utilities;
@@ -299,7 +301,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
             File dviFile = FileUtil.toFile(dvi);
             desc = new DVIParser().parse(dviFile);
         } catch (IOException ex) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, ex);
+            Logger.getLogger("global").log(Level.INFO,null, ex);
             desc = Collections.emptyList();
         }
         
@@ -510,7 +512,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
                 
                 lc.getLineSet().getCurrent(e.getLine() - 1).show(Line.SHOW_GOTO);
             } catch (IOException ex) {
-                ErrorManager.getDefault().notify(ex);
+                Exceptions.printStackTrace(ex);
             }
         }
 

@@ -44,13 +44,15 @@ package org.netbeans.modules.latex.guiproject;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.project.ProjectManager;
 import org.netbeans.spi.project.AuxiliaryConfiguration;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileSystem;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 import org.openide.util.Mutex;
 import org.openide.util.UserQuestionException;
 import org.openide.xml.XMLUtil;
@@ -136,11 +138,11 @@ public class LaTeXAuxiliaryConfigurationImpl implements AuxiliaryConfiguration {
             return XMLUtil.parse(new InputSource(f.toURI().toString()), false, true, null, null);
         } catch (IOException e) {
             if (!QUIETLY_SWALLOW_XML_LOAD_ERRORS) {
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                Logger.getLogger("global").log(Level.INFO,null, e);
             }
         } catch (SAXException e) {
             if (!QUIETLY_SWALLOW_XML_LOAD_ERRORS) {
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                Logger.getLogger("global").log(Level.INFO,null, e);
             }
         }
         return null;
@@ -185,7 +187,7 @@ public class LaTeXAuxiliaryConfigurationImpl implements AuxiliaryConfiguration {
                                     body.run();
                                 } catch (IOException e) {
                                     // Oh well.
-                                    ErrorManager.getDefault().notify(e);
+                                    Exceptions.printStackTrace(e);
                                     reload();
                                 }
                             }
@@ -193,7 +195,7 @@ public class LaTeXAuxiliaryConfigurationImpl implements AuxiliaryConfiguration {
                                 reload();
                             }
                             public void error(IOException e) {
-                                ErrorManager.getDefault().notify(e);
+                                Exceptions.printStackTrace(e);
                                 reload();
                             }
                             private void reload() {
@@ -203,7 +205,7 @@ public class LaTeXAuxiliaryConfigurationImpl implements AuxiliaryConfiguration {
                 }
             });
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         } finally {
             writingXML = false;
         }

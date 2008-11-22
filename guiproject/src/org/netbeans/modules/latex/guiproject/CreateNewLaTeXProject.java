@@ -46,7 +46,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileLock;
 
 import org.openide.filesystems.FileObject;
@@ -55,6 +54,7 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 
 import org.openide.filesystems.Repository;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -164,7 +164,7 @@ public class CreateNewLaTeXProject {
                 try {
                     out.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
             
@@ -172,7 +172,7 @@ public class CreateNewLaTeXProject {
                 try {
                     ins.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
         }

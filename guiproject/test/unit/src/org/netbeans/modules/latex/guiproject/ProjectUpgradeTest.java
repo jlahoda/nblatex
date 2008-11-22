@@ -53,6 +53,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Iterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 //import org.apache.tools.ant.module.loader.AntProjectDataLoader;
@@ -60,11 +62,9 @@ import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
 import org.netbeans.junit.NbTestCase;
 import org.netbeans.modules.latex.UnitUtilities;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.loaders.DataLoaderPool;
-import org.openide.util.SharedClassObject;
+import org.openide.util.Exceptions;
 import org.openide.xml.XMLUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -167,7 +167,7 @@ public class ProjectUpgradeTest extends NbTestCase {
                 try {
                     golden.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
             
@@ -175,7 +175,7 @@ public class ProjectUpgradeTest extends NbTestCase {
                 try {
                     file.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
         }
@@ -254,7 +254,7 @@ public class ProjectUpgradeTest extends NbTestCase {
                 try {
                     golden.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
             
@@ -262,7 +262,7 @@ public class ProjectUpgradeTest extends NbTestCase {
                 try {
                     file.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
         }
@@ -371,7 +371,7 @@ public class ProjectUpgradeTest extends NbTestCase {
                 try {
                     in.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
             
@@ -379,7 +379,7 @@ public class ProjectUpgradeTest extends NbTestCase {
                 try {
                     out.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
         }
@@ -409,7 +409,7 @@ public class ProjectUpgradeTest extends NbTestCase {
                     r.close();
                     files = null;
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
             
@@ -417,7 +417,7 @@ public class ProjectUpgradeTest extends NbTestCase {
                 try {
                     files.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
         }
@@ -434,7 +434,7 @@ public class ProjectUpgradeTest extends NbTestCase {
             
             if (propertiesFile == null) {
                 //strange...
-                ErrorManager.getDefault().log(ErrorManager.INFORMATIONAL, "During checking for upgrade of project data, properties file not found!");
+                Logger.getLogger("global").log(Level.FINE, "During checking for upgrade of project data, properties file not found!");
                 return ;
             }
             
@@ -456,7 +456,7 @@ public class ProjectUpgradeTest extends NbTestCase {
                 try {
                     out.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
             
@@ -464,7 +464,7 @@ public class ProjectUpgradeTest extends NbTestCase {
                 try {
                     ins.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 }
             }
         }

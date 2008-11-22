@@ -51,6 +51,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
@@ -64,7 +66,6 @@ import javax.swing.event.PopupMenuListener;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.ui.ToolbarEnvironmentAction.EnvironmentDescription;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.Presenter;
@@ -195,21 +196,21 @@ public class StructureToolbarAction extends    ToolbarCommandAction
         String type = (String) fo.getAttribute("type");
         
         if (type == null) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, new IllegalArgumentException("StructureToolbarAction: type not defined: " + fo));
+            Logger.getLogger("global").log(Level.INFO,null, new IllegalArgumentException("StructureToolbarAction: type not defined: " + fo));
             return null;
         }
             
         List<?> descriptions = getType2Descriptions().get(type);
         
         if (descriptions == null) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, new IllegalArgumentException("StructureToolbarAction: type not known: " + type + ", file=" + fo));
+            Logger.getLogger("global").log(Level.INFO,null, new IllegalArgumentException("StructureToolbarAction: type not known: " + type + ", file=" + fo));
             return null;
         }
         
         String name = (String) fo.getAttribute("name");
 
         if (type == null) {
-            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, new IllegalArgumentException("StructureToolbarAction: name not defined: " + fo));
+            Logger.getLogger("global").log(Level.INFO,null, new IllegalArgumentException("StructureToolbarAction: name not defined: " + fo));
             return null;
         }
 

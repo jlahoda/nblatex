@@ -52,7 +52,9 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
-import org.openide.ErrorManager;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 
 
 /**module private class
@@ -125,13 +127,13 @@ public final class IconsCreator {
                         System.err.print((char) read);
                     }
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 } finally {
                     if (is != null) {
                         try {
                             is.close();
                         } catch (IOException e) {
-                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                            Logger.getLogger("global").log(Level.INFO,null, e);
                         }
                     }
                 }
@@ -151,13 +153,13 @@ public final class IconsCreator {
                         System.err.print((char) read);
                     }
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                    Logger.getLogger("global").log(Level.INFO,null, e);
                 } finally {
                     if (is != null) {
                         try {
                             is.close();
                         } catch (IOException e) {
-                            ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                            Logger.getLogger("global").log(Level.INFO,null, e);
                         }
                     }
                 }
@@ -335,9 +337,9 @@ public final class IconsCreator {
                 createIcon(command, "16x16", iconDir);
             }
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         } catch (InterruptedException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
     }
     
@@ -350,9 +352,9 @@ public final class IconsCreator {
 
             createPNG(ps, png, null);
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         } catch (InterruptedException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
     }
     

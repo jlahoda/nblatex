@@ -56,7 +56,6 @@ import org.netbeans.modules.latex.guiproject.LaTeXGUIProject;
 import org.netbeans.modules.latex.guiproject.build.RunTypes;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileAttributeEvent;
 import org.openide.filesystems.FileChangeListener;
 import org.openide.filesystems.FileEvent;
@@ -64,6 +63,7 @@ import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileRenameEvent;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 
 
 /**
@@ -147,13 +147,13 @@ public class ProjectSettings implements FileChangeListener {
             loadFrom(ins);
             modified = false;
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         } finally {
             if (ins != null) {
                 try {
                     ins.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
         }
@@ -208,20 +208,20 @@ public class ProjectSettings implements FileChangeListener {
             
             modified = false;
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         } finally {
             if (ins != null) {
                 try {
                     ins.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
             if (outs != null) {
                 try {
                     outs.close();
                 } catch (IOException e) {
-                    ErrorManager.getDefault().notify(e);
+                    Exceptions.printStackTrace(e);
                 }
             }
             

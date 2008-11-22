@@ -45,12 +45,12 @@ package org.netbeans.modules.latex.model.structural;
 
 import java.io.IOException;
 import org.netbeans.modules.latex.model.command.SourcePosition;
-import org.openide.ErrorManager;
 import org.openide.cookies.LineCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.text.Line;
+import org.openide.util.Exceptions;
 import org.openide.util.HelpCtx;
 import org.openide.util.actions.NodeAction;
 
@@ -88,7 +88,7 @@ public class GoToSourceAction extends NodeAction {
             
             lc.getLineSet().getCurrent(line).show(Line.SHOW_GOTO);
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
         }
     }
     

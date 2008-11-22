@@ -52,13 +52,15 @@ import java.lang.ref.WeakReference;
 import java.util.Properties;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.text.Document;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.netbeans.spi.editor.completion.support.AsyncCompletionQuery;
 import org.netbeans.spi.editor.completion.support.AsyncCompletionTask;
-import org.openide.ErrorManager;
 
 import org.openide.modules.InstalledFileLocator;
+import org.openide.util.Exceptions;
 import org.openide.util.RequestProcessor;
 import org.netbeans.spi.editor.completion.CompletionTask;
 import org.openide.util.NbBundle;
@@ -130,7 +132,7 @@ public class TexCompletionJavaDoc {
         try {
             return getJarFile() != null;
         } catch (IOException e) {
-            ErrorManager.getDefault().notify(e);
+            Exceptions.printStackTrace(e);
             
             return false;
         }
@@ -217,7 +219,7 @@ public class TexCompletionJavaDoc {
             try {
                 resultSet.setDocumentation(new TexCompletionDocumentation(readItemHelp(name)));
             } catch (IOException e) {
-                ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                Logger.getLogger("global").log(Level.INFO,null, e);
             }
             resultSet.finish();
         }

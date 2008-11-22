@@ -42,25 +42,16 @@ package org.netbeans.modules.latex.guiproject.build;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.IOException;
-import java.io.Writer;
-import java.util.Stack;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import org.openide.ErrorManager;
 import org.openide.cookies.LineCookie;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.text.Annotatable;
 import org.openide.text.Annotation;
 import org.openide.text.Line;
-import org.openide.util.Utilities;
+import org.openide.util.Exceptions;
 import org.openide.windows.OutputEvent;
 import org.openide.windows.OutputListener;
-import org.openide.windows.OutputWriter;
 
 public final class OutputListenerImpl implements OutputListener {
     
@@ -89,7 +80,7 @@ public final class OutputListenerImpl implements OutputListener {
                 }
             }
         }  catch (DataObjectNotFoundException ex) {
-            ErrorManager.getDefault().notify(ex);
+            Exceptions.printStackTrace(ex);
         }
     }
     
@@ -108,7 +99,7 @@ public final class OutputListenerImpl implements OutputListener {
                 }
             }
         }  catch (DataObjectNotFoundException ex) {
-            ErrorManager.getDefault().notify(ex);
+            Exceptions.printStackTrace(ex);
         }
     }
     

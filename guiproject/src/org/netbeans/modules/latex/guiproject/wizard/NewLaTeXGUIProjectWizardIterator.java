@@ -51,12 +51,13 @@ import java.io.OutputStream;
 import java.util.HashSet;
 import java.util.Set;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 
 import org.netbeans.api.project.ProjectManager;
 
 import org.netbeans.modules.latex.guiproject.CreateNewLaTeXProject;
-import org.openide.ErrorManager;
 
 import org.openide.WizardDescriptor;
 import org.openide.WizardDescriptor.Panel;
@@ -138,7 +139,7 @@ public class NewLaTeXGUIProjectWizardIterator implements org.openide.WizardDescr
                     try {
                         ins.close();
                     } catch (IOException e) {
-                        ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                        Logger.getLogger("global").log(Level.INFO,null, e);
                     }
                 }
                 
@@ -146,7 +147,7 @@ public class NewLaTeXGUIProjectWizardIterator implements org.openide.WizardDescr
                     try {
                         outs.close();
                     } catch (IOException e) {
-                        ErrorManager.getDefault().notify(ErrorManager.INFORMATIONAL, e);
+                        Logger.getLogger("global").log(Level.INFO,null, e);
                     }
                 }
             }

@@ -61,7 +61,6 @@ import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.editor.bibtex.BiBTeXLanguage;
 import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.impl.NBUtilities;
-import org.openide.ErrorManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileSystem;
 import org.openide.filesystems.FileUtil;
@@ -234,7 +233,7 @@ public class UnitUtilities extends ProxyLookup {
                     try {
                         fis.close();
                     } catch (IOException e) {
-                        ErrorManager.getDefault().notify(e);
+                        Exceptions.printStackTrace(e);
                     }
                 }
             }
