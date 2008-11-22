@@ -41,6 +41,8 @@
 
 package org.netbeans.modules.latex.hints;
 
+import org.netbeans.modules.latex.editor.LaTeXSettings;
+
 /**
  *
  * @author Jan Lahoda
@@ -169,6 +171,7 @@ public class CiteFormatHintTest extends HintsTestBase {
 
     @Override
     protected HintProvider createProvider() {
+        LaTeXSettings.setCiteFormatHintEnabled(true);
         return new CiteFormatHint();
     }
 
