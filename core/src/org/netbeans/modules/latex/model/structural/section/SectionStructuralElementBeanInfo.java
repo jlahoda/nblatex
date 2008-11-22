@@ -63,7 +63,7 @@ public class SectionStructuralElementBeanInfo extends SimpleBeanInfo {
     // Property identifiers //GEN-FIRST:Properties
     private static final int PROPERTY_helpCtx = 0;
     private static final int PROPERTY_name = 1;
-    private static final int PROPERTY_node = 2;
+    private static final int PROPERTY_startingPosition = 2;
     private static final int PROPERTY_priority = 3;
     private static final int PROPERTY_subElements = 4;
     private static final int PROPERTY_type = 5;
@@ -77,8 +77,8 @@ public class SectionStructuralElementBeanInfo extends SimpleBeanInfo {
             properties[PROPERTY_helpCtx] = new PropertyDescriptor ( "helpCtx", SectionStructuralElement.class, "getHelpCtx", null );
             properties[PROPERTY_helpCtx].setHidden ( true );
             properties[PROPERTY_name] = new PropertyDescriptor ( "name", SectionStructuralElement.class, "getName", null );
-            properties[PROPERTY_node] = new PropertyDescriptor ( "node", SectionStructuralElement.class, "getNode", null );
-            properties[PROPERTY_node].setHidden ( true );
+            properties[PROPERTY_startingPosition] = new PropertyDescriptor ( "startingPosition", SectionStructuralElement.class, "getStartingPosition", null );
+            properties[PROPERTY_startingPosition].setHidden ( true );
             properties[PROPERTY_priority] = new PropertyDescriptor ( "priority", SectionStructuralElement.class, "getPriority", null );
             properties[PROPERTY_priority].setHidden ( true );
             properties[PROPERTY_subElements] = new PropertyDescriptor ( "subElements", SectionStructuralElement.class, "getSubElements", null );
