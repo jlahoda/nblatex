@@ -214,6 +214,7 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
         }
         allowHardWrap.setSelected(LaTeXSettings.isHardWrapAllowed());
         allowBracketCompletion.setSelected(LaTeXSettings.isBracketCompletionAllowed());
+        allowCiteFormatHint.setSelected(LaTeXSettings.isCiteFormatHintEnabled());
     }
     
     public void commit() {
@@ -236,6 +237,7 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
         
         LaTeXSettings.setHardWrapAllowed(allowHardWrap.isSelected());
         LaTeXSettings.setBracketCompletionAllowed(allowBracketCompletion.isSelected());
+        LaTeXSettings.setCiteFormatHintEnabled(allowCiteFormatHint.isSelected());
     }
     
     /** This method is called from within the constructor to
@@ -253,6 +255,7 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
         jPanel2 = new javax.swing.JPanel();
         allowHardWrap = new javax.swing.JCheckBox();
         allowBracketCompletion = new javax.swing.JCheckBox();
+        allowCiteFormatHint = new javax.swing.JCheckBox();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Commands", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP));
         jPanel1.setOpaque(false);
@@ -265,13 +268,13 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .add(jPanel3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 814, Short.MAX_VALUE)
+                .add(jPanel3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 857, Short.MAX_VALUE)
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(org.jdesktop.layout.GroupLayout.TRAILING, jPanel1Layout.createSequentialGroup()
-                .add(jPanel3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 276, Short.MAX_VALUE)
+                .add(jPanel3, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -291,14 +294,14 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
             .add(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .add(jButton1)
-                .addContainerGap(696, Short.MAX_VALUE))
+                .addContainerGap(725, Short.MAX_VALUE))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
             .add(jPanel4Layout.createSequentialGroup()
                 .addContainerGap()
                 .add(jButton1)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(13, Short.MAX_VALUE))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Editor Options"));
@@ -306,6 +309,8 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
         org.openide.awt.Mnemonics.setLocalizedText(allowHardWrap, "Allow Hard Wrap");
 
         org.openide.awt.Mnemonics.setLocalizedText(allowBracketCompletion, "Allow Bracket Completion");
+
+        org.openide.awt.Mnemonics.setLocalizedText(allowCiteFormatHint, "Allow Cite Format Hint");
 
         org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -316,7 +321,9 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
                 .add(allowHardWrap)
                 .add(18, 18, 18)
                 .add(allowBracketCompletion)
-                .addContainerGap(538, Short.MAX_VALUE))
+                .add(18, 18, 18)
+                .add(allowCiteFormatHint)
+                .addContainerGap(352, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -324,7 +331,8 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(allowHardWrap)
-                    .add(allowBracketCompletion))
+                    .add(allowBracketCompletion)
+                    .add(allowCiteFormatHint))
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -368,6 +376,7 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox allowBracketCompletion;
+    private javax.swing.JCheckBox allowCiteFormatHint;
     private javax.swing.JCheckBox allowHardWrap;
     private javax.swing.JButton jButton1;
     private javax.swing.JPanel jPanel1;

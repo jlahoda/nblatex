@@ -173,6 +173,7 @@ public class HintsProcessor implements CancellableTask<CompilationInfo> {
         
         providers.add(new CheckCountersHint());
         providers.add(new UnknownCiteHint());
+        providers.add(new CiteFormatHint());
         providers.add(new UnbalancedBrackets());
     }
         

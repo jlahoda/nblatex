@@ -50,6 +50,7 @@ public final class LaTeXSettings {
 
     private static final String HARD_WRAP_ALLOWED = "hardWrapAllowed";
     private static final String BRACKET_COMPLETION_ALLOWED = "bracketCompletionAllowed";
+    private static final String CITE_FORMAT_HINT_ENABLED = "citeFormatHintEnabled";
     
     public static boolean isHardWrapAllowed() {
         return NbPreferences.forModule(LaTeXSettings.class).getBoolean(HARD_WRAP_ALLOWED, true);
@@ -67,4 +68,12 @@ public final class LaTeXSettings {
         NbPreferences.forModule(LaTeXSettings.class).putBoolean(BRACKET_COMPLETION_ALLOWED, value);
     }
     
+    public static boolean isCiteFormatHintEnabled() {
+        return NbPreferences.forModule(LaTeXSettings.class).getBoolean(CITE_FORMAT_HINT_ENABLED, false);
+    }
+
+    public static void setCiteFormatHintEnabled(boolean value) {
+        NbPreferences.forModule(LaTeXSettings.class).putBoolean(CITE_FORMAT_HINT_ENABLED, value);
+    }
+
 }
