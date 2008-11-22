@@ -228,11 +228,7 @@ public class NewDocumentWizardIterator implements TemplateWizard.Iterator {
                 ec.saveDocument();
                 ec.open();
             } catch (BadLocationException e) {
-                IOException newE = new IOException();
-                
-                ErrorManager.getDefault().annotate(newE, e);
-                
-                throw newE;
+                throw (IOException) new IOException().initCause(e);
             }
         }
         
