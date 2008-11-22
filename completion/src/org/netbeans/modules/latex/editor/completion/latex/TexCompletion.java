@@ -467,7 +467,7 @@ public class TexCompletion implements CompletionProvider {
     }
     
     
-    private static void getSpecialCommandArguments(CompletionResultSet set, LaTeXParserResult lpr, Document doc, int offset, int start) throws BadLocationException {
+    private static void getSpecialCommandArguments(CompletionResultSet set, LaTeXParserResult lpr, Document doc, int offset) throws BadLocationException {
         ArgumentNode argument = lookupArgument(lpr, doc, offset);
         
         if (argument != null) {
@@ -476,17 +476,11 @@ public class TexCompletion implements CompletionProvider {
             if (!(container instanceof CommandNode))
                 return;
             
-            CommandNode cnode = (CommandNode) container;
-            String commandString = cnode.getCommand().getCommand();
             int    prefixLength = offset - argument.getStartingPosition().getOffsetValue();
             CharSequence argumentContent = argument.getText(); //jl: to be honest, I do not understand the stuff about argumentContent. getText returns only plain text, not commands!
             
             if (prefixLength < 0)
                 return ;
-
-            if (prefixLength == 1 && isArgumentCurlyBracket(argument)) {
-                start++;
-            }
 
             String ccPrefix = argumentContent.length() >= (prefixLength - 1) && prefixLength > 0 ? argumentContent.subSequence(0, prefixLength - 1).toString() : "";
             
@@ -496,6 +490,8 @@ public class TexCompletion implements CompletionProvider {
                 for (int atr_cntr = 0; atr_cntr < attributes.length; atr_cntr++) {
                     if (argument.getArgument().hasAttribute(attributes[atr_cntr])) {
                         ccPrefix = handlers[cntr].preprocessPrefix(lpr, argument, ccPrefix);
+
+                        int start = offset - ccPrefix.length();
                         
                         handlers[cntr].getCompletionResult(set, lpr, argument, ccPrefix, start);
                     }
@@ -503,7 +499,12 @@ public class TexCompletion implements CompletionProvider {
             }
             
             Command.Param param = argument.getArgument();
-            
+            int start = offset - prefixLength;
+
+            if (isArgumentCurlyBracket(argument)) {
+                start++;
+            }
+
             for (Iterator i = param.getValues().iterator(); i.hasNext(); ) {
                 String name = (String) i.next();
                 
@@ -567,7 +568,7 @@ public class TexCompletion implements CompletionProvider {
                         }
                         
                         if (isArgument(lpr, doc, caretOffset)) {
-                            getSpecialCommandArguments(resultSet, lpr, doc, caretOffset, start);
+                            getSpecialCommandArguments(resultSet, lpr, doc, caretOffset);
                         }
                     }
                 }, true);

@@ -146,47 +146,47 @@ public class TexCompletionTest extends NbTestCase {
     public void testrefargsorted() throws Exception {
         test("\\ref{}", "completion/CommandCompletionTest.tex", 5, 5);
     }
-    
+
     public void testcite1sorted() throws Exception {
         test("", "completion/CiteTest1.tex", 6, 12);
     }
-    
+
     public void testcite2sorted() throws Exception {
         test("", "completion/CiteTest2.tex", 9, 6);
     }
-    
+
     public void testcite3sorted() throws Exception {
         test("", "completion/CiteTest3.tex", 6, 12);
     }
-    
+
     public void testcite4sorted() throws Exception {
         test("", "completion/CiteTest4.tex", 5, 10);
     }
-    
+
     public void testnewenvreftestsorted() throws Exception {
         test("", "completion/NewEnvRefTest.tex", 11, 7);
     }
-    
+
     public void testnewenvreftest2sorted() throws Exception {
         test("", "completion/NewEnvRefTest2.tex", 9, 15);
     }
-    
+
     public void testnewcmdreftestsorted() throws Exception {
         test("", "completion/NewCmdRefTest.tex", 7, 10);
     }
-    
+
     public void testnotfulltest1sorted() throws Exception {
         test("", "completion/NotFullTest1.tex", 5, 4);
     }
-    
+
     public void testnotfulltest2sorted() throws Exception {
         test("", "completion/NotFullTest2.tex", 3, 4);
     }
-    
+
     public void testmultiplepackages1sorted() throws Exception {
         test("", "completion/MultiplePackagesTest1.tex", 3, 26);
     }
-//    
+//
 //    public void testmultiplebibliographies1sorted() throws Exception {
 //        test("", "completion/MultipleBibliographies1.tex", 6, 12);
 //    }
@@ -206,7 +206,7 @@ public class TexCompletionTest extends NbTestCase {
     public void testEndTest3a() throws Exception {
         test("", "completion/EndTest1.tex", 7, 3, 0);
     }
-    
+
     public void testNotFullTest3a() throws Exception {
         test("", "completion/NotFullTest3a.tex", 4, 7, 0);
     }
@@ -218,23 +218,35 @@ public class TexCompletionTest extends NbTestCase {
     public void testIncompleteEnvName() throws Exception {
         test("", "completion/IncompleteEnvName.tex", 5, 9);
     }
-    
+
     public void testCommandCommitTest() throws Exception {
         test("\\newcomma", "completion/CommandCommitTest.tex", 4, 9, 0);
     }
-    
+
     public void testRefArgCorrectly() throws Exception {
         test("", "completion/RefArgCorrectlyReplaced.tex", 6, 5, 0);
     }
-    
+
     public void testCountersTest1() throws Exception {
         test("", "completion/CountersTest.tex", 7, 8);
     }
-    
+
     public void testCountersTest2() throws Exception {
         test("", "completion/CountersTest.tex", 8, 10);
     }
     
+    public void testRefArgCorrectlyReplaced2() throws Exception {
+        test("", "completion/RefArgCorrectlyReplaced2.tex", 6, 8, 0);
+    }
+
+    public void testCiteWrite() throws Exception {
+        test("", "completion/CiteTest5a.tex", 5, 8, 0);
+    }
+
+    public void testMultipleCites() throws Exception {
+        test("", "completion/CiteTest5b.tex", 5, 12, 1);
+    }
+
     private List<? extends CompletionItem> getItems(JEditorPane editor) throws Exception {
         CompletionProvider provider = new TexCompletion();
         
