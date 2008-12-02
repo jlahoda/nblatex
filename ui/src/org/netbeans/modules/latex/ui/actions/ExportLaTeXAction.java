@@ -86,7 +86,7 @@ public class ExportLaTeXAction extends CookieAction {
     }
 
     protected final void performAction(Node[] activatedNodes) {
-        EditorCookie ec = (EditorCookie) activatedNodes[0].getCookie (EditorCookie.class);
+        EditorCookie ec = (EditorCookie) activatedNodes[0].getLookup().lookup (EditorCookie.class);
         StyledDocument doc = ec.getDocument();
         if (doc instanceof BaseDocument) {
             BaseDocument bdoc = (BaseDocument) doc;

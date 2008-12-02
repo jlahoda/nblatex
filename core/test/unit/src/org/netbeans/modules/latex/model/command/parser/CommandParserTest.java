@@ -236,7 +236,7 @@ public class CommandParserTest extends NbTestCase {
                 LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
                 
                 DataObject od = DataObject.find(testFileObject);
-                EditorCookie ec = (EditorCookie) od.getCookie(EditorCookie.class);
+                EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
             
                 int offset = NbDocument.findLineOffset(doc, 8) + 3;
@@ -271,7 +271,7 @@ public class CommandParserTest extends NbTestCase {
                 
                 LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
                 DataObject od = DataObject.find(testFileObject);
-                EditorCookie ec = (EditorCookie) od.getCookie(EditorCookie.class);
+                EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
 
                 int offset = NbDocument.findLineOffset(doc, 7) + 3;
@@ -318,7 +318,7 @@ public class CommandParserTest extends NbTestCase {
                 
                 LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
                 DataObject od = DataObject.find(testFileObject);
-                EditorCookie ec = (EditorCookie) od.getCookie(EditorCookie.class);
+                EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
 
                 Node node = lpr.getCommandUtilities().findNode(doc, 45);
@@ -344,7 +344,7 @@ public class CommandParserTest extends NbTestCase {
                 
                 LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
                 DataObject od = DataObject.find(testFileObject);
-                EditorCookie ec = (EditorCookie) od.getCookie(EditorCookie.class);
+                EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
 
                 Node node = lpr.getCommandUtilities().findNode(doc, 27);
@@ -370,7 +370,7 @@ public class CommandParserTest extends NbTestCase {
                 
                 LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
                 DataObject od = DataObject.find(testFileObject);
-                EditorCookie ec = (EditorCookie) od.getCookie(EditorCookie.class);
+                EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
 
                 Node node = lpr.getCommandUtilities().findNode(doc, 46);
@@ -396,7 +396,7 @@ public class CommandParserTest extends NbTestCase {
                 
                 LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
                 DataObject od = DataObject.find(testFileObject);
-                EditorCookie ec = (EditorCookie) od.getCookie(EditorCookie.class);
+                EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
 
                 lpr.getCommandUtilities().findNode(doc, 106);

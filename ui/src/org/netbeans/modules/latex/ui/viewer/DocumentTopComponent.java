@@ -509,7 +509,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         private void open(FilePosition e) {
             try {
                 DataObject d = DataObject.find(e.getFile());
-                LineCookie lc = (LineCookie) d.getCookie(LineCookie.class);
+                LineCookie lc = (LineCookie) d.getLookup().lookup(LineCookie.class);
                 
                 lc.getLineSet().getCurrent(e.getLine() - 1).show(ShowOpenType.OPEN, ShowVisibilityType.FOCUS);
             } catch (IOException ex) {

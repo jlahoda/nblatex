@@ -83,7 +83,7 @@ public class GoToFileAction extends CallableSystemAction {
             try {
                 DataObject od = DataObject.find(panel.getSelectedFile());
                 
-                ((OpenCookie) od.getCookie(OpenCookie.class)).open();
+                ((OpenCookie) od.getLookup().lookup(OpenCookie.class)).open();
             } catch (IOException e) {
                 Exceptions.printStackTrace(e);
             }

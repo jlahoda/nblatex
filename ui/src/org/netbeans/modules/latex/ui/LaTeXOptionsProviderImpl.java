@@ -175,7 +175,7 @@ public final class LaTeXOptionsProviderImpl extends OptionProcessor {
             
             FileObject fo = FileUtil.toFileObject(toOpen);
             DataObject od = DataObject.find(fo);
-            LineCookie lc = (LineCookie) od.getCookie(LineCookie.class);
+            LineCookie lc = (LineCookie) od.getLookup().lookup(LineCookie.class);
             final Line line = lc.getLineSet().getCurrent(lineNumber);
             
             SwingUtilities.invokeLater(new Runnable() {

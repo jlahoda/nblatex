@@ -469,7 +469,7 @@ public abstract class TexCompletionItem implements CompletionItem {
                 });
 
                 DataObject toOpen = DataObject.find(nueFile);
-                OpenCookie ec = (OpenCookie) toOpen.getCookie(OpenCookie.class);
+                OpenCookie ec = (OpenCookie) toOpen.getLookup().lookup(OpenCookie.class);
 
                 ec.open();
             } catch (IOException e) {

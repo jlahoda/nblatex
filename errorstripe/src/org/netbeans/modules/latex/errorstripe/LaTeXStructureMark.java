@@ -79,7 +79,7 @@ public class LaTeXStructureMark implements Mark {
 
     public int[] getAssignedLines() {
         Node n = StructuralNodeFactory.createNode(element);
-        PositionCookie pc = (PositionCookie) n.getCookie(PositionCookie.class);
+        PositionCookie pc = (PositionCookie) n.getLookup().lookup(PositionCookie.class);
         SourcePosition position = pc.getPosition();
         int line = position.getLine();
         

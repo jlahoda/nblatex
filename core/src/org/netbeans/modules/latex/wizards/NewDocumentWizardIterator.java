@@ -53,7 +53,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-import org.openide.ErrorManager;
 import org.openide.WizardDescriptor;
 import org.openide.cookies.EditorCookie;
 import org.openide.loaders.DataFolder;
@@ -192,7 +191,7 @@ public class NewDocumentWizardIterator implements TemplateWizard.Iterator {
         
         DataObject instatied = template.createFromTemplate(target, targetName);
         
-        EditorCookie ec = (EditorCookie) instatied.getCookie(EditorCookie.class);
+        EditorCookie ec = (EditorCookie) instatied.getLookup().lookup(EditorCookie.class);
         
         if (ec != null) {
             try {
