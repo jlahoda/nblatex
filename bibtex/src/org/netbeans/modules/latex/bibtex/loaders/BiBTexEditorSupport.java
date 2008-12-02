@@ -102,7 +102,7 @@ public class BiBTexEditorSupport extends DataEditorSupport implements EditorCook
             return false;
         }
         BiBTexDataObject obj = (BiBTexDataObject)getDataObject();
-        if (obj.getCookie(SaveCookie.class) == null) {
+        if (obj.getLookup().lookup(SaveCookie.class) == null) {
             obj.setModified(true);
             // You must implement this method on the object:
             obj.addSaveCookie(new Save());
