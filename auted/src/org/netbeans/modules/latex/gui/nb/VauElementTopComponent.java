@@ -321,7 +321,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
                 }
             });
             if (!wasModified) {
-                SaveCookie c = (SaveCookie) od.getCookie(SaveCookie.class);
+                SaveCookie c = (SaveCookie) od.getLookup().lookup(SaveCookie.class);
                 
                 if (c != null)
                     c.save();

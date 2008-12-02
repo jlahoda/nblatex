@@ -43,37 +43,20 @@
  */
 package org.netbeans.modules.latex.bibtex.loaders;
 
-import java.awt.event.ActionEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.*;
-import java.lang.reflect.Method;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JEditorPane;
-import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
 import javax.swing.text.EditorKit;
 import javax.swing.text.StyledDocument;
 import org.netbeans.modules.latex.bibtex.OpenBiBComponent;
 
 import org.openide.filesystems.FileLock;
 import org.openide.filesystems.FileObject;
-import org.openide.text.CloneableEditor;
 import org.openide.text.DataEditorSupport;
 import org.openide.text.DataEditorSupport.Env;
 import org.openide.windows.CloneableOpenSupport;
-import org.openide.windows.TopComponent;
 
 
 import org.openide.cookies.*;
-import org.openide.util.Lookup;
-import org.openide.util.actions.CallbackSystemAction;
-import org.openide.util.actions.SystemAction;
-import org.openide.windows.WindowManager;
 
 /** Support for editing a data object as text.
  *
@@ -226,7 +209,7 @@ public class BiBTexEditorSupport extends DataEditorSupport implements EditorCook
          * @return the editor support
          */
         public CloneableOpenSupport findCloneableOpenSupport() {
-            return (BiBTexEditorSupport)getDataObject().getCookie(BiBTexEditorSupport.class);
+            return (BiBTexEditorSupport)getDataObject().getLookup().lookup(BiBTexEditorSupport.class);
         }
         
     }

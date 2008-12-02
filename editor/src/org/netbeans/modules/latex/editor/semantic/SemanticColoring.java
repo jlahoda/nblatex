@@ -104,7 +104,7 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
     public Document getDocument() {
         try {
             DataObject d = DataObject.find(file);
-            EditorCookie ec = d.getCookie(EditorCookie.class);
+            EditorCookie ec = d.getLookup().lookup(EditorCookie.class);
             
             if (ec == null)
                 return null;

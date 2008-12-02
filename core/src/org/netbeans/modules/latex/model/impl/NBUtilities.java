@@ -63,7 +63,6 @@ import org.netbeans.modules.latex.model.command.SourcePosition;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
 import org.netbeans.modules.latex.model.structural.label.LabelStructuralElement;
 import org.netbeans.modules.latex.model.structural.parser.MainStructuralElement;
-import org.openide.ErrorManager;
 import org.openide.cookies.EditorCookie;
 import org.openide.cookies.LineCookie;
 import org.openide.filesystems.FileObject;
@@ -115,7 +114,7 @@ public class NBUtilities extends Utilities implements PropertyChangeListener {
         if (od == null)
             return null;
         
-        EditorCookie ec = (EditorCookie) od.getCookie(EditorCookie.class);
+        EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
         
         if (ec == null)
             return null;
@@ -249,7 +248,7 @@ public class NBUtilities extends Utilities implements PropertyChangeListener {
     public void openPosition(SourcePosition position) {
         try {
             DataObject od = DataObject.find((FileObject) position.getFile());
-            LineCookie lc = (LineCookie) od.getCookie(LineCookie.class);
+            LineCookie lc = (LineCookie) od.getLookup().lookup(LineCookie.class);
             Line line = lc.getLineSet().getCurrent(position.getLine());
             
             line.show(ShowOpenType.OPEN, ShowVisibilityType.FOCUS);

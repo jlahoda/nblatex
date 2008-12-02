@@ -50,7 +50,6 @@ import javax.swing.text.JTextComponent;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.filesystems.Repository;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.windows.WindowManager;
@@ -103,7 +102,7 @@ public abstract class FileOpen {
             try {
                 DataObject toOpenDO = DataObject.find(toOpenFO);
                 
-                EditorCookie ec = (EditorCookie) toOpenDO.getCookie(EditorCookie.class);
+                EditorCookie ec = (EditorCookie) toOpenDO.getLookup().lookup(EditorCookie.class);
                 
                 if (ec == null)
                     return null;

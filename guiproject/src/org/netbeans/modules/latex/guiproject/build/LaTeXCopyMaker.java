@@ -181,7 +181,7 @@ import org.openide.windows.OutputWriter;
 //                    os.println(new File(baseDir, (String) currentFile.peek()).getAbsolutePath() + ":" + startLineNumber + ":0:" + endLineNumber  + ":0:" + line);
                     if (file != null) {
                         DataObject d = DataObject.find(file);
-                        EditorCookie ec = (EditorCookie) d.getCookie(EditorCookie.class);
+                        EditorCookie ec = (EditorCookie) d.getLookup().lookup(EditorCookie.class);
                         Document doc = ec.openDocument();
                         ErrorDescription err = ErrorDescriptionFactory.createErrorDescription(Severity.VERIFIER, line, doc, startLineNumber);
                         List<ErrorDescription> errorDescriptions = errors.get(doc);

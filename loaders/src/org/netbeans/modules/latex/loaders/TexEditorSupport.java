@@ -291,7 +291,7 @@ public class TexEditorSupport extends DataEditorSupport implements EditorCookie,
          * @return the editor support
          */
         public CloneableOpenSupport findCloneableOpenSupport() {
-            return (TexEditorSupport)getDataObject().getCookie(TexEditorSupport.class);
+            return (TexEditorSupport)getDataObject().getLookup().lookup(TexEditorSupport.class);
         }
         
     }

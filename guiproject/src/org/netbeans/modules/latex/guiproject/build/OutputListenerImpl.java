@@ -71,7 +71,7 @@ public final class OutputListenerImpl implements OutputListener {
         //next action:
         try {
             DataObject od = DataObject.find(file);
-            LineCookie lc = (LineCookie) od.getCookie(LineCookie.class);
+            LineCookie lc = (LineCookie) od.getLookup().lookup(LineCookie.class);
             
             if (lc != null) {
                 Line l = lc.getLineSet().getOriginal(line - 1);
@@ -90,7 +90,7 @@ public final class OutputListenerImpl implements OutputListener {
         //goto:
         try {
             DataObject od = DataObject.find(file);
-            LineCookie lc = (LineCookie) od.getCookie(LineCookie.class);
+            LineCookie lc = (LineCookie) od.getLookup().lookup(LineCookie.class);
             
             if (lc != null) {
                 Line l = lc.getLineSet().getOriginal(line - 1);
