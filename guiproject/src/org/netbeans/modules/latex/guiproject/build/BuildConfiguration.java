@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import javax.swing.text.Document;
 import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.napi.gsfret.source.CompilationController;
@@ -80,6 +81,7 @@ import org.openide.windows.OutputWriter;
 public final class BuildConfiguration implements Builder {
 
     private static final ErrorManager ERR = ErrorManager.getDefault().getInstance(BuildConfiguration.class.getName());
+    private static final Pattern      RERUN_PATTERN = Pattern.compile("[Rr]erun to");
 
     private String   name;
     private String   displayName;
@@ -118,7 +120,7 @@ public final class BuildConfiguration implements Builder {
             if (LaTeXPlatform.TOOL_LATEX.equals(tool)) {
                 result &= runLaTeX(p, file, format, wd, inout);
             } else {
-                result &= BuildConfiguration.run(desc, format, wd, inout.getOut(), inout.getErr());
+                result &= BuildConfiguration.run(desc, format, wd, inout.getOut(), inout.getErr(), null).passed();
             }
             
             if (!result) {
@@ -141,9 +143,13 @@ public final class BuildConfiguration implements Builder {
         LaTeXPlatform platform = Utilities.getPlatform(p);
         NbProcessDescriptor latex  = platform.getTool(LaTeXPlatform.TOOL_LATEX);
         NbProcessDescriptor bibtex = platform.getTool(LaTeXPlatform.TOOL_BIBTEX);
+        int pass = 0;
+        boolean again = true;
         
-        for (int pass = 0; pass < 3; pass++) {
+        while (again && pass < 5) {
             boolean doLatex = true;
+            
+            again = false;
             
 //            if (isUpToDate()) {
 //                if (pass == 0) {
@@ -160,29 +166,32 @@ public final class BuildConfiguration implements Builder {
 //                    }
 //                }
 //            }
-            
+
             if (doLatex) {
                 ERR.log(ErrorManager.INFORMATIONAL, "LaTeXing, mainfile:" + mainFile);
                 
-                boolean result = BuildConfiguration.run(latex, format, wd, inout.getOut(), inout.getErr());
+                Result result = BuildConfiguration.run(latex, format, wd, inout.getOut(), inout.getErr(), RERUN_PATTERN);
 
-                if (!result)
+                if (result == Result.FAILED)
                     return false;
+
+                again |= result == Result.PASSED_AND_RERUN;
             }
             
             if (pass == 0) {
                 if (shouldRunBiBTeX(p)) {
                     ERR.log(ErrorManager.INFORMATIONAL, "Running bibtex tasks.");
                     
-                    boolean result = BuildConfiguration.run(bibtex, format, wd, inout.getOut(), inout.getErr());
+                    Result result = BuildConfiguration.run(bibtex, format, wd, inout.getOut(), inout.getErr(), null);
                     
 //                    if (!result)
 //                        return false;
+
+                    again = true;
                 }
             }
             
-            if (pass == 1) //TODO: maybe not necessary, need to parse it from the output...
-                forceReparse = true;
+            pass++;
         }
 
         return true;
@@ -274,12 +283,12 @@ public final class BuildConfiguration implements Builder {
         return getErrorIfAny(p) == null;
     }
     
-    static boolean run(NbProcessDescriptor descriptor, Map format, File wd, OutputWriter stdOut, OutputWriter stdErr) {
+    private static Result run(NbProcessDescriptor descriptor, Map format, File wd, OutputWriter stdOut, OutputWriter stdErr, Pattern rerunPattern) {
         try {
             Process process = descriptor.exec(new MapFormat(format), null, true, wd);
             
             Map<Document, List<ErrorDescription>> errors = new HashMap<Document, List<ErrorDescription>>();
-            LaTeXCopyMaker scOut = new LaTeXCopyMaker(wd, process.getInputStream(), stdOut);
+            LaTeXCopyMaker scOut = new LaTeXCopyMaker(wd, process.getInputStream(), stdOut, rerunPattern);
             LaTeXCopyMaker scErr = new LaTeXCopyMaker(wd, process.getErrorStream(), stdErr);
             
             scOut.start();
@@ -296,18 +305,32 @@ public final class BuildConfiguration implements Builder {
             for (Entry<Document, List<ErrorDescription>> e : errors.entrySet()) {
                 HintsController.setErrors(e.getKey(), BuildConfiguration.class.getName(), e.getValue());
             }
-            return result;
+            return result ? scOut.containsPattern() ? Result.PASSED_AND_RERUN : Result.PASSED : Result.FAILED;
         } catch (InterruptedException ex) {
             Exceptions.printStackTrace(ex);
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
-            return false;
+            return Result.FAILED;
         }
         
-        return true;
+        return Result.PASSED;
     }
 
     String[] getTools() {
         return tools;
+    }
+
+    private enum Result {
+        FAILED(true), PASSED(true), PASSED_AND_RERUN(true);
+
+        private final boolean p;
+
+        private Result(boolean p) {
+            this.p = p;
+        }
+
+        public boolean passed() {
+            return p;
+        }
     }
 }

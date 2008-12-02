@@ -81,13 +81,20 @@ import org.openide.windows.OutputWriter;
     private Stack<String> currentFile;
     private int lineNumber;
     private Map<Document, List<ErrorDescription>> errors;
+    private final Pattern pattern;
+    private volatile boolean containsPattern;
     
-    private File baseDir;
+    private final File baseDir;
     
     LaTeXCopyMaker(File baseDir, InputStream is, OutputWriter out) {
+        this(baseDir, is, out, null);
+    }
+
+    LaTeXCopyMaker(File baseDir, InputStream is, OutputWriter out, Pattern pattern) {
         this.baseDir = baseDir;
         this.out = out;
         this.is = new BufferedReader(new InputStreamReader(/*new TypingInputStream*/(is)));
+        this.pattern = pattern;
         autoflush = true;
         currentFile = new Stack<String>();
         lineNumber = 0;
@@ -103,6 +110,10 @@ import org.openide.windows.OutputWriter;
 
     public Map<Document, List<ErrorDescription>> getErrors() {
         return errors;
+    }
+
+    public boolean containsPattern() {
+        return containsPattern;
     }
     
     private class ErrorPattern {
@@ -221,6 +232,11 @@ import org.openide.windows.OutputWriter;
             
             MAIN_LOOP: while ((line = is.readLine()) != null) {
                 lineNumber++;
+
+                if (pattern != null && pattern.matcher(line).find()) {
+                    containsPattern = true;
+                }
+                
                 for (int pNumber = 0; pNumber < patterns.length; pNumber++) {
                     if (patterns[pNumber].process(line)) {
                         continue MAIN_LOOP;
