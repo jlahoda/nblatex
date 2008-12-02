@@ -122,7 +122,7 @@ public class BiBTeXNavigatorPanel implements NavigatorPanel, PropertyChangeListe
     }
     
     public void panelActivated(Lookup context) {
-        dataObjectSelection = context.lookup(new Lookup.Template(DataObject.class));
+        dataObjectSelection = context.lookupResult(DataObject.class);
         dataObjectSelection.addLookupListener(selectionListener);
         selectionListener.resultChanged(null);
     }
