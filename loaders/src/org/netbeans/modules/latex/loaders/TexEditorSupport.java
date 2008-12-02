@@ -149,7 +149,7 @@ public class TexEditorSupport extends DataEditorSupport implements EditorCookie,
             return false;
         }
         TexDataObject obj = (TexDataObject)getDataObject();
-        if (obj.getCookie(SaveCookie.class) == null) {
+        if (obj.getLookup().lookup(SaveCookie.class) == null) {
             obj.setModified(true);
             // You must implement this method on the object:
             obj.addSaveCookie(new Save());
@@ -162,7 +162,7 @@ public class TexEditorSupport extends DataEditorSupport implements EditorCookie,
      */
     protected void notifyUnmodified() {
         TexDataObject obj = (TexDataObject)getDataObject();
-        SaveCookie save = (SaveCookie)obj.getCookie(SaveCookie.class);
+        SaveCookie save = (SaveCookie)obj.getLookup().lookup(SaveCookie.class);
         if (save != null) {
             // You must implement this method on the object:
             obj.removeSaveCookie(save);
