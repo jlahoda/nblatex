@@ -51,6 +51,7 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
+import org.openide.util.ImageUtilities;
 
 /**
  *
@@ -149,9 +150,9 @@ public class SortingTable extends JTable {
         private ImageIcon getProperIcon(boolean ascending) {
             
             if ( ascending )
-                return new ImageIcon( org.openide.util.Utilities.loadImage( SORT_ASC_ICON ) );
+                return new ImageIcon( ImageUtilities.loadImage( SORT_ASC_ICON ) );
             else
-                return new ImageIcon( org.openide.util.Utilities.loadImage( SORT_DESC_ICON ) );
+                return new ImageIcon( ImageUtilities.loadImage( SORT_DESC_ICON ) );
         }}
     
 }

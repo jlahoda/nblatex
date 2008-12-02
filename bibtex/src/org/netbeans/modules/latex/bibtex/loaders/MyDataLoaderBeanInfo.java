@@ -50,6 +50,7 @@ import java.beans.Introspector;
 import java.beans.SimpleBeanInfo;
 
 import org.openide.util.Exceptions;
+import org.openide.util.ImageUtilities;
 import org.openide.util.Utilities;
 
 /** Description of {@link MyDataLoader}.
@@ -85,9 +86,9 @@ public class MyDataLoaderBeanInfo extends SimpleBeanInfo {
     
     public Image getIcon(int type) {
         if (type == BeanInfo.ICON_COLOR_16x16 || type == BeanInfo.ICON_MONO_16x16) {
-            return Utilities.loadImage("org/netbeans/modules/latex/MyDataIcon.gif");
+            return ImageUtilities.loadImage("org/netbeans/modules/latex/MyDataIcon.gif");
         } else {
-            return Utilities.loadImage("org/netbeans/modules/latex/MyDataIcon32.gif");
+            return ImageUtilities.loadImage("org/netbeans/modules/latex/MyDataIcon32.gif");
         }
     }
     
