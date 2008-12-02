@@ -85,6 +85,7 @@ import org.openide.loaders.DataObject;
 import org.openide.text.Line.ShowOpenType;
 import org.openide.text.Line.ShowVisibilityType;
 import org.openide.util.Exceptions;
+import org.openide.util.ImageUtilities;
 import org.openide.util.NbPreferences;
 import org.openide.util.RequestProcessor;
 import org.openide.util.Utilities;
@@ -137,8 +138,8 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         JButton zoomInButton = new JButton("+");
         JButton zoomOutButton = new JButton("-");
         
-        rebuildAutomatically = new JToggleButton(new ImageIcon(Utilities.loadImage("org/netbeans/modules/latex/ui/resources/refresh.png")));
-        followCaret = new JToggleButton(new ImageIcon(Utilities.loadImage("org/netbeans/modules/latex/ui/resources/caret.png")));
+        rebuildAutomatically = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("org/netbeans/modules/latex/ui/resources/refresh.png")));
+        followCaret = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("org/netbeans/modules/latex/ui/resources/caret.png")));
         
         rebuildAutomatically.setToolTipText("Automatically rebuild on save");
         followCaret.setToolTipText("Follow caret");

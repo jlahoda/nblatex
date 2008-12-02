@@ -82,7 +82,7 @@ import org.openide.nodes.BeanNode;
 import org.openide.nodes.Node;
 import org.openide.text.NbDocument;
 import org.openide.util.Exceptions;
-import org.openide.util.Utilities;
+import org.openide.util.ImageUtilities;
 import org.openide.windows.Mode;
 import org.openide.windows.TopComponent;
 import org.openide.windows.TopComponentGroup;
@@ -175,7 +175,7 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
         
         positionToComponent.put(start, this);
         
-        setIcon(Utilities.loadImage("org/netbeans/modules/latex/resource/autedit_icon.gif"));
+        setIcon(ImageUtilities.loadImage("org/netbeans/modules/latex/resource/autedit_icon.gif"));
         setDisplayName(el.getCaption());
         
         getActionMap().put("delete", delete = new DeleteNodeAction());

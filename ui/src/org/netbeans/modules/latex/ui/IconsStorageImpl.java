@@ -75,6 +75,7 @@ import org.netbeans.modules.latex.model.Queue;
 
 import org.openide.util.ChangeSupport;
 import org.openide.util.Exceptions;
+import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle;
 import org.openide.util.RequestProcessor;
 import org.openide.util.Utilities;
@@ -104,11 +105,11 @@ public final class IconsStorageImpl extends IconsStorage {
         
         iconsCreator.post(new IconCreatorTask());
         
-        Image waitIconImage = Utilities.loadImage("org/netbeans/modules/latex/ui/resources/hodiny.gif");
+        Image waitIconImage = ImageUtilities.loadImage("org/netbeans/modules/latex/ui/resources/hodiny.gif");
         
         waitIcon = new ImageIcon(waitIconImage);
         
-        Image noIconsImage = Utilities.loadImage("org/netbeans/modules/latex/ui/resources/no_icon.gif");
+        Image noIconsImage = ImageUtilities.loadImage("org/netbeans/modules/latex/ui/resources/no_icon.gif");
         
         noIcons = new ImageIcon(noIconsImage);
         

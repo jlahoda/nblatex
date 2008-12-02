@@ -44,6 +44,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import org.netbeans.spi.options.OptionsCategory;
 import org.netbeans.spi.options.OptionsPanelController;
+import org.openide.util.ImageUtilities;
 import org.openide.util.Utilities;
 
 /**
@@ -72,7 +73,7 @@ public class LaTeXOption extends OptionsCategory {
     
     public synchronized Icon getIcon() {
         if (i == null) {
-            i = new ImageIcon(Utilities.loadImage("org/netbeans/modules/latex/ui/resources/option.png"));
+            i = new ImageIcon(ImageUtilities.loadImage("org/netbeans/modules/latex/ui/resources/option.png"));
         }
         
         return i;
