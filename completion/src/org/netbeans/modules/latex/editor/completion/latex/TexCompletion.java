@@ -108,13 +108,10 @@ public class TexCompletion implements CompletionProvider {
         Object file = od.getPrimaryFile();
         try {
             SourcePosition spos = new SourcePosition(file, Utilities.getDefault().openDocument(file), pos);
-            List commandsList = lpr.getCommandUtilities().getCommands(spos);
+            List<Command> commands = lpr.getCommandUtilities().getCommands(spos);
             
-            if (commandsList != null) {
-                Iterator commands = commandsList.iterator();
-                
-                while (commands.hasNext()) {
-                    Command comm = (Command) commands.next();
+            if (commands != null) {
+                for (Command comm : commands) {
                     String commandName = comm.getCommand();
                     
                     if (commandName.startsWith(prefix)) {
@@ -200,13 +197,9 @@ public class TexCompletion implements CompletionProvider {
         }
         
         public void getCompletionResult(CompletionResultSet set, LaTeXParserResult lpr, ArgumentNode node, String prefix, int start) {
-            Collection/*<LabelInfo>*/ labels = Utilities.getDefault().getLabels(lpr);
+            Collection<? extends LabelInfo> labels = Utilities.getDefault().getLabels(lpr);
             
-            Iterator             labelsIter = labels.iterator();
-            
-            while (labelsIter.hasNext()) {
-                LabelInfo info = (LabelInfo) labelsIter.next();
-                
+            for (LabelInfo info : labels) {
                 if (!info.getLabel().startsWith(prefix))
                     continue;
                 
@@ -254,7 +247,7 @@ public class TexCompletion implements CompletionProvider {
         }
         
         public void getCompletionResult(CompletionResultSet set, LaTeXParserResult lpr, ArgumentNode node, String prefix, int start) {
-            Collection names;
+            Collection<String> names;
             
             if (node.getArgument().hasAttribute("#documentclass")) {
                 names = CommandPackage.getKnownDocumentClasses();
@@ -262,8 +255,8 @@ public class TexCompletion implements CompletionProvider {
                 names = CommandPackage.getKnownPackages();
             }
             
-            for (Iterator iter = names.iterator(); iter.hasNext(); ) {
-                String option = (String) iter.next();
+            for (Iterator<String> iter = names.iterator(); iter.hasNext(); ) {
+                String option = iter.next();
 
                 if (option.startsWith(prefix)) {
                     set.addItem(new DocClassCompletionItem(start, option));
@@ -508,9 +501,7 @@ public class TexCompletion implements CompletionProvider {
                 start++;
             }
 
-            for (Iterator i = param.getValues().iterator(); i.hasNext(); ) {
-                String name = (String) i.next();
-                
+            for (String name : param.getValues()) {
                 if (name.startsWith(ccPrefix)) {
                     set.addItem(new ValueCompletionItem(start, "{" + name + "}"));
                 }
