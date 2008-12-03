@@ -102,12 +102,20 @@ public class BlockNodeImpl extends ArgumentContainingNodeImpl implements BlockNo
     }
     
     public void traverse(TraverseHandler th) {
-        th.blockStart(this);
-        getBeginCommand().traverse(th);
-        getContent().traverse(th);
-        if (getEndCommand() != null)
-            getEndCommand().traverse(th);
-        th.blockEnd(this);
+        if (th.blockStart(this)) {
+            getBeginCommand().traverse(th);
+
+            int count = getArgumentCount();
+
+            for (int cntr = 0; cntr < count; cntr++) {
+                getArgument(cntr).traverse(th);
+            }
+
+            getContent().traverse(th);
+            if (getEndCommand() != null)
+                getEndCommand().traverse(th);
+            th.blockEnd(this);
+        }
     }
 
     protected boolean isInChild(Object file, Position pos) {
