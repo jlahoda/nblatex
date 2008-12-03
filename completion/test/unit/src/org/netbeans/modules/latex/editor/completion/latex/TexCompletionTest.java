@@ -234,7 +234,7 @@ public class TexCompletionTest extends NbTestCase {
     public void testCountersTest2() throws Exception {
         test("", "completion/CountersTest.tex", 8, 10);
     }
-    
+
     public void testRefArgCorrectlyReplaced2() throws Exception {
         test("", "completion/RefArgCorrectlyReplaced2.tex", 6, 8, 0);
     }
@@ -247,6 +247,10 @@ public class TexCompletionTest extends NbTestCase {
         test("", "completion/CiteTest5b.tex", 5, 12, 1);
     }
 
+    public void testPackagesDocClass1() throws Exception {
+        test("", "completion/PackagesDocClassTest.tex", 1, 19);
+    }
+    
     private List<? extends CompletionItem> getItems(JEditorPane editor) throws Exception {
         CompletionProvider provider = new TexCompletion();
         

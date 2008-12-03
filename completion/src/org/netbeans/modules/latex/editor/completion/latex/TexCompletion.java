@@ -264,8 +264,10 @@ public class TexCompletion implements CompletionProvider {
             
             for (Iterator iter = names.iterator(); iter.hasNext(); ) {
                 String option = (String) iter.next();
-                
-                set.addItem(new DocClassCompletionItem(start, option));
+
+                if (option.startsWith(prefix)) {
+                    set.addItem(new DocClassCompletionItem(start, option));
+                }
             }
         }
         
