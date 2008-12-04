@@ -69,6 +69,7 @@ import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.BlockNode;
 import org.netbeans.modules.latex.model.command.Command;
 import org.netbeans.modules.latex.model.command.CommandNode;
+import org.netbeans.modules.latex.model.command.DefaultTraverseHandler;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Environment;
 import org.netbeans.modules.latex.model.command.MathNode;
@@ -135,10 +136,28 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
         }
 
         final OffsetsBag coloring = new OffsetsBag(document, true);
-        final Map<String, int[]> possiblyUnusedLabel2Tokens = new HashMap<String, int[]>();
+        final Map<String, int[]> unusedLabel2Tokens = new HashMap<String, int[]>();
         final Set<String> seenLabels = new HashSet<String>();
-        
-        dn.traverse(new TraverseHandler() {
+
+        //XXX: gather all defined labels, ideally should be done only once per parse for all features:
+        dn.traverse(new DefaultTraverseHandler() {
+            @Override
+            public boolean argumentStart(final ArgumentNode node) {
+                if (cancelled.get()) {
+                    return false;
+                }
+
+                if (node.getArgument().hasAttribute("#ref")) { // NOI18N
+                    String label = node.getText().toString();
+
+                    seenLabels.add(label);
+                }
+
+                return true;
+            }
+        });
+
+        rootNode.traverse(new TraverseHandler() {
             public boolean commandStart(final CommandNode node) {
                 if (cancelled.get()) {
                     return false;
@@ -183,51 +202,44 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
                         String label = node.getText().toString();
 
                         if (!seenLabels.contains(label)) {
-                            possiblyUnusedLabel2Tokens.put(label, new int[] {node.getStartingPosition().getOffsetValue(),
+                            unusedLabel2Tokens.put(label, new int[] {node.getStartingPosition().getOffsetValue(),
                                                                              node.getEndingPosition().getOffsetValue()});
                         }
                     } else {
-                        if (node.getArgument().hasAttribute("#ref")) { // NOI18N
-                            String label = node.getText().toString();
-
-                            seenLabels.add(label);
-                            possiblyUnusedLabel2Tokens.remove(label);
+                        if (node.getArgument().isEnumerable()) {
+                            if (node.isValidEnum()) {
+                                attrs = getColoringForName(TexColoringNames.ENUM_ARG_CORRECT);
+                            } else {
+                                attrs = getColoringForName(TexColoringNames.ENUM_ARG_INCORRECT);
+                            }
                         } else {
-                            if (node.getArgument().isEnumerable()) {
-                                if (node.isValidEnum()) {
-                                    attrs = getColoringForName(TexColoringNames.ENUM_ARG_CORRECT);
-                                } else {
-                                    attrs = getColoringForName(TexColoringNames.ENUM_ARG_INCORRECT);
+                            if (node.hasAttribute("extended-coloring-modifier")) {
+                                String modifier = node.getAttribute("extended-coloring-modifier");
+
+                                if (modifier.endsWith("*")) {
+                                    modifier = modifier.substring(0, modifier.length() - 1);
+                                }
+
+                                if (captionColorings.contains(modifier)) {
+                                    attrs = getColoringForName("mod-caption");
                                 }
                             } else {
-                                if (node.hasAttribute("extended-coloring-modifier")) {
-                                    String modifier = node.getAttribute("extended-coloring-modifier");
-                                    
-                                    if (modifier.endsWith("*")) {
-                                        modifier = modifier.substring(0, modifier.length() - 1);
-                                    }
-
-                                    if (captionColorings.contains(modifier)) {
-                                        attrs = getColoringForName("mod-caption");
-                                    }
+                                if (node.hasAttribute("#caption")) {
+                                    attrs = getColoringForName("mod-caption");
                                 } else {
-                                    if (node.hasAttribute("#caption")) {
-                                        attrs = getColoringForName("mod-caption");
+                                    if (node.hasAttribute("font-style")) {
+                                        attrs = getColoringForName("mod-font-style-" + node.getAttribute("font-style"));
                                     } else {
-                                        if (node.hasAttribute("font-style")) {
-                                            attrs = getColoringForName("mod-font-style-" + node.getAttribute("font-style"));
-                                        } else {
-                                            ArgumentContainingNode cnode = node.getCommand();
+                                        ArgumentContainingNode cnode = node.getCommand();
 
-                                            if (cnode instanceof CommandNode && cnode.getParent() instanceof BlockNode) {
-                                                BlockNode bnode = (BlockNode) cnode.getParent();
-                                                Environment env = bnode.getEnvironment();
+                                        if (cnode instanceof CommandNode && cnode.getParent() instanceof BlockNode) {
+                                            BlockNode bnode = (BlockNode) cnode.getParent();
+                                            Environment env = bnode.getEnvironment();
 
-                                                if (env != null) {
-                                                    attrs = getColoringForName(TexColoringNames.ENUM_ARG_CORRECT);
-                                                } else {
-                                                    attrs = getColoringForName(TexColoringNames.ENUM_ARG_INCORRECT);
-                                                }
+                                            if (env != null) {
+                                                attrs = getColoringForName(TexColoringNames.ENUM_ARG_CORRECT);
+                                            } else {
+                                                attrs = getColoringForName(TexColoringNames.ENUM_ARG_INCORRECT);
                                             }
                                         }
                                     }
@@ -307,7 +319,7 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
 
         document.render(new Runnable() {
             public void run() {
-                for (int[] span : possiblyUnusedLabel2Tokens.values()) {
+                for (int[] span : unusedLabel2Tokens.values()) {
                     coloring.addHighlight(span[0], span[1], unused);
                 }
             }
