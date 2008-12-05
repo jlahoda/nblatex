@@ -213,7 +213,6 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
             }
         }
         allowHardWrap.setSelected(LaTeXSettings.isHardWrapAllowed());
-        allowBracketCompletion.setSelected(LaTeXSettings.isBracketCompletionAllowed());
         allowCiteFormatHint.setSelected(LaTeXSettings.isCiteFormatHintEnabled());
     }
     
@@ -236,7 +235,6 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
         ModuleSettings.getDefault().writeSettings(settings);
         
         LaTeXSettings.setHardWrapAllowed(allowHardWrap.isSelected());
-        LaTeXSettings.setBracketCompletionAllowed(allowBracketCompletion.isSelected());
         LaTeXSettings.setCiteFormatHintEnabled(allowCiteFormatHint.isSelected());
     }
     
@@ -254,7 +252,6 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
         jButton1 = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         allowHardWrap = new javax.swing.JCheckBox();
-        allowBracketCompletion = new javax.swing.JCheckBox();
         allowCiteFormatHint = new javax.swing.JCheckBox();
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Commands", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.TOP));
@@ -308,8 +305,6 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
 
         org.openide.awt.Mnemonics.setLocalizedText(allowHardWrap, "Allow Hard Wrap");
 
-        org.openide.awt.Mnemonics.setLocalizedText(allowBracketCompletion, "Allow Bracket Completion");
-
         org.openide.awt.Mnemonics.setLocalizedText(allowCiteFormatHint, "Allow Cite Format Hint");
 
         org.jdesktop.layout.GroupLayout jPanel2Layout = new org.jdesktop.layout.GroupLayout(jPanel2);
@@ -320,10 +315,8 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .add(allowHardWrap)
                 .add(18, 18, 18)
-                .add(allowBracketCompletion)
-                .add(18, 18, 18)
                 .add(allowCiteFormatHint)
-                .addContainerGap(352, Short.MAX_VALUE))
+                .addContainerGap(558, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
@@ -331,7 +324,6 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
                 .addContainerGap()
                 .add(jPanel2Layout.createParallelGroup(org.jdesktop.layout.GroupLayout.BASELINE)
                     .add(allowHardWrap)
-                    .add(allowBracketCompletion)
                     .add(allowCiteFormatHint))
                 .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -357,7 +349,7 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
                 .add(jPanel2, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(org.jdesktop.layout.LayoutStyle.UNRELATED)
                 .add(jPanel4, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE, org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, org.jdesktop.layout.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(org.jdesktop.layout.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
@@ -375,7 +367,6 @@ public class LaTeXOptionsPanel extends javax.swing.JPanel {
     
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JCheckBox allowBracketCompletion;
     private javax.swing.JCheckBox allowCiteFormatHint;
     private javax.swing.JCheckBox allowHardWrap;
     private javax.swing.JButton jButton1;

@@ -36,7 +36,7 @@
               <Component id="jPanel2" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="jPanel4" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="15" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -134,10 +134,8 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="allowHardWrap" min="-2" max="-2" attributes="0"/>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
-                  <Component id="allowBracketCompletion" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="allowCiteFormatHint" min="-2" max="-2" attributes="0"/>
-                  <EmptySpace pref="352" max="32767" attributes="0"/>
+                  <EmptySpace pref="558" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -147,7 +145,6 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="allowHardWrap" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="allowBracketCompletion" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="allowCiteFormatHint" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace max="32767" attributes="0"/>
@@ -159,11 +156,6 @@
         <Component class="javax.swing.JCheckBox" name="allowHardWrap">
           <Properties>
             <Property name="text" type="java.lang.String" value="Allow Hard Wrap"/>
-          </Properties>
-        </Component>
-        <Component class="javax.swing.JCheckBox" name="allowBracketCompletion">
-          <Properties>
-            <Property name="text" type="java.lang.String" value="Allow Bracket Completion"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JCheckBox" name="allowCiteFormatHint">

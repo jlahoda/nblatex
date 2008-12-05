@@ -49,7 +49,6 @@ import org.openide.util.NbPreferences;
 public final class LaTeXSettings {
 
     private static final String HARD_WRAP_ALLOWED = "hardWrapAllowed";
-    private static final String BRACKET_COMPLETION_ALLOWED = "bracketCompletionAllowed";
     private static final String CITE_FORMAT_HINT_ENABLED = "citeFormatHintEnabled";
     
     public static boolean isHardWrapAllowed() {
@@ -60,14 +59,6 @@ public final class LaTeXSettings {
         NbPreferences.forModule(LaTeXSettings.class).putBoolean(HARD_WRAP_ALLOWED, value);
     }
 
-    public static boolean isBracketCompletionAllowed() {
-        return NbPreferences.forModule(LaTeXSettings.class).getBoolean(BRACKET_COMPLETION_ALLOWED, true);
-    }
-    
-    public static void setBracketCompletionAllowed(boolean value) {
-        NbPreferences.forModule(LaTeXSettings.class).putBoolean(BRACKET_COMPLETION_ALLOWED, value);
-    }
-    
     public static boolean isCiteFormatHintEnabled() {
         return NbPreferences.forModule(LaTeXSettings.class).getBoolean(CITE_FORMAT_HINT_ENABLED, false);
     }

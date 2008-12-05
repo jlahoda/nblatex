@@ -58,35 +58,64 @@ public class BracketCompleterTest extends TestCase {
     }            
 
     public void testAddedBracket1() throws BadLocationException {
-        doTestBrackets("{|", "{}");
+        doTestBrackets("{|", "{|}");
     }
 
     public void testAddedBracket2() throws BadLocationException {
-        doTestBrackets("{|}", "{}");
+        doTestBrackets("{|}", "{|}");
     }
-    
+
     public void testAddedBracket3() throws BadLocationException {
-        doTestBrackets("\\{|", "\\{\\}");
+        doTestBrackets("\\{|", "\\{|\\}");
     }
 
     public void testAddedBracket4() throws BadLocationException {
-        doTestBrackets("\\{|\\}", "\\{\\}");
+        doTestBrackets("\\{|\\}", "\\{|\\}");
     }
-    
+
     public void testAddedBracket5() throws BadLocationException {
-        doTestBrackets("$|", "$$");
+        doTestBrackets("$|", "$|$");
     }
-    
+
+    public void testAddedBracket6() throws BadLocationException {
+        doTestBrackets("{{|}", "{{|}}");
+    }
+
+    public void testRemoveOverBalanced1() throws BadLocationException {
+        doTestBrackets("{}|}", "{}|");
+    }
+
+    public void testRemoveOverBalanced2() throws BadLocationException {
+        doTestBrackets("\\{\\}|\\}", "\\{\\}|");
+    }
+
+    public void testDoNotRemoveUnBalanced1() throws BadLocationException {
+        doTestBrackets("{{}}|", "{{}}|");
+    }
+
+    public void testDoNotRemoveUnBalanced2() throws BadLocationException {
+        doTestBrackets("a\n\n{{}}|", "a\n\n{{}}|");
+    }
+
+    public void testDoNotRemoveUnBalanced3() throws BadLocationException {
+        doTestBrackets("a\n\n{{}}}|", "a\n\n{{}}}|");
+    }
+
     private void doTestBrackets(String text, String golden) throws BadLocationException {
         int offset = text.indexOf('|');
         
         text = text.replace("|", "");
+
+        int targetCaret = golden.indexOf('|');
+
+        golden = golden.replace("|", "");
+        
         Document doc = new PlainDocument();
 
         doc.putProperty(Language.class, TexLanguage.description());
         doc.insertString(0, text, null);
 
-        BracketCompleter.typed(doc, offset, "" + text.charAt(offset - 1));
+        assertEquals(targetCaret, BracketCompleter.typed(doc, offset, "" + text.charAt(offset - 1)));
 
         assertEquals(golden, doc.getText(0, doc.getLength()));
     }

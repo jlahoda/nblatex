@@ -168,9 +168,9 @@ public class TexKit extends NbEditorKit {
             try {
                 int offset = target.getCaretPosition();
                 
-                BracketCompleter.typed(target.getDocument(), offset,cmd);
+                offset = BracketCompleter.typed(target.getDocument(), offset, cmd);
 
-                if (offset != target.getCaretPosition()) {
+                if (offset != (-1) && offset != target.getCaretPosition()) {
                     target.setCaretPosition(offset);
                 }
             } catch (BadLocationException ex) {
