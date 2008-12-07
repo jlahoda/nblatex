@@ -130,7 +130,11 @@ public class BraceMatcherImpl implements BracesMatcher {
                         return;
                     }
 
-                    result.addAll(ComputeBraces.doComputeBraces(LaTeXParserResult.get(parameter), context, cancel, privateCancel));
+                    List<int[]> braces = ComputeBraces.doComputeBraces(LaTeXParserResult.get(parameter), context, cancel, privateCancel);
+
+                    if (braces != null) {
+                        result.addAll(braces);
+                    }
 
                     if (privateCancel.get() && !cancel.get()) {
                         RunOnceFactory.add(parameter.getFileObject(), this);
