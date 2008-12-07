@@ -100,7 +100,7 @@ public class Reformatter implements ReformatTask {
                     parameter.toPhase(Phase.PARSED);
 
                     LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
-                    diffs.addAll(FormatWorker.format(lpr, lpr.getDocument(), 0));
+                    diffs.addAll(FormatWorker.format(lpr, lpr.getDocument().getRootForFile(parameter.getFileObject()), 0));
                 }
             }, true);
 

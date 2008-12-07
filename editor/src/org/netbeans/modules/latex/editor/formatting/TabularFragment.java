@@ -74,7 +74,11 @@ public class TabularFragment implements Fragment {
         int offset = start;
         
         for (String line : tableContent.split("\n")) {
-            lines.add(new Line(offset, line));
+            Line l = Line.create(offset, line);
+
+            if (l != null) {
+                lines.add(new Line(offset, line));
+            }
 
             offset += line.length() + 1;
         }
@@ -153,6 +157,14 @@ public class TabularFragment implements Fragment {
             this.columnStart = columnStart;
             this.columnEnd   = columnEnd;
             this.columnText  = columnText;
+        }
+
+        public static Line create(int localOffset, String line) {
+            if (line.contains("\\\\") && line.contains("&")) {
+                return new Line(localOffset, line);
+            }
+
+            return null;
         }
     }
 
