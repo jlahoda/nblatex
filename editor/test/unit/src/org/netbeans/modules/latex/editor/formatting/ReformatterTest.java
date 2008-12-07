@@ -186,6 +186,38 @@ public class ReformatterTest extends NbTestCase {
                      "\\end{document}\n");
     }
 
+    public void testTabular3() throws Exception {
+        testReformat(
+                     "\\documentclass{article}\n" +
+                     "\\begin{document}\n" +
+                     "|\\begin{tabular}{c c}\n" +
+                     "\\hline\n" +
+                     "asdfadsf & s \\\\\n" +
+                     "\\hline\n" +
+                     "s & lajdfjlakjdflkjalkdfj\\\\\n" +
+                     "\\hline\n" +
+                     "\\end{tabular}|\n" +
+                     "\\begin{tabular}{c c}\n" +
+                     "asdfadsf & s \\\\\n" +
+                     "s & lajdfjlakjdflkjalkdfj\\\\\n" +
+                     "\\end{tabular}\n" +
+                     "\\end{document}\n",
+                     "\\documentclass{article}\n" +
+                     "\\begin{document}\n" +
+                     "\\begin{tabular}{c c}\n" +
+                     "\\hline\n" +
+                     "asdfadsf & s                    \\\\\n" +
+                     "\\hline\n" +
+                     "s        & lajdfjlakjdflkjalkdfj\\\\\n" +
+                     "\\hline\n" +
+                     "\\end{tabular}\n" +
+                     "\\begin{tabular}{c c}\n" +
+                     "asdfadsf & s \\\\\n" +
+                     "s & lajdfjlakjdflkjalkdfj\\\\\n" +
+                     "\\end{tabular}\n" +
+                     "\\end{document}\n");
+    }
+    
     private void testReformat(String code, final String golden) throws Exception {
         String[] split = code.split("\\|");
 
@@ -237,7 +269,7 @@ public class ReformatterTest extends NbTestCase {
         
         assertNotNull(workdir);
         
-        FileObject test = workdir.createData("test.tex");
+        FileObject test = workdir.createData(testFile);
         
         assertNotNull(test);
         
