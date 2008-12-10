@@ -51,6 +51,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JToolTip;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
@@ -80,9 +81,11 @@ import org.netbeans.modules.latex.model.command.ArgumentContainingNode;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.BlockNode;
 import org.netbeans.modules.latex.model.command.Command;
+import org.netbeans.modules.latex.model.command.Command.Param;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.CommandPackage;
 import org.netbeans.modules.latex.model.command.DefaultTraverseHandler;
+import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Environment;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
 import org.netbeans.spi.editor.completion.CompletionProvider;
@@ -515,9 +518,13 @@ public class TexCompletion implements CompletionProvider {
     
     public CompletionTask createTask(int queryType, JTextComponent component) {
         if ((queryType & COMPLETION_QUERY_TYPE) != 0) {
-            return new AsyncCompletionTask(new Query(), component);
+            return new AsyncCompletionTask(new Query(true), component);
         }
         
+        if ((queryType & TOOLTIP_QUERY_TYPE) != 0) {
+            return new AsyncCompletionTask(new Query(false), component);
+        }
+
         return null;
     }
     
@@ -526,6 +533,12 @@ public class TexCompletion implements CompletionProvider {
     }
     
     private static class Query extends AsyncCompletionQuery {
+
+        private final boolean completion;
+
+        public Query(boolean completion) {
+            this.completion = completion;
+        }
 
         protected void query(final CompletionResultSet resultSet, final Document doc, final int caretOffset) {
             final DataObject od = (DataObject) doc.getProperty(Document.StreamDescriptionProperty); //TODO: this won't work in SA
@@ -554,15 +567,31 @@ public class TexCompletion implements CompletionProvider {
                         String caption      = null;
                         int start = ts.offset();
                         
-                        if (token != null && isCommand(token.id())) {
+                        if (token != null && isCommand(token.id()) && completion) {
                             Position pos = doc.createPosition(caretOffset);
                             String prefix = token.text().subSequence(0, caretOffset - start).toString();
                             
                                 getCommandsForPrefix(resultSet, lpr, doc, od, pos, prefix, start);
                         }
                         
-                        if (isArgument(lpr, doc, caretOffset)) {
+                        if (isArgument(lpr, doc, caretOffset) && completion) {
                             getSpecialCommandArguments(resultSet, lpr, doc, caretOffset);
+                        }
+
+                        if (!completion) {
+                            ArgumentContainingNode parent = resolve(lpr, doc, caretOffset);
+
+                            if (parent != null) {
+                                String tooltip = resolveTooltip(lpr, parent, caretOffset);
+
+                                if (tooltip != null) {
+                                    JToolTip tt = new JToolTip();
+
+                                    tt.setTipText(tooltip);
+
+                                    resultSet.setToolTip(tt);
+                                }
+                            }
                         }
                     }
                 }, true);
@@ -579,7 +608,6 @@ public class TexCompletion implements CompletionProvider {
         }
         
     }
-
 
     //XXX:
     private static CharSequence getArgumentValue(ArgumentNode an) {
@@ -613,7 +641,102 @@ public class TexCompletion implements CompletionProvider {
         
         return result;
     }
+
+    static ArgumentContainingNode resolve(LaTeXParserResult lpr, Document doc, int caretOffset) {
+        try {
+            Node node = lpr.getCommandUtilities().findNode(doc, caretOffset);
+
+            while (!(node instanceof DocumentNode)) {
+                if (node instanceof CommandNode) {
+                    CommandNode cnode = (CommandNode) node;
+
+                    if ((cnode.getStartingPosition().getOffsetValue() + cnode.getCommand().getCommand().length()) <= caretOffset) {
+                        return cnode;
+                    }
+                }
+
+                node = node.getParent();
+            }
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+        return null;
+    }
     
+    static String resolveTooltip(LaTeXParserResult lpr, ArgumentContainingNode parent, int caretOffset) {
+        StringBuilder tooltip = new StringBuilder();
+
+        tooltip.append("<html><body>");
+        
+        if (parent instanceof CommandNode) {
+            tooltip.append(((CommandNode) parent).getCommand().getCommand());
+        }
+
+        for (int cntr = 0; cntr < parent.getArgumentCount(); cntr++) {
+            ArgumentNode arg = parent.getArgument(cntr);
+            String desc = null;
+            Param param = arg.getArgument();
+
+            if (param.hasAttribute("short-description")) {
+                desc = param.getAttribute("short-description");
+            }
+            
+            if (desc == null && param.isEnumerable()) {
+                StringBuilder enumText = new StringBuilder();
+
+                for (String v : param.getValues()) {
+                    if (enumText.length() > 0) {
+                        enumText.append("|");
+                    }
+                    enumText.append(v);
+                }
+
+                if (enumText.length() > 0) {
+                    desc = enumText.toString();
+                }
+            }
+
+            if (desc == null) {
+                if (param.isCodeLike()) {
+                    desc = "code";
+                } else {
+                    if (param.isTextual()) {
+                        desc = "text";
+                    } else {
+                        desc = "";
+                    }
+                }
+            }
+
+            boolean current = arg.isPresent() && arg.getStartingPosition().getOffsetValue() <= caretOffset && caretOffset <= arg.getEndingPosition().getOffsetValue();
+
+            if (current) {
+                tooltip.append("<b>");
+            }
+            
+            switch (param.getType()) {
+                case Param.FREE:
+                case Param.MANDATORY:
+                    tooltip.append("{");
+                    tooltip.append(desc);
+                    tooltip.append("}");
+                    break;
+                case Param.NONMANDATORY:
+                    tooltip.append("[");
+                    tooltip.append(desc);
+                    tooltip.append("]");
+                    break;
+                default: return null;//XXX
+            }
+            
+            if (current) {
+                tooltip.append("</b>");
+            }
+        }
+
+        return tooltip.toString();
+    }
+
 //    public static final Token<TexTokenId> getToken(Document doc, int offset) throws ClassCastException {
 //        TokenSequence<TexTokenId> ts = (TokenSequence<TexTokenId>) TokenHierarchy.get(doc).tokenSequence();
 //        
