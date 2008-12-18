@@ -232,7 +232,7 @@ public class LaTeXGSFParser implements IncrementalParser {
     }
 
     public ParserResult parse(ParserFile file, SourceFileReader reader, TranslatedSource translatedSource, EditHistory history, ParserResult previousResult) {
-        if (previousResult == null || previousResult.getInfo() == null || !INCREMENTAL_REPARSE) {
+        if (previousResult == null || previousResult.getInfo() == null || history.getStart() == (-1) || !INCREMENTAL_REPARSE) {
             return parseFile(file);
         }
         
