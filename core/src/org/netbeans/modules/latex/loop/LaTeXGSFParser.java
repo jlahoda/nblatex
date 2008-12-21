@@ -75,6 +75,7 @@ import org.netbeans.modules.latex.model.ParseError;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.LaTeXSourceFactory;
 import org.netbeans.modules.latex.model.command.impl.CommandUtilitiesImpl;
+import org.netbeans.modules.latex.model.command.impl.NBDocumentNodeImpl;
 import org.netbeans.modules.latex.model.command.parser.CommandParser;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
@@ -243,6 +244,10 @@ public class LaTeXGSFParser implements IncrementalParser {
 
             if (!fullReparse) {
                 previousResult.setUpdateState(UpdateState.NO_SEMANTIC_CHANGE);
+                TokenHierarchy h = TokenHierarchy.create(reader.read(file), TexLanguage.description());
+
+                ((NBDocumentNodeImpl) ((LaTeXParserResult) previousResult).getDocument()).addUsedFile(file.getFileObject(), h);
+
                 long end = System.currentTimeMillis();
                 Logger.getLogger("TIMER").log(Level.FINE, "LaTeX Incremental Reparse", new Object[]{file.getFileObject(), (end - start)});
                 return previousResult;
