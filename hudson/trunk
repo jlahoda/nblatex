@@ -7,6 +7,9 @@ cd nbbuild
 rm -rf netbeans
 mkdir netbeans
 mkdir -p download
+
+rm `ls download/netbeans-hudson-trunk* | grep -v $TRUNK_ID`
+
 cd netbeans
 
 download_and_unpack_cluster() {
