@@ -52,12 +52,12 @@ cp -r netbeans/* ../netbeans/extra
 
 cd ../..
 
-ant -Dnbplatform.temp2.harness.dir=$PWD/nbbuild/netbeans/harness -Dnbplatform.temp2.netbeans.dest.dir=$PWD/nbbuild/netbeans clean || exit
-ant -Dnbplatform.temp2.harness.dir=$PWD/nbbuild/netbeans/harness -Dnbplatform.temp2.netbeans.dest.dir=$PWD/nbbuild/netbeans build-zip || exit
-ant -Dnbplatform.temp2.harness.dir=$PWD/nbbuild/netbeans/harness -Dnbplatform.temp2.netbeans.dest.dir=$PWD/nbbuild/netbeans test || exit
+ant -Dnbplatform.default.harness.dir=$PWD/nbbuild/netbeans/harness -Dnbplatform.default.netbeans.dest.dir=$PWD/nbbuild/netbeans clean || exit
+ant -Dnbplatform.default.harness.dir=$PWD/nbbuild/netbeans/harness -Dnbplatform.default.netbeans.dest.dir=$PWD/nbbuild/netbeans build-zip || exit
+ant -Dnbplatform.default.harness.dir=$PWD/nbbuild/netbeans/harness -Dnbplatform.default.netbeans.dest.dir=$PWD/nbbuild/netbeans test || exit
 
 mkdir -p build/updates
 cp nbbuild/download/*.nbm build/updates
 
-ant -Ddist.base=$DIST_BASE -Dnbplatform.temp2.harness.dir=$PWD/nbbuild/netbeans/harness -Dnbplatform.temp2.netbeans.dest.dir=$PWD/nbbuild/netbeans nbms || exit
+ant -Ddist.base=$DIST_BASE -Dnbplatform.default.harness.dir=$PWD/nbbuild/netbeans/harness -Dnbplatform.default.netbeans.dest.dir=$PWD/nbbuild/netbeans nbms || exit
 gzip <build/updates/updates.xml >build/updates/updates.xml.gz
