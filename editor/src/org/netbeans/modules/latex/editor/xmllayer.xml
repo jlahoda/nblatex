@@ -170,6 +170,14 @@ Contributor(s): Jan Lahoda
             <folder name="Defaults">
                 <file name="keybindings.xml" url="BiBTeX-DefaultKeyBindings.xml" />
             </folder>
+
+            <folder name="FoldManager">
+                <file name="org-netbeans-editor-CustomFoldManager$Factory.instance"/>
+            </folder>
+            
+            <folder name="SideBar">
+                <file name="org-netbeans-modules-latex-editor-fold-FoldMaintainerImpl$SideBarFactoryImpl.instance"/>
+            </folder>
          </folder>
       </folder>
    </folder>
