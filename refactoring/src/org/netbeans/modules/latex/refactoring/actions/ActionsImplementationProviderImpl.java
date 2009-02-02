@@ -156,6 +156,7 @@ public class ActionsImplementationProviderImpl extends ActionsImplementationProv
                         searchFor[0] = "Something";
                     } else {
                         searchFor[0] ="Nothing";
+                        originalName[0] = "";
                         problem[0] = new Problem(true, "Cannot resolve");
                     }
                 }
