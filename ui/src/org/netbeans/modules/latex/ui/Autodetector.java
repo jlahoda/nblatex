@@ -68,7 +68,7 @@ import org.openide.windows.WindowManager;
 public class Autodetector {
 
     private static final String AUTODETECTOR_VERSION = "autodetector-version";
-    private static final int CURRENT_AUTODETECTOR_VERSION = 2;
+    private static final int CURRENT_AUTODETECTOR_VERSION = 3;
     
     private static final boolean debug = false;
     
@@ -348,7 +348,7 @@ public class Autodetector {
         defaultLocations.put("ps2pdf", new String[] {"ps2pdf", "/usr/bin/ps2pdf", "C:\\texmf\\miktex\\bin\\ps2pdf.exe"});
         defaultLocations.put("gs", new String[] {"gs-gpl", "gs", "/usr/bin/gs", "/usr/local/bin/gs", "C:\\Program Files\\gs\\gs8.53\\bin\\gswin32c.exe"});
         defaultLocations.put("xdvi", new String[] {"xdvi", "C:\\texmf\\miktex\\bin\\yap.exe"});
-        defaultLocations.put("gv", new String[] {"gv", "kghostview", "ggv", });
+        defaultLocations.put("gv", new String[] {"gv", "kghostview", "ggv", "evince"});
     }
     
     private int getBetter(int status1, int status2) {
