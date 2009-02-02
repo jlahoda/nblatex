@@ -94,7 +94,7 @@ public class LaTeXPlatformImpl implements LaTeXPlatform {
     public LaTeXPlatformImpl() {
         viewers.add(new ViewerImpl());
         viewers.add(new ProcessViewerImpl(this, TOOL_XDVI, "xdvi", "DVI Viewer", new String[] {".dvi"}));
-        viewers.add(new ProcessViewerImpl(this, TOOL_XDVI, "gv", "PS/PDF Viewer", new String[] {".ps", ".pdf"}));
+        viewers.add(new ProcessViewerImpl(this, TOOL_GV, "gv", "PS/PDF Viewer", new String[] {".ps", ".pdf"}));
     }
 
     private String getDefaultArgs(String tool) {
