@@ -1,5 +1,5 @@
-#!/bin/bash
-TRUNK_ID=`wget -q http://deadlock.netbeans.org/hudson/job/trunk/rssAll -O - | tr '<>' '\n' | grep SUCCESS | head -1 | cut -d '#' -f 2 | cut -d ' ' -f 1`
+#!/bin/bash -x
+TRUNK_ID=`wget -q http://deadlock.netbeans.org/hudson/job/nbms-and-javadoc/lastSuccessfulBuild/buildNumber -O -`
 
 mkdir -p nbbuild
 
@@ -14,12 +14,12 @@ cd netbeans
 
 download_and_unpack_cluster() {
     if [ ! -e ../download/netbeans-hudson-trunk-$TRUNK_ID-$1.zip ] ; then
-        wget -q -N http://deadlock.netbeans.org/hudson/job/trunk/$TRUNK_ID/artifact/nbbuild/dist/zip/moduleclusters/netbeans-hudson-trunk-$TRUNK_ID-$1.zip -O ../download/netbeans-hudson-trunk-$TRUNK_ID-$1.zip || exit
+        wget -q -N http://deadlock.netbeans.org/hudson/job/nbms-and-javadoc/$TRUNK_ID/artifact/nbbuild/dist/hudson-nbms-and-javadoc-$TRUNK_ID-$1.zip -O ../download/netbeans-hudson-trunk-$TRUNK_ID-$1.zip || exit
     fi;
     unzip -q ../download/*$TRUNK_ID-$1.zip || exit
 }
 
-for cluster in ide platform gsf java harness nb6.0-etc; do
+for cluster in ide11 platform10 java2 harness nb6.7; do
     download_and_unpack_cluster $cluster;
 done
 

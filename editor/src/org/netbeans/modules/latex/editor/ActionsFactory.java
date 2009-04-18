@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the Viewer module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -58,10 +58,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.JTextComponent;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
 import org.netbeans.editor.BaseAction;
 import org.netbeans.editor.DialogSupport;
 import org.netbeans.editor.ext.ExtKit.GotoDeclarationAction;
@@ -69,6 +65,11 @@ import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.LabelInfo;
 import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.bibtex.PublicationEntry;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.openide.util.Exceptions;
 
 /**
@@ -142,23 +143,22 @@ public final class ActionsFactory {
         }
         
         public void actionPerformed(ActionEvent evt, final JTextComponent target) {
-            Source s = Source.forDocument(target.getDocument());
+            Source s = Source.create(target.getDocument());
             final List references = new LinkedList();
             
             try {
-                s.runUserActionTask(new CancellableTask<CompilationController>() {
-                    public void cancel() {}
-                    public void run(CompilationController parameter) throws Exception {
-                        parameter.toPhase(Phase.RESOLVED);
-                        LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+                ParserManager.parse(Collections.singleton(s), new UserTask() {
+                    @Override
+                    public void run(ResultIterator resultIterator) throws Exception {
+                        LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                         if (type == CITE) {
                             references.addAll(Utilities.getDefault().getAllBibReferences(lpr));
                         } else {
                             references.addAll(new ArrayList(org.netbeans.modules.latex.model.Utilities.getDefault().getLabels(lpr)));
                         }
                     }
-                }, true);
-            } catch (IOException e) {
+                });
+            } catch (ParseException e) {
                 Exceptions.printStackTrace(e);
             }
             

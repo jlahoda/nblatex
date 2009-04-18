@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 2008-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -41,13 +41,14 @@
 
 package org.netbeans.modules.latex.editor.codegen;
 
-import java.io.IOException;
+import java.util.Collections;
 import javax.swing.text.JTextComponent;
-import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.spi.editor.codegen.CodeGeneratorContextProvider;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -62,16 +63,13 @@ public class ContextProviderImpl implements CodeGeneratorContextProvider {
 
     public void runTaskWithinContext(final Lookup context, final Task task) {
         final JTextComponent comp = context.lookup(JTextComponent.class);
-        Source s = Source.forDocument(comp.getDocument());
+        Source s = Source.create(comp.getDocument());
         
         try {
-            s.runUserActionTask(new CancellableTask<CompilationController>() {
-                public void cancel() {}
-                public void run(CompilationController parameter) throws Exception {
-                    parameter.toPhase(Phase.UP_TO_DATE);
-
+            ParserManager.parse(Collections.singleton(s), new UserTask() {
+                public void run(ResultIterator resultIterator) throws Exception {
                     Lookup additional = Lookup.EMPTY;
-                    LaTeXParserResult lpr = LaTeXParserResult.get(parameter, comp.getCaretPosition());
+                    LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator, comp.getCaretPosition());
 
                     if (lpr != null) {
                         additional = Lookups.fixed(lpr);
@@ -79,8 +77,8 @@ public class ContextProviderImpl implements CodeGeneratorContextProvider {
 
                     task.run(new ProxyLookup(context, additional));
                 }
-            }, true);
-        } catch (IOException ex) {
+            });
+        } catch (ParseException ex) {
             Exceptions.printStackTrace(ex);
         }
     }

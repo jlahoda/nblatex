@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -45,6 +45,7 @@ package org.netbeans.modules.latex.editor.completion.latex;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -56,14 +57,10 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import javax.swing.text.Position;
-import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenId;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
 import org.netbeans.modules.latex.editor.completion.latex.TexCompletionItem.BiBRecordCompletionItem;
 import org.netbeans.modules.latex.editor.completion.latex.TexCompletionItem.CommandCompletionItem;
 import org.netbeans.modules.latex.editor.completion.latex.TexCompletionItem.DocClassCompletionItem;
@@ -88,6 +85,7 @@ import org.netbeans.modules.latex.model.command.DefaultTraverseHandler;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Environment;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.parsing.api.ResultIterator;
 import org.netbeans.spi.editor.completion.CompletionProvider;
 import org.netbeans.spi.editor.completion.CompletionResultSet;
 import org.netbeans.spi.editor.completion.CompletionTask;
@@ -95,6 +93,10 @@ import org.netbeans.spi.editor.completion.support.AsyncCompletionQuery;
 import org.netbeans.spi.editor.completion.support.AsyncCompletionTask;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.SourcePosition;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
@@ -542,14 +544,12 @@ public class TexCompletion implements CompletionProvider {
 
         protected void query(final CompletionResultSet resultSet, final Document doc, final int caretOffset) {
             final DataObject od = (DataObject) doc.getProperty(Document.StreamDescriptionProperty); //TODO: this won't work in SA
-            Source source = Source.forDocument(doc);
+            Source source = Source.create(doc);
             try {
-                source.runUserActionTask(new CancellableTask<CompilationController>() {
-                    public void cancel() {}
-                    public void run(CompilationController parameter) throws Exception {
-                        parameter.toPhase(Phase.RESOLVED);
-                        
-                        LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+                ParserManager.parse(Collections.singleton(source), new UserTask() {
+                    @Override
+                    public void run(ResultIterator resultIterator) throws Exception {
+                        LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                                 
                         int type;
                         
@@ -594,9 +594,8 @@ public class TexCompletion implements CompletionProvider {
                             }
                         }
                     }
-                }, true);
-                
-            } catch (IOException e) {
+                });
+            } catch (ParseException e) {
                 Exceptions.printStackTrace(e);
             } finally {
                 resultSet.finish();

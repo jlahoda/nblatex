@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -57,9 +57,6 @@ import java.util.Set;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Position;
-import org.netbeans.modules.gsf.api.Element;
-import org.netbeans.modules.gsf.api.ElementKind;
-import org.netbeans.modules.gsf.api.Modifier;
 
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
@@ -80,7 +77,7 @@ import org.openide.filesystems.FileObject;
  *
  * @author Jan Lahoda
  */
-public abstract class NodeImpl implements Node, Element {
+public abstract class NodeImpl implements Node {
     
     public static final String START    = "start";
     public static final String END      = "end";
@@ -470,11 +467,4 @@ public abstract class NodeImpl implements Node, Element {
         return "";
     }
     
-    public ElementKind getKind() {
-        return ElementKind.OTHER;
-    }
-    
-    public Set<Modifier> getModifiers() {
-        return EnumSet.noneOf(Modifier.class);
-    }
 }

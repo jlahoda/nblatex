@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 2008-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -48,6 +48,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,6 +61,7 @@ import org.netbeans.api.lexer.Language;
 import org.netbeans.junit.NbTestCase;
 import org.netbeans.modules.latex.UnitUtilities;
 import org.netbeans.modules.latex.bibtex.loaders.MyDataLoader;
+import org.netbeans.modules.parsing.api.Source;
 import static org.junit.Assert.*;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.spi.editor.bracesmatching.MatcherContext;
@@ -69,11 +71,10 @@ import org.xml.sax.SAXException;
 
 import org.netbeans.core.startup.Main;
 import org.netbeans.modules.editor.bracesmatching.SpiAccessor;
-import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.modules.latex.editor.TexLanguage;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.UserTask;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -179,23 +180,20 @@ public class ComputeBracesTest extends NbTestCase {
         DataObject od = DataObject.find(testFileObject);
         final StyledDocument doc = od.getLookup().lookup(EditorCookie.class).openDocument();
  
-        doc.putProperty("mime-type", "text/x-tex");
+        doc.putProperty("mimeType", "text/x-tex");
         doc.putProperty(Language.class, TexLanguage.description());
 
-        Source s = Source.forDocument(doc);
+        Source s = Source.create(doc);
         
-        s.runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        ParserManager.parse(Collections.singleton(s), new UserTask() {
+            public void run(ResultIterator it) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(it);
                 MatcherContext mc = SpiAccessor.get().createCaretContext(doc, caret[0], true, -1);
                 List<int[]> result = ComputeBraces.doComputeBraces(lpr, mc, new AtomicBoolean(), new AtomicBoolean());
 
                 assertEquals(braces, result);
             }
-        }, true);
+        });
     }
 
     private FileObject getTestFile(String testFile) throws IOException, InterruptedException {

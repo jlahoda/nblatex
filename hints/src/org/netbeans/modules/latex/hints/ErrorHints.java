@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -54,13 +54,11 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.Document;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source.Priority;
-import org.netbeans.napi.gsfret.source.support.EditorAwareSourceTaskFactory;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.ParseError;
+import org.netbeans.modules.parsing.spi.ParserResultTask;
+import org.netbeans.modules.parsing.spi.Scheduler;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Fix;
@@ -72,22 +70,23 @@ import org.openide.filesystems.FileObject;
  *
  * @author Jan Lahoda
  */
-public class ErrorHints implements CancellableTask<CompilationInfo> {
+public class ErrorHints extends ParserResultTask<LaTeXParserResult> {
 
     public void cancel() {
     }
 
-    public void run(final CompilationInfo info) throws Exception {
+    public void run(final LaTeXParserResult info, SchedulerEvent evt) {
         long start = System.currentTimeMillis();
         
-        final Document doc = info.getDocument();
+        final Document doc = info.getSnapshot().getSource().getDocument(false);
         
         if (doc == null) return ;
         
         LaTeXParserResult lpr = LaTeXParserResult.get(info);
         
         Map<FileObject, List<ParseError>> sortedErrors = sortErrors(lpr.getErrors());
-        List<ParseError> errors = sortedErrors.get(info.getFileObject());
+        final FileObject file = info.getSnapshot().getSource().getFileObject();
+        List<ParseError> errors = sortedErrors.get(file);
         
         if (errors == null) errors = Collections.<ParseError>emptyList();
         
@@ -116,17 +115,17 @@ public class ErrorHints implements CancellableTask<CompilationInfo> {
                     if (e.getEnd() == null) {
                         editorErrors.add(ErrorDescriptionFactory.createErrorDescription(s, e.getDisplayName(), fixes, doc, e.getStart().getLine() + 1));
                     } else {
-                        editorErrors.add(ErrorDescriptionFactory.createErrorDescription(s, e.getDisplayName(), fixes, info.getFileObject(), e.getStart().getOffsetValue(), e.getEnd().getOffsetValue()));
+                        editorErrors.add(ErrorDescriptionFactory.createErrorDescription(s, e.getDisplayName(), fixes, file, e.getStart().getOffsetValue(), e.getEnd().getOffsetValue()));
                     }
                 }
             });
         }
         
-        HintsController.setErrors(info.getFileObject(), ErrorHints.class.getName(), editorErrors);
+        HintsController.setErrors(file, ErrorHints.class.getName(), editorErrors);
         
         long end = System.currentTimeMillis();
         
-        Logger.getLogger("TIMER").log(Level.FINE, "Error Hints Processor", new Object[] {info.getFileObject(), (end - start)});
+        Logger.getLogger("TIMER").log(Level.FINE, "Error Hints Processor", new Object[] {file, (end - start)});
     }
 
     private Map<FileObject, List<ParseError>> sortErrors(Collection<ParseError> errors) {
@@ -166,17 +165,15 @@ public class ErrorHints implements CancellableTask<CompilationInfo> {
         code2Ignore.add("unknown.command");
         code2Ignore.add("unknown.environment");
     }
-    
-    public static final class Factory extends EditorAwareSourceTaskFactory {
 
-        public Factory() {
-            super(Phase.RESOLVED, Priority.NORMAL);
-        }
+    @Override
+    public int getPriority() {
+        return 10;
+    }
 
-        protected CancellableTask<CompilationInfo> createTask(FileObject file) {
-            return new ErrorHints();
-        }
-        
+    @Override
+    public Class<? extends Scheduler> getSchedulerClass() {
+        return Scheduler.EDITOR_SENSITIVE_TASK_SCHEDULER;
     }
     
 }

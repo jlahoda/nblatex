@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -42,14 +42,17 @@
 package org.netbeans.modules.latex.ui.navigator;
 
 import java.awt.BorderLayout;
+import java.beans.IntrospectionException;
+import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.ActionMap;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.structural.StructuralNodeFactory;
+import org.netbeans.modules.parsing.spi.ParserResultTask;
+import org.netbeans.modules.parsing.spi.Scheduler;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
 import org.netbeans.spi.navigator.NavigatorPanel;
 import org.openide.explorer.ExplorerManager;
 import org.openide.explorer.ExplorerUtils;
@@ -66,7 +69,6 @@ public class LaTeXNavigatorPanel implements NavigatorPanel {
     private JComponent panel;
     private final ExplorerManager manager = new ExplorerManager();
     
-    /** Creates a new instance of LaTeXNavigatorPanel */
     public LaTeXNavigatorPanel() {
     }
     
@@ -105,28 +107,46 @@ public class LaTeXNavigatorPanel implements NavigatorPanel {
     }
     
     public void panelActivated(Lookup context) {
-        LaTeXNavigatorFactory.getInstance().setLookup(context, new TaskImpl());
+        instance.set(this);
     }
 
     public void panelDeactivated() {
-        LaTeXNavigatorFactory.getInstance().setLookup(Lookup.EMPTY, null);
+        instance.set(null);
     }
     
     public Lookup getLookup() {
         return null;
     }
+
+    private static AtomicReference<LaTeXNavigatorPanel> instance = new AtomicReference<LaTeXNavigatorPanel>();
     
-    private final class TaskImpl implements CancellableTask<CompilationInfo> {
+    public final static class TaskImpl extends ParserResultTask<LaTeXParserResult> {
+        @Override
+        public void run(LaTeXParserResult lpr, SchedulerEvent evt) {
+//            if (lpr.getUpdateState().isUnchanged()) {
+//                return ;
+//            }
+
+            LaTeXNavigatorPanel instance = LaTeXNavigatorPanel.instance.get();
+
+            if (instance == null) return ;
+
+            instance.manager.setRootContext(StructuralNodeFactory.createNode(lpr.getStructuralRoot()));
+        }
+
+        @Override
+        public int getPriority() {
+            return 100;
+        }
+
+        @Override
+        public Class<? extends Scheduler> getSchedulerClass() {
+            return Scheduler.SELECTED_NODES_SENSITIVE_TASK_SCHEDULER;
+        }
+
+        @Override
         public void cancel() {}
 
-        public void run(CompilationInfo ci) throws Exception {
-            LaTeXParserResult lpr = LaTeXParserResult.get(ci);
-            if (lpr.getUpdateState().isUnchanged()) {
-                return ;
-            }
-            manager.setRootContext(StructuralNodeFactory.createNode(lpr.getStructuralRoot()));
-        }
-        
     }
     
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -41,25 +41,23 @@
 
 package org.netbeans.modules.latex.editor.semantic;
 
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source.Priority;
-import org.netbeans.napi.gsfret.source.support.EditorAwareSourceTaskFactory;
-import org.openide.filesystems.FileObject;
+import java.util.Collection;
+import java.util.Collections;
+import org.netbeans.modules.latex.model.hacks.RegisterParsingTaskFactory;
+import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.parsing.spi.SchedulerTask;
+import org.netbeans.modules.parsing.spi.TaskFactory;
 
 /**
  *
  * @author Jan Lahoda
  */
-public class SemanticColoringFactory extends EditorAwareSourceTaskFactory {
+@RegisterParsingTaskFactory(mimeType="text/x-tex")
+public class SemanticColoringFactory extends TaskFactory {
 
-    public SemanticColoringFactory() {
-        super(Phase.RESOLVED, Priority.BELOW_NORMAL);
-    }
-
-    protected CancellableTask<CompilationInfo> createTask(FileObject file) {
-        return new SemanticColoring(file);
+    @Override
+    public Collection<? extends SchedulerTask> create(Snapshot snapshot) {
+        return Collections.singleton(new SemanticColoring(snapshot.getSource().getFileObject()));
     }
 
 }

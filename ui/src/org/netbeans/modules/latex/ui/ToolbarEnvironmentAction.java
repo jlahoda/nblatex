@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -45,20 +45,22 @@ package org.netbeans.modules.latex.ui;
 
 import java.awt.Toolkit;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.JEditorPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.BlockNode;
 import org.netbeans.modules.latex.model.command.CommandPackage;
 import org.netbeans.modules.latex.model.command.Node;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.openide.text.NbDocument;
 import org.openide.util.Exceptions;
 
@@ -94,14 +96,11 @@ public abstract class ToolbarEnvironmentAction extends AbstractAction {
 
             final boolean[] insert        = {false};
 
-            Source source = Source.forDocument(doc);
+            Source source = Source.create(doc);
 
-            source.runUserActionTask(new CancellableTask<CompilationController>() {
-                public void cancel() {}
-
-                public void run(CompilationController cc) throws Exception {
-                    cc.toPhase(Phase.RESOLVED);
-                    LaTeXParserResult lpr = LaTeXParserResult.get(cc);
+            ParserManager.parse(Collections.singleton(source), new UserTask() {
+                public void run(ResultIterator parameter) throws Exception {
+                    LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
                 Node node = lpr.getCommandUtilities().findNode(doc, pane.getCaret().getDot());
 
                 BlockNode bn = findCorrespondingNode(node); //TODO: CommandNode?
@@ -119,7 +118,7 @@ public abstract class ToolbarEnvironmentAction extends AbstractAction {
 
                 insert[0] = !wantedType.isEmpty();
             }
-            }, true);
+            });
                     
             //TODO:may this cause deadlock?:
             NbDocument.runAtomicAsUser((StyledDocument) doc, new Runnable() {
@@ -151,7 +150,7 @@ public abstract class ToolbarEnvironmentAction extends AbstractAction {
                     }
                 }
             });
-        } catch (IOException e) {
+        } catch (ParseException e) {
             Exceptions.printStackTrace(e);
         } catch (BadLocationException e) {
             Exceptions.printStackTrace(e);

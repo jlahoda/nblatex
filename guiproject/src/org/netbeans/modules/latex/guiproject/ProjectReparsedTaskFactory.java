@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -45,12 +45,16 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source.Priority;
-import org.netbeans.napi.gsfret.source.SourceTaskFactory;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
+import org.netbeans.modules.latex.model.hacks.RegisterParsingTaskFactory;
+import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.spi.ParserResultTask;
+import org.netbeans.modules.parsing.spi.Scheduler;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
+import org.netbeans.modules.parsing.spi.SchedulerTask;
+import org.netbeans.modules.parsing.spi.SourceModificationEvent;
+import org.netbeans.modules.parsing.spi.TaskFactory;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Lookup;
 
@@ -58,51 +62,87 @@ import org.openide.util.Lookup;
  *
  * @author Jan Lahoda
  */
-public class ProjectReparsedTaskFactory extends SourceTaskFactory {
+public class ProjectReparsedTaskFactory {
 
-    public ProjectReparsedTaskFactory() {
-        super(Phase.RESOLVED, Priority.BELOW_NORMAL);
-    }
-    
-    protected CancellableTask<CompilationInfo> createTask(final FileObject file) {
-        return new CancellableTask<CompilationInfo>() {
-            public void cancel() {}
-            public void run(CompilationInfo parameter) throws Exception {
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
-                
-                LaTeXGUIProject p = LaTeXGUIProjectFactorySourceFactory.get().mainFile2Project.get(file);
-                
-                if (p != null) {
-                    p.setContainedFile(lpr.getDocument().getFiles());
+    static final class TaskImpl extends ParserResultTask<LaTeXParserResult> {
+        @Override
+        public void run(LaTeXParserResult lpr, SchedulerEvent event) {
+            LaTeXGUIProject p = null;
+
+            for (FileObject contained : lpr.getDocument().getFiles()) {
+                if ((p = LaTeXGUIProjectFactorySourceFactory.get().mainFile2Project.get(contained)) != null) {
+                    break;
                 }
             }
-        };
-    }
 
-    protected synchronized Collection<FileObject> getFileObjects() {
-        return Collections.unmodifiableList(registeredFiles);
-    }
-    
-    static ProjectReparsedTaskFactory get() {
-        for (SourceTaskFactory f : Lookup.getDefault().lookupAll(SourceTaskFactory.class)) {
-            if (f.getClass() == ProjectReparsedTaskFactory.class) {
-                return (ProjectReparsedTaskFactory) f;
+            if (p != null) {
+                p.setContainedFile(lpr.getDocument().getFiles());
             }
         }
+
+        @Override
+        public int getPriority() {
+            return 10;
+        }
+
+        @Override
+        public Class<? extends Scheduler> getSchedulerClass() {
+            return SchedulerImpl.class;
+        }
+
+        @Override
+        public void cancel() {
+            //XXX
+        }
         
+    }
+
+    @RegisterParsingTaskFactory(mimeType="text/x-tex")
+    public static final class TaskFactoryImpl extends TaskFactory {
+
+        @Override
+        public Collection<? extends SchedulerTask> create(Snapshot snapshot) {
+            return Collections.singleton(new TaskImpl());
+        }
+        
+    }
+
+    private static SchedulerImpl get() {
+        for (Scheduler f : Lookup.getDefault().lookupAll(Scheduler.class)) {
+            if (f.getClass() == SchedulerImpl.class) {
+                return (SchedulerImpl) f;
+            }
+        }
+
         return null;
     }
-    
+
     synchronized void registerFile(FileObject main) {
         registeredFiles.add(main);
-        fileObjectsChanged();
+        get().schedule(registeredFiles);
     }
-    
+
     synchronized void unregisterFile(FileObject main) {
         registeredFiles.remove(main);
-        fileObjectsChanged();
+        get().schedule(registeredFiles);
     }
 
     private List<FileObject> registeredFiles = new LinkedList<FileObject>();
-    
+
+    public static final class SchedulerImpl extends Scheduler {
+
+        @Override
+        protected SchedulerEvent createSchedulerEvent(SourceModificationEvent event) {
+            return new SchedulerEvent(event.getModifiedSource()) {};
+        }
+
+        private void schedule(List<FileObject> registeredFiles) {
+            for (FileObject f : registeredFiles) {
+                Source s = Source.create(f);
+                schedule(s, new SchedulerEvent(s) {});
+            }
+        }
+        
+    }
+
 }

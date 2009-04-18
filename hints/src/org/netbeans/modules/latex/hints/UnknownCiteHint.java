@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -50,7 +50,6 @@ import org.netbeans.modules.latex.model.bibtex.PublicationEntry;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Severity;
@@ -62,12 +61,11 @@ import org.openide.filesystems.FileObject;
  */
 public class UnknownCiteHint implements HintProvider<Void> {
 
-    public boolean accept(CompilationInfo info, Node n) {
+    public boolean accept(LaTeXParserResult lpr, Node n) {
         return n instanceof ArgumentNode && n.hasAttribute("#cite");
     }
 
-    public List<ErrorDescription> computeHints(CompilationInfo info, Node n, Data<Void> providerPrivateData) throws Exception {
-        LaTeXParserResult lpr = LaTeXParserResult.get(info);
+    public List<ErrorDescription> computeHints(LaTeXParserResult lpr, Node n, Data<Void> providerPrivateData) throws Exception {
         ArgumentNode anode = (ArgumentNode) n;
         String       nodeValue = lpr.getCommandUtilities().getArgumentValue(anode).toString();
         List<ErrorDescription> res = new  LinkedList<ErrorDescription>();
@@ -96,7 +94,7 @@ public class UnknownCiteHint implements HintProvider<Void> {
         return res;
     }
 
-    public List<ErrorDescription> scanningFinished(CompilationInfo info, DocumentNode dn, Data<Void> providerPrivateData) throws Exception {
+    public List<ErrorDescription> scanningFinished(LaTeXParserResult lpr, DocumentNode dn, Data<Void> providerPrivateData) throws Exception {
         return null;
     }
     

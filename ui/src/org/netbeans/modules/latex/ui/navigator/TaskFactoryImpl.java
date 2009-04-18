@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -21,12 +21,6 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Contributor(s):
- *
- * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
- * Microsystems, Inc. All Rights Reserved.
- *
  * If you wish your version of this file to be governed by only the CDDL
  * or only the GPL Version 2, indicate your decision by adding
  * "[Contributor] elects to include this software in this distribution
@@ -37,51 +31,30 @@
  * However, if you add GPL Version 2 code and therefore, elected the GPL
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
+ *
+ * Contributor(s):
+ *
+ * Portions Copyrighted 2009 Sun Microsystems, Inc.
  */
+package org.netbeans.modules.latex.ui.navigator;
 
-package org.netbeans.modules.latex.loop;
-
+import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import org.netbeans.modules.gsf.api.GsfLanguage;
-import org.netbeans.api.lexer.Language;
-import org.netbeans.modules.latex.editor.TexLanguage;
-import org.openide.filesystems.FileObject;
+import org.netbeans.modules.latex.model.hacks.RegisterParsingTaskFactory;
+import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.parsing.spi.SchedulerTask;
+import org.netbeans.modules.parsing.spi.TaskFactory;
 
 /**
  *
  * @author Jan Lahoda
  */
-public class LaTeXGSFLanguage implements GsfLanguage {
+@RegisterParsingTaskFactory(mimeType="text/x-tex")
+public class TaskFactoryImpl extends TaskFactory {
 
-    public String getLineCommentPrefix() {
-        return null;
-    }
-
-    public boolean isIdentifierChar(char c) {
-        //XXX:
-        return Character.isJavaIdentifierPart(c);
-    }
-
-    public Language getLexerLanguage() {
-        return TexLanguage.description();
-    }
-
-    public Collection<FileObject> getCoreLibraries() {
-        return Collections.emptyList();
-    }
-
-    public String getDisplayName() {
-        return "LaTeX";
-    }
-
-    public String getPreferredExtension() {
-        return "tex";
-    }
-
-    public Map<String, String> getSourceGroupNames() {
-        return Collections.emptyMap();
+    @Override
+    public Collection<? extends SchedulerTask> create(Snapshot snapshot) {
+        return Arrays.asList(new LaTeXNavigatorPanel.TaskImpl(), new DebugNavigatorProviderImpl.TaskImpl());
     }
 
 }

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 2008-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -249,7 +249,7 @@ public class ReformatterTest extends NbTestCase {
         DataObject od = DataObject.find(testFileObject);
         StyledDocument doc = od.getLookup().lookup(EditorCookie.class).openDocument();
  
-        doc.putProperty("mime-type", "text/x-tex");
+        doc.putProperty("mimeType", "text/x-tex");
         doc.putProperty(Language.class, TexLanguage.description());
 
         Region reg = IndentSpiPackageAccessor.get().createContextRegion(new MutablePositionRegion(doc, start, end));

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -53,17 +53,17 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.text.StyledDocument;
 import junit.framework.Assert;
-import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.core.startup.Main;
 import org.netbeans.junit.NbTestCase;
 import org.netbeans.modules.latex.UnitUtilities;
 import org.netbeans.modules.latex.bibtex.loaders.MyDataLoader;
 import org.netbeans.modules.latex.editor.TexLanguage;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
+import org.netbeans.modules.latex.model.LaTeXParserResult;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
@@ -97,7 +97,7 @@ public abstract class HintsTestBase extends NbTestCase {
     
     protected abstract HintProvider createProvider();
     
-    private List<ErrorDescription> computeHint(CompilationInfo info) throws Exception {
+    private List<ErrorDescription> computeHint(LaTeXParserResult info) throws Exception {
         HintProvider provider = createProvider();
         List<ErrorDescription> ed = HintsProcessor.compute(info, Collections.singletonList(provider), new AtomicBoolean());
         
@@ -126,17 +126,15 @@ public abstract class HintsTestBase extends NbTestCase {
         DataObject od = DataObject.find(testFileObject);
         StyledDocument doc = od.getLookup().lookup(EditorCookie.class).openDocument();
  
-        doc.putProperty("mime-type", "text/x-tex");
+        doc.putProperty("mimeType", "text/x-tex");
         doc.putProperty(Language.class, TexLanguage.description());
 
-        Source s = Source.forDocument(doc);
+        Source s = Source.create(doc);
         
-        s.runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-
-                List<ErrorDescription> errorsForHint = computeHint(parameter);
+        ParserManager.parse(Collections.singleton(s), new UserTask() {
+            public void run(ResultIterator iterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(iterator);
+                List<ErrorDescription> errorsForHint = computeHint(lpr);
                 
                 assertNotNull(errorsForHint);
                 
@@ -148,7 +146,7 @@ public abstract class HintsTestBase extends NbTestCase {
                 
                 assertEquals(Arrays.asList(errors), errorsNames);
             }
-        }, true);
+        });
     }
     
     public static String detectOffsets(String source, int[] positionOrSpan) {

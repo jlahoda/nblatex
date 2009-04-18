@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 2008-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -47,9 +47,10 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.swing.text.BadLocationException;
 import org.netbeans.modules.editor.NbEditorUtilities;
-import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
+import org.netbeans.modules.parsing.spi.ParserResultTask;
+import org.netbeans.modules.parsing.spi.Scheduler;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcher;
 import org.netbeans.spi.editor.bracesmatching.BracesMatcherFactory;
 import org.netbeans.spi.editor.bracesmatching.MatcherContext;
@@ -118,34 +119,44 @@ public class BraceMatcherImpl implements BracesMatcher {
         final Object wait = new Object();
 
         synchronized (wait) {
-            RunOnceFactory.add(f, new CancellableTask<CompilationInfo>() {
+            RunOnceFactory.add(f, new ParserResultTask<LaTeXParserResult>() {
                 private final AtomicBoolean privateCancel = new AtomicBoolean();
+                @Override
                 public void cancel() {
                     privateCancel.set(true);
                 }
-                public  void run(CompilationInfo parameter) throws Exception {
+                @Override
+                public  void run(LaTeXParserResult lpr, SchedulerEvent evt) {
                     privateCancel.set(false);
-                    
+
                     if (cancel.get()) {
                         return;
                     }
 
-                    List<int[]> braces = ComputeBraces.doComputeBraces(LaTeXParserResult.get(parameter), context, cancel, privateCancel);
+                    List<int[]> braces = ComputeBraces.doComputeBraces(lpr, context, cancel, privateCancel);
 
                     if (braces != null) {
                         result.addAll(braces);
                     }
 
                     if (privateCancel.get() && !cancel.get()) {
-                        RunOnceFactory.add(parameter.getFileObject(), this);
+                        RunOnceFactory.add(lpr.getSnapshot().getSource().getFileObject(), this);
                         return;
                     }
-                    
+
                     synchronized (wait) {
                         finished.set(true);
                         wait.notifyAll();
 
                     }
+                }
+                @Override
+                public int getPriority() {
+                    return 100;
+                }
+                @Override
+                public Class<? extends Scheduler> getSchedulerClass() {
+                    return null;
                 }
             });
 

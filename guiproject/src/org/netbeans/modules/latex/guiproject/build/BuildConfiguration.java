@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -44,23 +44,25 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.regex.Pattern;
 import javax.swing.text.Document;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
-import org.netbeans.napi.gsfret.source.Source;
 import org.netbeans.modules.latex.guiproject.LaTeXGUIProject;
 import org.netbeans.modules.latex.guiproject.Utilities;
 import org.netbeans.modules.latex.guiproject.ui.ProjectSettings;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.DefaultTraverseHandler;
 import org.netbeans.modules.latex.model.platform.LaTeXPlatform;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.HintsController;
 import org.openide.ErrorManager;
@@ -206,14 +208,13 @@ public final class BuildConfiguration implements Builder {
             case AUTO:
             default:
                 final boolean [] result = new boolean[1];
-                Source source = Source.forFileObject(p.getMainFile());
+                Source source = Source.create(p.getMainFile());
                 
                 try {
-                    source.runUserActionTask(new CancellableTask<CompilationController>() {
-                        public void cancel() {}
-                        public void run(CompilationController parameter) throws Exception {
-                            parameter.toPhase(Phase.RESOLVED);
-                            LaTeXParserResult.get(parameter).getDocument().traverse(new DefaultTraverseHandler() {
+                    ParserManager.parse(Collections.singleton(source), new UserTask() {
+                        @Override
+                        public void run(ResultIterator resultIterator) throws Exception {
+                            LaTeXParserResult.get(resultIterator).getDocument().traverse(new DefaultTraverseHandler() {
                                 @Override
                                 public boolean commandStart(CommandNode node) {
                                     if ("\\bibliography".equals(node.getCommand().getCommand())) {
@@ -225,8 +226,8 @@ public final class BuildConfiguration implements Builder {
                                 }
                             });
                         }
-                    }, true);
-                } catch (IOException e) {
+                    });
+                } catch (ParseException e) {
                     Exceptions.printStackTrace(e);
                 }
                 

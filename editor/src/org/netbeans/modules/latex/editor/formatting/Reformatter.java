@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 2008-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -51,13 +51,14 @@ import org.netbeans.modules.editor.indent.spi.Context;
 import org.netbeans.modules.editor.indent.spi.Context.Region;
 import org.netbeans.modules.editor.indent.spi.ExtraLock;
 import org.netbeans.modules.editor.indent.spi.ReformatTask;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.modules.gsfret.source.SourceAccessor;
 import org.netbeans.modules.latex.editor.formatting.Fragment.Diff;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
+import org.netbeans.modules.parsing.spi.Parser;
 import org.openide.util.Exceptions;
 
 /**
@@ -89,20 +90,20 @@ public class Reformatter implements ReformatTask {
         Document     doc     = this.doc     != null ? this.doc     : this.context.document();
         List<Region> regions = this.regions != null ? this.regions : this.context.indentRegions();
         try {
-            Source s = Source.forDocument(doc);
+            Source s = Source.create(doc);
             final List<Diff> diffs = new LinkedList<Diff>();
 
-            s.runUserActionTask(new CancellableTask<CompilationController>() {
-                public void cancel() {
-                }
+            ParserManager.parse(Collections.singleton(s), new UserTask() {
+                public void run(ResultIterator it) throws Exception {
+                    LaTeXParserResult lpr = LaTeXParserResult.get(it);
 
-                public void run(CompilationController parameter) throws Exception {
-                    parameter.toPhase(Phase.PARSED);
-
-                    LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
-                    diffs.addAll(FormatWorker.format(lpr, lpr.getDocument().getRootForFile(parameter.getFileObject()), 0));
+                    if (lpr == null) {
+                        return ;
+                    }
+                    
+                    diffs.addAll(FormatWorker.format(lpr, lpr.getDocument().getRootForFile(lpr.getSnapshot().getSource().getFileObject()), 0));
                 }
-            }, true);
+            });
 
             Collections.sort(diffs, new Comparator<Diff>() {
                 public int compare(Diff o1, Diff o2) {
@@ -132,7 +133,7 @@ public class Reformatter implements ReformatTask {
                 doc.remove(d.getOffset(), d.getRemoveLength());
                 doc.insertString(d.getOffset(), d.getAdd(), null);
             }
-        } catch (IOException ex) {
+        } catch (ParseException ex) {
             if (ex.getCause() instanceof BadLocationException) {
                 throw (BadLocationException) ex.getCause();
             }
@@ -147,11 +148,11 @@ public class Reformatter implements ReformatTask {
     private static final class LockImpl implements ExtraLock {
 
         public void lock() {
-            SourceAccessor.getINSTANCE().lockParser();
+//            SourceAccessor.getINSTANCE().lockParser();
         }
 
         public void unlock() {
-            SourceAccessor.getINSTANCE().unlockParser();
+//            SourceAccessor.getINSTANCE().unlockParser();
         }
         
     }

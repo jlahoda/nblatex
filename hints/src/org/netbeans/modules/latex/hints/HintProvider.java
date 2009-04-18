@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -42,9 +42,10 @@
 package org.netbeans.modules.latex.hints;
 
 import java.util.List;
+import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 
 /**
@@ -53,11 +54,11 @@ import org.netbeans.spi.editor.hints.ErrorDescription;
  */
 public interface HintProvider<T> {
 
-    public boolean accept(CompilationInfo info, Node n);
+    public boolean accept(LaTeXParserResult lpr, Node n);
     
-    public List<ErrorDescription> computeHints(CompilationInfo info, Node n, Data<T> providerPrivateData) throws Exception;
+    public List<ErrorDescription> computeHints(LaTeXParserResult lpr, Node n, Data<T> providerPrivateData) throws Exception;
     
-    public List<ErrorDescription> scanningFinished(CompilationInfo info, DocumentNode dn, Data<T> providerPrivateData) throws Exception;
+    public List<ErrorDescription> scanningFinished(LaTeXParserResult lpr, DocumentNode dn, Data<T> providerPrivateData) throws Exception;
     
     public static final class Data<T> {
         private T value;
