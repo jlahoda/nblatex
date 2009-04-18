@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -42,12 +42,9 @@
 package org.netbeans.modules.latex.refactoring.actions;
 
 import java.io.IOException;
+import java.util.Collections;
 import javax.swing.JEditorPane;
 import javax.swing.text.Document;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.BlockNode;
@@ -58,6 +55,11 @@ import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.impl.NodeImpl;
 import org.netbeans.modules.latex.refactoring.FindUsagesPerformer;
 import org.netbeans.modules.latex.refactoring.UsagesQuery;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.refactoring.api.Problem;
 import org.netbeans.modules.refactoring.spi.ui.ActionsImplementationProvider;
 import org.netbeans.modules.refactoring.spi.ui.UI;
@@ -138,16 +140,13 @@ public class ActionsImplementationProviderImpl extends ActionsImplementationProv
         final String[] originalName = new String[1];
         
         final int caret = panes[0].getCaretPosition();
-        
-            final Source source = Source.forFileObject(file);
+
+            final Source source = Source.create(file);
             
-            source.runUserActionTask(new CancellableTask<CompilationController>() {
-                public void cancel() {}
-                public void run(CompilationController parameter) throws Exception {
-                    parameter.toPhase(Phase.RESOLVED);
-                    
+            ParserManager.parse(Collections.singleton(source), new UserTask() {
+                public void run(ResultIterator parameter) throws Exception {
                     LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
-                    Document doc = parameter.getDocument();
+                    Document doc = parameter.getSnapshot().getSource().getDocument(false);
                     
                     if (doc == null)
                         return ;
@@ -160,9 +159,11 @@ public class ActionsImplementationProviderImpl extends ActionsImplementationProv
                         problem[0] = new Problem(true, "Cannot resolve");
                     }
                 }
-            }, true);
+            });
         
             UI.openRefactoringUI(new LaTeXFURefactoringUI(source, caret, searchFor[0], originalName[0], problem[0], whereUsed));
+        } catch (ParseException e) {
+            Exceptions.printStackTrace(e);
         } catch (IOException e) {
             Exceptions.printStackTrace(e);
         }

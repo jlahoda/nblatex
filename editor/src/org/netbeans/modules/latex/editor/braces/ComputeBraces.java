@@ -57,6 +57,7 @@ import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.TextNode;
 import org.netbeans.modules.latex.model.command.TraverseHandler;
 import org.netbeans.spi.editor.bracesmatching.MatcherContext;
+import org.openide.util.Exceptions;
 
 /**
  *
@@ -66,7 +67,15 @@ public class ComputeBraces {
 
     private ComputeBraces() {}
 
-    public static List<int[]> doComputeBraces(LaTeXParserResult lpr, MatcherContext context, AtomicBoolean cancel, AtomicBoolean privateCancel) throws IOException {
+    public static List<int[]> doComputeBraces(LaTeXParserResult lpr, MatcherContext context, AtomicBoolean cancel, AtomicBoolean privateCancel) {
+        try {
+            return doComputeBracesImpl(lpr, context, cancel, privateCancel);
+        } catch (IOException ex) {
+            throw new IllegalStateException(ex);
+        }
+    }
+    
+    private static List<int[]> doComputeBracesImpl(LaTeXParserResult lpr, MatcherContext context, AtomicBoolean cancel, AtomicBoolean privateCancel) throws IOException {
         if (privateCancel.get() || cancel.get()) {
             return null;
         }

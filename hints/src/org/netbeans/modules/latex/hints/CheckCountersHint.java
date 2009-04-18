@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -47,12 +47,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.WeakHashMap;
+import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.Command;
 import org.netbeans.modules.latex.model.command.CommandPackage;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Severity;
@@ -64,7 +64,7 @@ import org.openide.filesystems.FileObject;
  */
 public class CheckCountersHint implements HintProvider {
 
-    public boolean accept(CompilationInfo info, Node n) {
+    public boolean accept(LaTeXParserResult lpr, Node n) {
         if (n instanceof ArgumentNode) {
             ArgumentNode an = (ArgumentNode) n;
             
@@ -81,16 +81,16 @@ public class CheckCountersHint implements HintProvider {
         return false;
     }
 
-    public List computeHints(CompilationInfo info, Node n, Data providerPrivateData) throws Exception {
+    public List computeHints(LaTeXParserResult lpr, Node n, Data providerPrivateData) throws Exception {
         ArgumentNode an = (ArgumentNode) n;
         
         if (an.hasAttribute("new-counter")) {
-            getExistingCounters(info).add(getArgumentValue(an).toString());
+            getExistingCounters(lpr).add(getArgumentValue(an).toString());
             return null;
         }
         
         if (an.hasAttribute("existing-counter")) {
-            if (!getExistingCounters(info).contains(getArgumentValue(an).toString())) {
+            if (!getExistingCounters(lpr).contains(getArgumentValue(an).toString())) {
                 ErrorDescription e = ErrorDescriptionFactory.createErrorDescription(Severity.WARNING,
                         "Undefined counter", (FileObject) n.getStartingPosition().getFile(),
                         n.getStartingPosition().getOffsetValue(), n.getEndingPosition().getOffsetValue());
@@ -108,7 +108,7 @@ public class CheckCountersHint implements HintProvider {
                 cp = CommandPackage.getDefaultDocumentClass();
             }
             
-            getExistingCounters(info).addAll(cp.getCounters());
+            getExistingCounters(lpr).addAll(cp.getCounters());
             
             return null;
         }
@@ -119,7 +119,7 @@ public class CheckCountersHint implements HintProvider {
             CommandPackage cp = CommandPackage.getCommandPackageForName(name);
             
             if (cp != null) {
-                getExistingCounters(info).addAll(cp.getCounters());
+                getExistingCounters(lpr).addAll(cp.getCounters());
             }
             
             return null;
@@ -128,17 +128,17 @@ public class CheckCountersHint implements HintProvider {
         return null;
     }
     
-    private Set<String> getExistingCounters(CompilationInfo info) {
-        Set<String> existing = info2ExistingCounters.get(info);
+    private Set<String> getExistingCounters(LaTeXParserResult lpr) {
+        Set<String> existing = lpr2ExistingCounters.get(lpr);
         
         if (existing == null) {
-            info2ExistingCounters.put(info, existing = new HashSet<String>());
+            lpr2ExistingCounters.put(lpr, existing = new HashSet<String>());
         }
         
         return existing;
     }
     
-    private Map<CompilationInfo, Set<String>> info2ExistingCounters = new WeakHashMap<CompilationInfo, Set<String>>();
+    private Map<LaTeXParserResult, Set<String>> lpr2ExistingCounters = new WeakHashMap<LaTeXParserResult, Set<String>>();
 
     //XXX:
     private static CharSequence getArgumentValue(ArgumentNode an) {
@@ -173,7 +173,7 @@ public class CheckCountersHint implements HintProvider {
         return result;
     }
 
-    public List scanningFinished(CompilationInfo info, DocumentNode dn, Data providerPrivateData) throws Exception {
+    public List scanningFinished(LaTeXParserResult lpr, DocumentNode dn, Data providerPrivateData) throws Exception {
         return null;
     }
     

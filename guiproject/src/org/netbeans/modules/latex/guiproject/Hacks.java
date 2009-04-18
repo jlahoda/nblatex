@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2008.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2008-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -46,7 +46,7 @@ package org.netbeans.modules.latex.guiproject;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashSet;
-import org.netbeans.napi.gsfret.source.Source;
+//import org.netbeans.napi.gsfret.source.Source;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
 
@@ -58,28 +58,29 @@ public class Hacks {
 
     static void revalidateAll(HashSet<FileObject> nueFilesCopy) {
         for (FileObject f : nueFilesCopy) {
-            Source s = Source.forFileObject(f);
-
-            if (s == null) {
-                continue;
-            }
-            
-            try {
-                Method m = Source.class.getDeclaredMethod("revalidate");
-
-                m.setAccessible(true);
-                m.invoke(s);
-            } catch (IllegalAccessException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (IllegalArgumentException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (InvocationTargetException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (NoSuchMethodException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (SecurityException ex) {
-                Exceptions.printStackTrace(ex);
-            }
+            //XXX:
+//            Source s = Source.forFileObject(f);
+//
+//            if (s == null) {
+//                continue;
+//            }
+//
+//            try {
+//                Method m = Source.class.getDeclaredMethod("revalidate");
+//
+//                m.setAccessible(true);
+//                m.invoke(s);
+//            } catch (IllegalAccessException ex) {
+//                Exceptions.printStackTrace(ex);
+//            } catch (IllegalArgumentException ex) {
+//                Exceptions.printStackTrace(ex);
+//            } catch (InvocationTargetException ex) {
+//                Exceptions.printStackTrace(ex);
+//            } catch (NoSuchMethodException ex) {
+//                Exceptions.printStackTrace(ex);
+//            } catch (SecurityException ex) {
+//                Exceptions.printStackTrace(ex);
+//            }
         }
     }
 

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -34,7 +34,7 @@
  * 
  * Contributor(s):
  * 
- * Portions Copyrighted 2008 Sun Microsystems, Inc.
+ * Portions Copyrighted 2008-2009 Sun Microsystems, Inc.
  */
 package org.netbeans.modules.latex.ui.preview;
 
@@ -47,7 +47,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import org.netbeans.modules.latex.model.IconsStorage.ChangeableIcon;
-import org.netbeans.modules.latex.ui.preview.PreviewTask.FactoryImpl;
+//import org.netbeans.modules.latex.ui.preview.PreviewTask.FactoryImpl;
 import org.openide.util.NbBundle;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
@@ -152,12 +152,12 @@ final class PreviewTopComponent extends TopComponent {
 
     @Override
     public void componentOpened() {
-        FactoryImpl.getInstance().setComponent(this);
+//        FactoryImpl.getInstance().setComponent(this);
     }
 
     @Override
     public void componentClosed() {
-        FactoryImpl.getInstance().setComponent(null);
+//        FactoryImpl.getInstance().setComponent(null);
     }
 
     /** replaces this in object stream */

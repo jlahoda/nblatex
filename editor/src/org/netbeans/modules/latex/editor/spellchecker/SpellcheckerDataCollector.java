@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -41,6 +41,7 @@
 package org.netbeans.modules.latex.editor.spellchecker;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -49,14 +50,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.text.Document;
-import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source.Priority;
-import org.netbeans.napi.gsfret.source.support.EditorAwareSourceTaskFactory;
+import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.parsing.spi.Parser.Result;
+import org.netbeans.modules.parsing.spi.Scheduler;
+import org.netbeans.modules.parsing.spi.SchedulerTask;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.command.ArgumentContainingNode;
@@ -68,7 +68,11 @@ import org.netbeans.modules.latex.model.command.InputNode;
 import org.netbeans.modules.latex.model.command.MathNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.TextNode;
+import org.netbeans.modules.latex.model.hacks.RegisterParsingTaskFactory;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.parsing.spi.ParserResultTask;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
+import org.netbeans.modules.parsing.spi.TaskFactory;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.WeakSet;
@@ -77,7 +81,7 @@ import org.openide.util.WeakSet;
  *
  * @author Jan Lahoda
  */
-public class SpellcheckerDataCollector implements CancellableTask<CompilationInfo> {
+public class SpellcheckerDataCollector extends ParserResultTask {
 
     private static final Logger LOG = Logger.getLogger(SpellcheckerDataCollector.class.getName());
     private AtomicBoolean cancel = new AtomicBoolean();
@@ -87,18 +91,25 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
         LOG.fine("cancelled");
     }
 
-    public void run(CompilationInfo parameter) throws Exception {
+    @Override
+    public void run(Result result, SchedulerEvent evt) {
         cancel.set(false);
         
         long startTime = System.currentTimeMillis();
+        FileObject file = result.getSnapshot().getSource().getFileObject();
         
         try {
-            LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
-            Document doc = parameter.getDocument();
-            Node rootNode = lpr.getDocument().getRootForFile(parameter.getFileObject());
+            LaTeXParserResult lpr = LaTeXParserResult.get(result);
+            Document doc = result.getSnapshot().getSource().getDocument(false);
+
+            if (doc == null) {
+                return ;
+            }
+            
+            Node rootNode = lpr.getDocument().getRootForFile(file);
 
             if (rootNode == null) {
-                LOG.log(Level.SEVERE, "No root for: {0}", FileUtil.getFileDisplayName(parameter.getFileObject()));
+                LOG.log(Level.SEVERE, "No root for: {0}", FileUtil.getFileDisplayName(file));
                 LaTeXTokenListProvider.findTokenListImpl(doc).setAcceptedTokens(Collections.<Token>emptySet());
                 return ;
             }
@@ -113,7 +124,7 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
         } finally {
             long endTime = System.currentTimeMillis();
             
-            Logger.getLogger("TIMER").log(Level.FINE, "Spellchecker Data Collector", new Object[] {parameter.getFileObject(), endTime - startTime});
+            Logger.getLogger("TIMER").log(Level.FINE, "Spellchecker Data Collector", new Object[] {file, endTime - startTime});
         }
     }
 
@@ -123,6 +134,16 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
         root.traverse(vi);
 
         return vi.acceptedTokens;
+    }
+
+    @Override
+    public int getPriority() {
+        return 100;
+    }
+
+    @Override
+    public Class<? extends Scheduler> getSchedulerClass() {
+        return Scheduler.EDITOR_SENSITIVE_TASK_SCHEDULER;
     }
 
     private static final class VisitorImpl extends DefaultTraverseHandler {
@@ -319,15 +340,13 @@ public class SpellcheckerDataCollector implements CancellableTask<CompilationInf
 
         return fc.children;
     }
-    
-    public static final class Factory extends EditorAwareSourceTaskFactory {
 
-        public Factory() {
-            super(Phase.RESOLVED, Priority.NORMAL);
-        }
-        
-        protected CancellableTask<CompilationInfo> createTask(FileObject file) {
-            return new SpellcheckerDataCollector();
+    @RegisterParsingTaskFactory(mimeType="text/x-tex")
+    public static final class Factory extends TaskFactory {
+
+        @Override
+        public Collection<? extends SchedulerTask> create(Snapshot snapshot) {
+            return Collections.singleton(new SpellcheckerDataCollector());
         }
         
     }

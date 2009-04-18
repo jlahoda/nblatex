@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -21,13 +21,6 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  *
- * Contributor(s):
- *
- * The Original Software is the LaTeX module.
- * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
- * All Rights Reserved.
- *
  * If you wish your version of this file to be governed by only the CDDL
  * or only the GPL Version 2, indicate your decision by adding
  * "[Contributor] elects to include this software in this distribution
@@ -39,34 +32,18 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  *
- * Contributor(s): Jan Lahoda.
+ * Contributor(s):
+ *
+ * Portions Copyrighted 2008-2009 Sun Microsystems, Inc.
  */
-package org.netbeans.modules.latex.guiproject;
-
-import org.netbeans.spi.project.ui.ProjectOpenedHook;
+package org.netbeans.modules.latex.model.hacks;
 
 /**
  *
  * @author Jan Lahoda
  */
-public class LaTeXGUIProjectOpenedHookImpl extends ProjectOpenedHook {
+public @interface RegisterParsingTaskFactory {
 
-    private LaTeXGUIProject project;
+    public String mimeType();
 
-    /** Creates a new instance of LaTeXGUIProjectOpenedHookImpl */
-    public LaTeXGUIProjectOpenedHookImpl(LaTeXGUIProject project) {
-        this.project = project;
-    }
-
-    protected void projectOpened() {
-        LaTeXGUIProjectUpgrader.getUpgrader().upgrade(project);
-        //XXX:
-//        ProjectReparsedTaskFactory.get().registerFile(project.getMainFile());
-    }
-
-    protected void projectClosed() {
-        //XXX:
-//        ProjectReparsedTaskFactory.get().unregisterFile(project.getMainFile());
-    }
-    
 }

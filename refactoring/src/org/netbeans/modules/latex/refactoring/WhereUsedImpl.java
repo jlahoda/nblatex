@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -42,16 +42,18 @@
 package org.netbeans.modules.latex.refactoring;
 
 import java.io.IOException;
+import java.util.Collections;
 import javax.swing.text.Document;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.Command;
 import org.netbeans.modules.latex.model.command.Environment;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.refactoring.actions.ActionsImplementationProviderImpl;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.refactoring.api.Problem;
 import org.netbeans.modules.refactoring.api.RenameRefactoring;
 import org.netbeans.modules.refactoring.api.WhereUsedQuery;
@@ -91,13 +93,10 @@ public class WhereUsedImpl implements RefactoringPlugin {
         Source source = ref.getRefactoringSource().lookup(Data.class).getSource();
         final int caret = ref.getRefactoringSource().lookup(Data.class).getCaret();
         try {
-            source.runUserActionTask(new CancellableTask<CompilationController>() {
-                public void cancel() {}
-                public void run(CompilationController parameter) throws Exception {
-                    parameter.toPhase(Phase.RESOLVED);
-                    
+            ParserManager.parse(Collections.singleton(source), new UserTask() {
+                public void run(ResultIterator parameter) throws Exception {
                     LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
-                    Document doc = parameter.getDocument();
+                    Document doc = parameter.getSnapshot().getSource().getDocument(false);
                     
                     if (doc == null)
                         return ;
@@ -120,8 +119,8 @@ public class WhereUsedImpl implements RefactoringPlugin {
                         }
                     }
                 }
-            }, true);
-        } catch (IOException e) {
+            });
+        } catch (ParseException e) {
             Exceptions.printStackTrace(e);
         }
         

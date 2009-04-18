@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2008.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2008-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -45,15 +45,10 @@ package org.netbeans.modules.latex.gui.nb;
 
 import java.io.IOException;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.netbeans.modules.gsf.api.CompilationInfo;
-import org.netbeans.modules.gsf.api.InstantRenamer;
-import org.netbeans.modules.gsf.api.OffsetRange;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.BlockNode;
@@ -65,39 +60,39 @@ import org.netbeans.modules.latex.model.command.Node;
  *
  * @author Jan Lahoda
  */
-public class InstantRenamerImpl implements InstantRenamer {
+public class InstantRenamerImpl {
 
     private static final Logger LOG = Logger.getLogger(InstantRenamerImpl.class.getName());
-    
-    public boolean isRenameAllowed(CompilationInfo info, int caretOffset, String[] explanationRetValue) {
-        return lookupNodes(info, caretOffset, new Node[1], new String[1]);
-    }
 
-    public Set<OffsetRange> getRenameRegions(CompilationInfo info, int caretOffset) {
-        Set<OffsetRange> result = new HashSet<OffsetRange>();
+//    public boolean isRenameAllowed(CompilationInfo info, int caretOffset, String[] explanationRetValue) {
+//        return lookupNodes(info, caretOffset, new Node[1], new String[1]);
+//    }
+//
+//    public Set<OffsetRange> getRenameRegions(CompilationInfo info, int caretOffset) {
+//        Set<OffsetRange> result = new HashSet<OffsetRange>();
+//
+//        for (int[] span : getRenameRegionsImpl(info, caretOffset)) {
+//            result.add(new OffsetRange(span[0], span[1]));
+//        }
+//
+//        return result;
+//    }
 
-        for (int[] span : getRenameRegionsImpl(info, caretOffset)) {
-            result.add(new OffsetRange(span[0], span[1]));
-        }
-
-        return result;
-    }
-
-    static List<int[]> getRenameRegionsImpl(final CompilationInfo info, int caretOffset) {
+    static List<int[]> getRenameRegionsImpl(final LaTeXParserResult lpr, int caretOffset) {
         Node[] vcpicture = new Node[1];
         final String[] name = new String[1];
-        
-        if (!lookupNodes(info, caretOffset, vcpicture, name)) {
+
+        if (!lookupNodes(lpr, caretOffset, vcpicture, name)) {
             return Collections.emptyList();
         }
 
         final List<int[]> span = new LinkedList<int[]>();
-        
+
         vcpicture[0].traverse(new DefaultTraverseHandler() {
             @Override
             public boolean argumentStart(ArgumentNode node) {
                 if (node.hasAttribute("#vc-state-name")) {
-                    if (name[0].equals(findText(info, node))) {
+                    if (name[0].equals(findText(lpr, node))) {
                         span.add(findSpan(node));
                     }
                 }
@@ -108,14 +103,13 @@ public class InstantRenamerImpl implements InstantRenamer {
         return span;
     }
 
-    private static boolean lookupNodes(CompilationInfo info, int offset, Node[] vcpicture, String[] name) {
+    private static boolean lookupNodes(LaTeXParserResult lpr, int offset, Node[] vcpicture, String[] name) {
         try {
-            LaTeXParserResult lpr = LaTeXParserResult.get(info, offset);
-            Node n = lpr.getCommandUtilities().findNode(info.getDocument(), offset);
+            Node n = lpr.getCommandUtilities().findNode(lpr.getSnapshot().getSource().getDocument(true), offset);
 
             while (!(n instanceof DocumentNode)) {
                 if (n instanceof ArgumentNode && n.hasAttribute("#vc-state-name")) {
-                    name[0] = findText(info, (ArgumentNode) n);
+                    name[0] = findText(lpr, (ArgumentNode) n);
                 }
 
                 if (n instanceof BlockNode && "VCPicture".equals(((BlockNode) n).getEnvironment().getName())) {
@@ -133,10 +127,10 @@ public class InstantRenamerImpl implements InstantRenamer {
         }
     }
 
-    private static String findText(CompilationInfo info, ArgumentNode n) {
+    private static String findText(LaTeXParserResult lpr, ArgumentNode n) {
         int[] span = findSpan((ArgumentNode) n);
 
-        return info.getText().substring(span[0], span[1] + 1);
+        return lpr.getSnapshot().getText().subSequence(span[0], span[1] + 1).toString();
     }
 
     private static int[] findSpan(ArgumentNode n) {

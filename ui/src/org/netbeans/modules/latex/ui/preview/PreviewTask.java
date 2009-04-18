@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  * 
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  * 
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -34,51 +34,59 @@
  * 
  * Contributor(s):
  * 
- * Portions Copyrighted 2008 Sun Microsystems, Inc.
+ * Portions Copyrighted 2008-2009 Sun Microsystems, Inc.
  */
 package org.netbeans.modules.latex.ui.preview;
 
+import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
-import org.netbeans.modules.gsf.api.CancellableTask;
+import javax.swing.text.Document;
 import org.netbeans.modules.latex.model.IconsStorage.ChangeableIcon;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.ParagraphNode;
 import org.netbeans.modules.latex.ui.IconsStorageImpl;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source.Priority;
-import org.netbeans.napi.gsfret.source.support.CaretAwareSourceTaskFactory;
-import org.openide.filesystems.FileObject;
+import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.parsing.spi.CursorMovedSchedulerEvent;
+import org.netbeans.modules.parsing.spi.ParserResultTask;
+import org.netbeans.modules.parsing.spi.Scheduler;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
+import org.netbeans.modules.parsing.spi.SchedulerTask;
+import org.netbeans.modules.parsing.spi.TaskFactory;
 import org.openide.util.Lookup;
 
 /**
  *
  * @author Jan Lahoda
  */
-public class PreviewTask implements CancellableTask<CompilationInfo> {
+public final class PreviewTask extends ParserResultTask<LaTeXParserResult> {
 
     private PreviewTopComponent comp;
 
     public PreviewTask(PreviewTopComponent comp) {
         this.comp = comp;
     }
-    
+
     public void cancel() {
     }
 
-    public void run(CompilationInfo parameter) throws Exception {
+    public void run(LaTeXParserResult lpr, SchedulerEvent evt) {
         long startTime = System.currentTimeMillis();
-        
-        try {
-            LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
-            int pos = CaretAwareSourceTaskFactory.getLastPosition(parameter.getFileObject());
 
-            Node n = lpr.getCommandUtilities().findNode(parameter.getDocument(), pos); //XXX: getDocument() == null;
+        try {
+            Document doc = lpr.getSnapshot().getSource().getDocument(false);
+
+            if (doc == null) {
+                return ;
+            }
+            
+            int pos = ((CursorMovedSchedulerEvent) evt).getCaretOffset();
+
+            Node n = lpr.getCommandUtilities().findNode(doc, pos);
 
             while (n != null && !(n instanceof ParagraphNode)) {
                 n = n.getParent();
@@ -89,7 +97,7 @@ public class PreviewTask implements CancellableTask<CompilationInfo> {
             }
 
             final ChangeableIcon i = IconsStorageImpl.getDefaultImpl().getIconForText(n.getFullText().toString());
-            
+
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     if (comp != null) {
@@ -97,43 +105,44 @@ public class PreviewTask implements CancellableTask<CompilationInfo> {
                     }
                 }
             });
+        } catch (IOException ex) {
+            throw new IllegalStateException(ex);
         } finally {
             long endTime = System.currentTimeMillis();
-            
-            Logger.getLogger("TIMER").log(Level.FINE, "PreviewTask", new Object[] {parameter.getFileObject(), endTime - startTime});
+
+            Logger.getLogger("TIMER").log(Level.FINE, "PreviewTask", new Object[] {lpr.getSnapshot().getSource().getFileObject(), endTime - startTime});
         }
     }
 
-    public static final class FactoryImpl extends CaretAwareSourceTaskFactory {
+    @Override
+    public int getPriority() {
+        return 100;
+    }
 
-        public FactoryImpl() {
-            super(Phase.RESOLVED, Priority.MIN);
-        }
+    @Override
+    public Class<? extends Scheduler> getSchedulerClass() {
+        return Scheduler.CURSOR_SENSITIVE_TASK_SCHEDULER;
+    }
 
-        @Override
-        public synchronized List<FileObject> getFileObjects() {
-            if (comp != null) {
-                return super.getFileObjects();
-            } else {
-                return Collections.emptyList();
-            }
-        }
+    //XXX: should be bound to the scheduler!
+    public static final class FactoryImpl extends TaskFactory {
 
-        @Override
-        protected synchronized CancellableTask<CompilationInfo> createTask(FileObject file) {
-            return new PreviewTask(comp);
-        }
-        
+        public FactoryImpl() {}
+
         public static FactoryImpl getInstance() {
             return Lookup.getDefault().lookup(FactoryImpl.class);
         }
-        
+
         private PreviewTopComponent comp;
-        
+
         public synchronized void setComponent(PreviewTopComponent comp) {
             this.comp = comp;
-            fileObjectsChanged();
+        }
+
+        @Override
+        public Collection<? extends SchedulerTask> create(Snapshot snapshot) {
+            return Collections.singleton(new PreviewTask(comp));
         }
     }
-        
+
 }

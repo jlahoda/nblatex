@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -46,99 +46,112 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source.Priority;
-import org.netbeans.napi.gsfret.source.SourceTaskFactory;
+import org.netbeans.modules.latex.model.hacks.RegisterParsingTaskFactory;
+import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.spi.Parser;
+import org.netbeans.modules.parsing.spi.Parser.Result;
+import org.netbeans.modules.parsing.spi.ParserResultTask;
+import org.netbeans.modules.parsing.spi.Scheduler;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
+import org.netbeans.modules.parsing.spi.SourceModificationEvent;
+import org.netbeans.modules.parsing.spi.TaskFactory;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Jan Lahoda
  */
-public class RunOnceFactory extends SourceTaskFactory {
+@RegisterParsingTaskFactory(mimeType="text/x-tex")
+public class RunOnceFactory extends TaskFactory {
 
     private static final Logger LOG = Logger.getLogger(RunOnceFactory.class.getName());
-    
+
     static {
         LOG.setLevel(Level.ALL);
     }
-    
+
     private static RunOnceFactory INSTANCE;
-    
-    private List<Pair<FileObject, CancellableTask<CompilationInfo>>> work = new LinkedList<Pair<FileObject, CancellableTask<CompilationInfo>>>();
+
+    private List<Pair<FileObject, ParserResultTask<?>>> work = new LinkedList<Pair<FileObject, ParserResultTask<?>>>();
     private FileObject currentFile;
-    private CancellableTask<CompilationInfo> task;
-    
+    private ParserResultTask<?> task;
+
     public RunOnceFactory() {
-        super(Phase.RESOLVED, Priority.BELOW_NORMAL);
         INSTANCE = this;
     }
 
-    protected synchronized CancellableTask<CompilationInfo> createTask(FileObject file) {
-        final CancellableTask<CompilationInfo> task = this.task;
-        return new CancellableTask<CompilationInfo>() {
+    @Override
+    public synchronized Collection<ParserResultTask<?>> create(Snapshot s) {
+        final ParserResultTask task = this.task;
+        if (task == null) return Collections.emptyList();
+        return Collections.<ParserResultTask<?>>singleton(new ParserResultTask<Parser.Result>() {
             public void cancel() {
                 task.cancel();
             }
-            public void run(CompilationInfo parameter) throws Exception {
-                task.run(parameter);
+
+            @Override
+            public void run(Result result, SchedulerEvent event) {
+                task.run(result, event);
                 next();
             }
-        };
+
+            @Override
+            public int getPriority() {
+                return task.getPriority();
+            }
+
+            @Override
+            public Class<? extends Scheduler> getSchedulerClass() {
+                return OneTimeScheduler.class;
+            }
+        });
     }
 
-    protected synchronized Collection<FileObject> getFileObjects() {
-        if (currentFile == null)
-            return Collections.<FileObject>emptyList();
-        
-        return Collections.<FileObject>singletonList(currentFile);
-    }
-
-    private synchronized void addImpl(FileObject file, CancellableTask<CompilationInfo> task) {
+    private synchronized void addImpl(FileObject file, ParserResultTask<?> task) {
         if (LOG.isLoggable(Level.FINE)) {
             LOG.log(Level.FINE, "addImpl({0}, {1})", new Object[] {FileUtil.getFileDisplayName(file), task.getClass().getName()});
         }
-        
-        work.add(new Pair<FileObject, CancellableTask<CompilationInfo>>(file, task));
-        
+
+        work.add(new Pair<FileObject, ParserResultTask<?>>(file, task));
+
         if (currentFile == null)
             next();
     }
-    
+
     private synchronized void next() {
         LOG.fine("next, phase 1");
-        
+
         if (currentFile != null) {
             currentFile = null;
             task = null;
-            fileObjectsChanged();
         }
-        
+
         LOG.fine("next, phase 1 done");
-        
+
         if (work.isEmpty())
             return ;
-        
+
         LOG.fine("next, phase 2");
-        
-        Pair<FileObject, CancellableTask<CompilationInfo>> p = work.remove(0);
-        
+
+        Pair<FileObject, ParserResultTask<?>> p = work.remove(0);
+
         currentFile = p.getA();
         task = p.getB();
-        
-        fileObjectsChanged();
-        
+
+        if (SCHEDULER != null) {
+            SCHEDULER.schedule(currentFile);
+        }
+
         LOG.fine("next, phase 2 done");
     }
-    
 
-    public static void add(FileObject file, CancellableTask<CompilationInfo> task) {
+    public static void add(FileObject file, ParserResultTask<?> task) {
         if (INSTANCE == null)
             return ;
-        
+
         INSTANCE.addImpl(file, task);
     }
 
@@ -159,5 +172,27 @@ public class RunOnceFactory extends SourceTaskFactory {
             return b;
         }
 
+    }
+
+    private static OneTimeScheduler SCHEDULER;
+
+    @ServiceProvider(service=Scheduler.class)
+    public static final class OneTimeScheduler extends Scheduler {
+
+        public OneTimeScheduler() {
+            SCHEDULER = this;
+        }
+
+        @Override
+        protected SchedulerEvent createSchedulerEvent(SourceModificationEvent event) {
+            return new SchedulerEvent(event.getModifiedSource()) {};
+        }
+
+        public void schedule(FileObject file) {
+            Source s = Source.create(file);
+            
+            schedule(s, new SchedulerEvent(s) {});
+        }
+        
     }
 }

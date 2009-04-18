@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -50,22 +50,18 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
-import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.modules.latex.editor.TexLanguage;
+import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
-import org.netbeans.napi.gsfret.source.ModificationResult;
-import org.netbeans.napi.gsfret.source.ModificationResult.Difference;
-import org.netbeans.napi.gsfret.source.ModificationResult.Difference.Kind;
-import org.netbeans.napi.gsfret.source.Source;
-import org.netbeans.napi.gsfret.source.WorkingCopy;
-import org.netbeans.napi.gsfret.source.support.CaretAwareSourceTaskFactory;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.spi.CursorMovedSchedulerEvent;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
 import org.netbeans.spi.editor.hints.ChangeInfo;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
@@ -85,16 +81,21 @@ import org.openide.util.Exceptions;
  */
 public class AddItemHint implements HintProvider {
 
-    public boolean accept(CompilationInfo info, Node n) {
+    public boolean accept(LaTeXParserResult lpr, Node n) {
         return n instanceof CommandNode && n.hasAttribute("item-command") && ((CommandNode) n).getCommand().getArgumentCount() == 2 /*XXX*/;
     }
 
-    public List computeHints(CompilationInfo info, Node n, Data providerPrivateData) throws Exception {
-        return computeHints(info, n, CaretAwareSourceTaskFactory.getLastPosition(info.getFileObject()));
+    private static int getCaret(SchedulerEvent event) {
+        return event instanceof CursorMovedSchedulerEvent ?
+            ((CursorMovedSchedulerEvent) event).getCaretOffset () : -1;
+    }
+
+    public List computeHints(LaTeXParserResult lpr, SchedulerEvent event, Node n, Data providerPrivateData) throws Exception {
+        return computeHints(lpr, n, getCaret(event));
     }
     
-    List<ErrorDescription> computeHints(CompilationInfo info, Node n, int offset) throws Exception {
-        Document doc = info.getDocument();
+    List<ErrorDescription> computeHints(LaTeXParserResult lpr, Node n, int offset) throws Exception {
+        Document doc = lpr.getSnapshot().getSource().getDocument(false);
         
         if (doc == null) {
             return null;
@@ -114,12 +115,12 @@ public class AddItemHint implements HintProvider {
             return null;
         }
         
-        if (checkOffset(info.getTokenHierarchy().tokenSequence(TexLanguage.description()).subSequence(start, offset), offset, TexTokenId.COMP_BRACKET_LEFT)) {
-            fixes.add(new FixImpl(doc, info.getSource(), n.getStartingPosition().getOffset(), true, hasFirstArgument, hasBracketsInTheSecondArgument));
+        if (checkOffset(lpr.getTokenHierarchy().tokenSequence(TexLanguage.description()).subSequence(start, offset), offset, TexTokenId.COMP_BRACKET_LEFT)) {
+            fixes.add(new FixImpl(doc, lpr.getSnapshot().getSource(), n.getStartingPosition().getOffset(), true, hasFirstArgument, hasBracketsInTheSecondArgument));
         }
         
-        if (checkOffset(info.getTokenHierarchy().tokenSequence(TexLanguage.description()).subSequence(offset, end), offset, TexTokenId.COMP_BRACKET_RIGHT)) {
-            fixes.add(new FixImpl(doc, info.getSource(), n.getEndingPosition().getOffset(), false, hasFirstArgument, hasBracketsInTheSecondArgument));
+        if (checkOffset(lpr.getTokenHierarchy().tokenSequence(TexLanguage.description()).subSequence(offset, end), offset, TexTokenId.COMP_BRACKET_RIGHT)) {
+            fixes.add(new FixImpl(doc, lpr.getSnapshot().getSource(), n.getEndingPosition().getOffset(), false, hasFirstArgument, hasBracketsInTheSecondArgument));
         }
         
         if (!fixes.isEmpty()) {
@@ -147,6 +148,10 @@ public class AddItemHint implements HintProvider {
         
         return true;
     }
+
+    public List computeHints(LaTeXParserResult lpr, Node n, Data providerPrivateData) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
         
 
     static final class FixImpl implements Fix {
@@ -172,53 +177,25 @@ public class AddItemHint implements HintProvider {
         }
 
         public ChangeInfo implement() throws Exception {
-            final ModificationResult mr = computeResult();
+            final String textToInsert = computeTextToInsert();
+            final String filteredTextToInsert = textToInsert.replace("|", "");
             final Position[] pos = new Position[1];
-            
+
+
             NbDocument.runAtomic((StyledDocument) doc, new Runnable() {
                 public void run() {
                     try {
                         int offset = FixImpl.this.pos.getOffset();
-                        
-                        mr.commit();
-                        
-                        String textToInsert = computeTextToInsert();
-                        
+                        doc.insertString(offset, filteredTextToInsert, null);
+
                         pos[0] = doc.createPosition(offset + textToInsert.indexOf('|'));
                     } catch (BadLocationException ex) {
                         Exceptions.printStackTrace(ex);
-                    } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
                     }
                 }
             });
-            
-            return new ChangeInfo(s.getFileObjects().iterator().next(), pos[0], pos[0]);
-        }
 
-        private ModificationResult computeResult() throws IOException {
-            final ModificationResult mr = s.runModificationTask(new CancellableTask<WorkingCopy>() {
-                public void cancel() {
-                }
-
-                public void run(WorkingCopy copy) throws Exception {
-                    DataObject d = DataObject.find(copy.getFileObject());
-                    EditorCookie ec = d.getLookup().lookup(EditorCookie.class);
-
-                    if (ec instanceof CloneableEditorSupport) {
-                        CloneableEditorSupport ces = (CloneableEditorSupport) ec;
-                        PositionRef ref = ces.createPositionRef(pos.getOffset(), Position.Bias.Backward);
-                        String textToInsert = computeTextToInsert();
-                        
-                        textToInsert = textToInsert.replace("|", "");
-                        
-                        copy.addDiff(new Difference(Kind.INSERT, ref, ref, null, textToInsert, "Add \\item"));
-                    }
-                }
-
-            });
-
-            return mr;
+            return new ChangeInfo(s.getFileObject(), pos[0], pos[0]);
         }
 
         private String computeTextToInsert() {
@@ -243,7 +220,7 @@ public class AddItemHint implements HintProvider {
         
     }
 
-    public List scanningFinished(CompilationInfo info, DocumentNode dn, Data providerPrivateData) throws Exception {
+    public List scanningFinished(LaTeXParserResult lpr, DocumentNode dn, Data providerPrivateData) throws Exception {
         return null;
     }
     

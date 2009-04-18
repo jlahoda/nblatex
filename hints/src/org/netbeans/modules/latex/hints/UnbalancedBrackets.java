@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -47,10 +47,10 @@ import java.util.List;
 import java.util.Stack;
 import org.netbeans.modules.latex.hints.HintProvider.Data;
 import org.netbeans.modules.latex.hints.UnbalancedBrackets.Pair;
+import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Severity;
@@ -65,13 +65,13 @@ public class UnbalancedBrackets implements HintProvider<Stack<Pair>> {
     private static final String UNBALANCED_BRACKET = "Unbalanced opening bracket";
     private static final String TRAILING_BRACKET = "Trailing closing bracket";
     
-    public boolean accept(CompilationInfo info, Node n) {
+    public boolean accept(LaTeXParserResult lpr, Node n) {
         String bracket = n.getAttribute("bracket");
         
         return "open".equals(bracket) || "close".equals(bracket);
     }
 
-    public List<ErrorDescription> computeHints(CompilationInfo info, Node n, Data<Stack<Pair>> providerPrivateData) throws Exception {
+    public List<ErrorDescription> computeHints(LaTeXParserResult lpr, Node n, Data<Stack<Pair>> providerPrivateData) throws Exception {
         Stack<Pair> seenBrackets = providerPrivateData.getValue();
         
         if (seenBrackets == null) {
@@ -120,7 +120,7 @@ public class UnbalancedBrackets implements HintProvider<Stack<Pair>> {
         return ErrorDescriptionFactory.createErrorDescription(Severity.WARNING, message, (FileObject) n.getStartingPosition().getFile(), start, end);
     }
 
-    public List<ErrorDescription> scanningFinished(CompilationInfo info, DocumentNode dn, Data<Stack<Pair>> providerPrivateData) throws Exception {
+    public List<ErrorDescription> scanningFinished(LaTeXParserResult lpr, DocumentNode dn, Data<Stack<Pair>> providerPrivateData) throws Exception {
         Stack<Pair> seenBrackets = providerPrivateData.getValue();
         
         if (seenBrackets == null) {

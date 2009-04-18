@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -55,7 +55,6 @@ import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Severity;
@@ -67,22 +66,21 @@ import org.openide.filesystems.FileObject;
  */
 public class CiteFormatHint implements HintProvider<Void> {
 
-    public boolean accept(CompilationInfo info, Node n) {
+    public boolean accept(LaTeXParserResult lpr, Node n) {
         return n instanceof ArgumentNode && n.hasAttribute("#cite");
     }
 
-    public List<ErrorDescription> computeHints(CompilationInfo info, Node n, Data<Void> providerPrivateData) throws Exception {
+    public List<ErrorDescription> computeHints(LaTeXParserResult lpr, Node n, Data<Void> providerPrivateData) throws Exception {
         if (!LaTeXSettings.isCiteFormatHintEnabled()) {
             return Collections.emptyList();
         }
         
-        LaTeXParserResult lpr = LaTeXParserResult.get(info);
         ArgumentNode anode = (ArgumentNode) n;
         String       nodeValue = lpr.getCommandUtilities().getArgumentValue(anode).toString();
         List<ErrorDescription> res = new  LinkedList<ErrorDescription>();
         FileObject file = (FileObject) anode.getStartingPosition().getFile();
 
-        if (!info.getFileObject().equals(file)) {
+        if (!lpr.getSnapshot().getSource().getFileObject().equals(file)) {
             return res;
         }
 
@@ -90,7 +88,7 @@ public class CiteFormatHint implements HintProvider<Void> {
         int startOffset = cnode.getStartingPosition().getOffsetValue();
         int endOffset = cnode.getEndingPosition().getOffsetValue();
 
-        if (isSuppressed(info, endOffset, "NO-CITE-FORMAT")) {
+        if (isSuppressed(lpr, endOffset, "NO-CITE-FORMAT")) {
             return res;
         }
 
@@ -169,7 +167,7 @@ public class CiteFormatHint implements HintProvider<Void> {
             }
         }
 
-        String realText = info.getText().substring(startOffset - correctText.length(), startOffset); //XXX: whitespaces!
+        String realText = lpr.getSnapshot().getText().subSequence(startOffset - correctText.length(), startOffset).toString(); //XXX: whitespaces!
 
         if (!realText.equals(correctText.toString())) {
             res.add(ErrorDescriptionFactory.createErrorDescription(Severity.WARNING, "Incorrect format of a citation", file, startOffset, endOffset));
@@ -178,14 +176,14 @@ public class CiteFormatHint implements HintProvider<Void> {
         return res;
     }
 
-    private static boolean isSuppressed(CompilationInfo info, int offset, String key) {
-        TokenSequence<TexTokenId> ts = (TokenSequence<TexTokenId>) info.getTokenHierarchy().tokenSequence();
+    private static boolean isSuppressed(LaTeXParserResult lpr, int offset, String key) {
+        TokenSequence<TexTokenId> ts = (TokenSequence<TexTokenId>) lpr.getSnapshot().getTokenHierarchy().tokenSequence();
 
         ts.move(offset);
 
         while (ts.moveNext()) {
             String text = ts.token().text().toString();
-            
+
             if (ts.token().id() == TexTokenId.COMMENT) {
                 if (text.contains(key)) {
                     return true;
@@ -200,7 +198,7 @@ public class CiteFormatHint implements HintProvider<Void> {
         return false;
     }
 
-    public List<ErrorDescription> scanningFinished(CompilationInfo info, DocumentNode dn, Data<Void> providerPrivateData) throws Exception {
+    public List<ErrorDescription> scanningFinished(LaTeXParserResult lpr, DocumentNode dn, Data<Void> providerPrivateData) throws Exception {
         return null;
     }
     

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -45,6 +45,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,10 +55,7 @@ import javax.swing.text.StyledDocument;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
+import org.netbeans.modules.parsing.api.ResultIterator;
 import org.netbeans.core.startup.Main;
 import org.netbeans.junit.NbTestCase;
 import org.netbeans.modules.latex.UnitUtilities;
@@ -73,6 +71,9 @@ import org.netbeans.modules.latex.model.command.TextNode;
 import org.netbeans.modules.latex.model.command.TraverseHandler;
 import org.netbeans.modules.latex.model.command.impl.BlockNodeImpl;
 import org.netbeans.modules.latex.model.command.impl.CommandNodeImpl;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -227,13 +228,13 @@ public class CommandParserTest extends NbTestCase {
         final FileObject testFileObject = dataDir.getFileObject("testEnvironmentsWithCommandDefinitions.tex");
         
         assertNotNull(testFileObject);
-        
-        Source.forFileObject(testFileObject).runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+
+        Source source = Source.create(testFileObject);
+
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                 
                 DataObject od = DataObject.find(testFileObject);
                 EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
@@ -244,7 +245,7 @@ public class CommandParserTest extends NbTestCase {
                 assertTrue(node instanceof CommandNode);
                 assertEquals("\\test", ((CommandNode) node).getCommand().getCommand());
             }
-        }, true);
+        });
     }
     
     public void testEnvironmentInEnvironment() throws Exception {
@@ -263,13 +264,13 @@ public class CommandParserTest extends NbTestCase {
         final FileObject testFileObject = dataDir.getFileObject("testInclude.tex");
         
         assertNotNull(testFileObject);
+
+        final Source source = Source.create(testFileObject);
         
-        Source.forFileObject(testFileObject).runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                 DataObject od = DataObject.find(testFileObject);
                 EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
@@ -279,7 +280,7 @@ public class CommandParserTest extends NbTestCase {
                 assertTrue(node instanceof CommandNode);
                 assertEquals("\\test", ((CommandNode) node).getCommand().getCommand());
             }
-        }, true);
+        });
     }
     
     public void testVerbatimEnvironment() throws Exception {
@@ -311,12 +312,12 @@ public class CommandParserTest extends NbTestCase {
         
         assertNotNull(testFileObject);
         
-        Source.forFileObject(testFileObject).runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        final Source source = Source.create(testFileObject);
+
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                 DataObject od = DataObject.find(testFileObject);
                 EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
@@ -329,7 +330,7 @@ public class CommandParserTest extends NbTestCase {
                 node = lpr.getCommandUtilities().findNode(doc, 47);
                 assertTrue(node instanceof MathNode);
             }
-        }, true);
+        });
     }
     
     public void testMathNode2() throws Exception {
@@ -337,12 +338,12 @@ public class CommandParserTest extends NbTestCase {
         
         assertNotNull(testFileObject);
         
-        Source.forFileObject(testFileObject).runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        final Source source = Source.create(testFileObject);
+
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                 DataObject od = DataObject.find(testFileObject);
                 EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
@@ -355,7 +356,7 @@ public class CommandParserTest extends NbTestCase {
                 node = lpr.getCommandUtilities().findNode(doc, 29);
                 assertTrue(node instanceof MathNode);
             }
-        }, true);
+        });
     }
 
     public void testMathNode3() throws Exception {
@@ -363,12 +364,12 @@ public class CommandParserTest extends NbTestCase {
         
         assertNotNull(testFileObject);
         
-        Source.forFileObject(testFileObject).runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        final Source source = Source.create(testFileObject);
+
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                 DataObject od = DataObject.find(testFileObject);
                 EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
@@ -381,7 +382,7 @@ public class CommandParserTest extends NbTestCase {
                 node = lpr.getCommandUtilities().findNode(doc, 48);
                 assertTrue(node instanceof MathNode);
             }
-        }, true);
+        });
     }
     
     public void testEnvironmentInEnvironment2() throws Exception {
@@ -389,12 +390,12 @@ public class CommandParserTest extends NbTestCase {
         
         assertNotNull(testFileObject);
         
-        Source.forFileObject(testFileObject).runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        final Source source = Source.create(testFileObject);
+
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                 DataObject od = DataObject.find(testFileObject);
                 EditorCookie ec = (EditorCookie) od.getLookup().lookup(EditorCookie.class);
                 StyledDocument doc = ec.openDocument();
@@ -405,7 +406,7 @@ public class CommandParserTest extends NbTestCase {
                     lpr.getCommandUtilities().findNode(doc, offset);
                 }
             }
-        }, true);
+        });
     }
 
     public void testEnvironmentInEnvironment3() throws Exception {
@@ -413,12 +414,12 @@ public class CommandParserTest extends NbTestCase {
         
         assertNotNull(testFileObject);
         
-        Source.forFileObject(testFileObject).runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        final Source source = Source.create(testFileObject);
+
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
             
                 lpr.getDocument().traverse(new TraverseHandler() {
                     public void argumentEnd(ArgumentNode node) {
@@ -440,7 +441,7 @@ public class CommandParserTest extends NbTestCase {
                     }
                 });
             }
-        }, true);
+        });
     }
 
     public void testUserCommands() throws Exception {
@@ -448,16 +449,16 @@ public class CommandParserTest extends NbTestCase {
         
         assertNotNull(testFileObject);
         
-        Source.forFileObject(testFileObject).runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        final Source source = Source.create(testFileObject);
+
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                 
                 assertTrue(lpr.getErrors().toString(), lpr.getErrors().isEmpty());
             }
-        }, true);
+        });
     }
     
     public void testNewCommand3() throws Exception {
@@ -465,16 +466,16 @@ public class CommandParserTest extends NbTestCase {
         
         assertNotNull(testFileObject);
         
-        Source.forFileObject(testFileObject).runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        final Source source = Source.create(testFileObject);
+
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                 
                 assertTrue(lpr.getErrors().toString(), lpr.getErrors().isEmpty());
             }
-        }, true);
+        });
     }
     
     public void testCounter1() throws Exception {
@@ -482,16 +483,16 @@ public class CommandParserTest extends NbTestCase {
         
         assertNotNull(testFileObject);
         
-        Source.forFileObject(testFileObject).runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        final Source source = Source.create(testFileObject);
+
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                 
                 assertTrue(lpr.getErrors().toString(), lpr.getErrors().isEmpty());
             }
-        }, true);
+        });
     }
     
 }

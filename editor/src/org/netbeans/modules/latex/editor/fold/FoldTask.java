@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -44,16 +44,15 @@
 package org.netbeans.modules.latex.editor.fold;
 
 import java.util.ArrayList;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source.Priority;
+import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.parsing.spi.Parser.Result;
+import org.netbeans.modules.parsing.spi.Scheduler;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.Stack;
 import javax.swing.text.Document;
 import org.netbeans.api.editor.fold.FoldType;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
-import org.netbeans.napi.gsfret.source.support.EditorAwareSourceTaskFactory;
 import org.netbeans.modules.latex.editor.fold.FoldMaintainerImpl.FoldInfo;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.Utilities;
@@ -61,13 +60,17 @@ import org.netbeans.modules.latex.model.command.BlockNode;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.DefaultTraverseHandler;
 import org.netbeans.modules.latex.model.command.SourcePosition;
-import org.openide.filesystems.FileObject;
+import org.netbeans.modules.latex.model.hacks.RegisterParsingTaskFactory;
+import org.netbeans.modules.parsing.spi.ParserResultTask;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
+import org.netbeans.modules.parsing.spi.SchedulerTask;
+import org.netbeans.modules.parsing.spi.TaskFactory;
 
 /**
  *
  * @author Jan Lahoda
  */
-public final class FoldTask implements CancellableTask<CompilationInfo> {
+public final class FoldTask extends ParserResultTask {
 
     private class BlockFoldMaintainerSourceTraverseHandler extends DefaultTraverseHandler {
         
@@ -114,16 +117,18 @@ public final class FoldTask implements CancellableTask<CompilationInfo> {
     public void cancel() {
     }
 
-    public void run(CompilationInfo parameter) throws Exception {
-        Document doc = parameter.getDocument();
+    @Override
+    public void run(Result result, SchedulerEvent evt) {
+        Document doc = result.getSnapshot().getSource().getDocument(false);
         
         if (doc == null)
             return ;
         
-        LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+        LaTeXParserResult lpr = LaTeXParserResult.get(result);
 
-        if (lpr.getUpdateState().isUnchanged())
-            return ;
+        //XXX:
+//        if (lpr.getUpdateState().isUnchanged())
+//            return ;
         
         Collection<FoldInfo> folds = new LinkedList<FoldInfo>();
         
@@ -142,6 +147,16 @@ public final class FoldTask implements CancellableTask<CompilationInfo> {
         FoldMaintainerImpl.getHolder(doc).setFolds(folds);
     }
     
+    @Override
+    public int getPriority() {
+        return 100;
+    }
+
+    @Override
+    public Class<? extends Scheduler> getSchedulerClass() {
+        return Scheduler.EDITOR_SENSITIVE_TASK_SCHEDULER;
+    }
+
     private class SectionFoldInfo extends FoldInfo {
         
         private int type;
@@ -240,15 +255,13 @@ public final class FoldTask implements CancellableTask<CompilationInfo> {
         
         return (-1);
     }
-    
-    public static final class Factory extends EditorAwareSourceTaskFactory {
 
-        public Factory() {
-            super(Phase.RESOLVED, Priority.LOW);
-        }
+    @RegisterParsingTaskFactory(mimeType="text/x-tex")
+    public static final class FactoryImpl extends TaskFactory {
 
-        protected CancellableTask<CompilationInfo> createTask(FileObject file) {
-            return new FoldTask();
+        @Override
+        public Collection<? extends SchedulerTask> create(Snapshot snapshot) {
+            return Collections.singleton(new FoldTask());
         }
         
     }

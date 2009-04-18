@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2004.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -55,12 +55,20 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.Document;
 import junit.framework.Assert;
+import org.netbeans.api.editor.mimelookup.MimePath;
+import org.netbeans.api.lexer.InputAttributes;
 import org.netbeans.api.lexer.Language;
+import org.netbeans.api.lexer.LanguagePath;
+import org.netbeans.api.lexer.Token;
 import org.netbeans.junit.NbTestCase;
 import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.editor.bibtex.BiBTeXLanguage;
+import org.netbeans.modules.latex.loop.LaTeXGSFParser;
 import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.impl.NBUtilities;
+import org.netbeans.spi.editor.mimelookup.MimeDataProvider;
+import org.netbeans.spi.lexer.LanguageEmbedding;
+import org.netbeans.spi.lexer.LanguageProvider;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileSystem;
 import org.openide.filesystems.FileUtil;
@@ -116,12 +124,14 @@ public class UnitUtilities extends ProxyLookup {
         FileSystem fs = new MFSImpl(new FileSystem[] {FileUtil.createMemoryFileSystem(), system});
         
         Repository repository = new Repository(fs);
-        Object[] lookupContent = new Object[additionalLookupContent.length + 2];
+        Object[] lookupContent = new Object[additionalLookupContent.length + 4];
         
         System.arraycopy(additionalLookupContent, 0, lookupContent, 0, additionalLookupContent.length);
         
         lookupContent[additionalLookupContent.length] = repository;
         lookupContent[additionalLookupContent.length + 1] = new ModelUtilities();
+        lookupContent[additionalLookupContent.length + 2] = new MimeDataProviderImpl();
+        lookupContent[additionalLookupContent.length + 3] = new LanguageProviderImpl();
         
         DEFAULT_LOOKUP.setLookup(lookupContent, Utilities.class.getClassLoader());
     }
@@ -211,12 +221,12 @@ public class UnitUtilities extends ProxyLookup {
                     doc.putProperty(Document.StreamDescriptionProperty,  DataObject.find((FileObject) obj));
                     
                     if ("tex".equals(file.getExt())) {
-                        doc.putProperty("mime-type", "text/x-tex");
+                        doc.putProperty("mimeType", "text/x-tex");
                         doc.putProperty(Language.class, TexLanguage.description());
                     }
                     
                     if ("bib".equals(file.getExt())) {
-                        doc.putProperty("mime-type", "text/x-bibtex");
+                        doc.putProperty("mimeType", "text/x-bibtex");
                         doc.putProperty(Language.class, BiBTeXLanguage.description());
                     }
                     
@@ -237,6 +247,36 @@ public class UnitUtilities extends ProxyLookup {
                     }
                 }
             }
+        }
+        
+    }
+
+    private static final class MimeDataProviderImpl implements MimeDataProvider {
+
+        public Lookup getLookup(MimePath mimePath) {
+            if ("text/x-tex".equals(mimePath.getPath())) {
+                return Lookups.fixed(new LaTeXGSFParser.FactoryImpl());
+            }
+            return Lookup.EMPTY;
+        }
+        
+    }
+
+    private static final class LanguageProviderImpl extends LanguageProvider {
+
+        @Override
+        public Language<?> findLanguage(String mimeType) {
+            if ("text/x-tex".equals(mimeType))
+                return TexLanguage.description();
+            if ("text/x-bibtex".equals(mimeType))
+                return BiBTeXLanguage.description();
+
+            return null;
+        }
+
+        @Override
+        public LanguageEmbedding<?> findLanguageEmbedding(Token<?> token, LanguagePath languagePath, InputAttributes inputAttributes) {
+            return null;
         }
         
     }

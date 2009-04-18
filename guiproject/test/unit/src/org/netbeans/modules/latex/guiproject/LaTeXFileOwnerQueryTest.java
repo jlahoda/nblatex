@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2007.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -44,12 +44,14 @@
 package org.netbeans.modules.latex.guiproject;
 
 import java.io.IOException;
-import org.netbeans.modules.gsf.api.CancellableTask;
+import java.util.Collections;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
+import org.netbeans.modules.latex.model.LaTeXParserResult;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
 import org.openide.filesystems.FileObject;
 
 /**
@@ -63,21 +65,20 @@ public class LaTeXFileOwnerQueryTest extends ProjectTestCase {
         super(name);
     }
     
-    private void parse(final FileObject mainFile) throws IOException {
-        Source s = Source.forFileObject(mainFile);
+    private void parse(final FileObject mainFile) throws Exception {
+        Source s = Source.create(mainFile);
         
         assertNotNull(s);
         
-        s.runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.UP_TO_DATE);
-                new ProjectReparsedTaskFactory().createTask(mainFile).run(parameter);
+        ParserManager.parse(Collections.singleton(s), new UserTask() {
+            public void run(ResultIterator it) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(it);
+                new ProjectReparsedTaskFactory.TaskImpl().run(lpr, null);
             }
-        }, true);
+        });
     }
     
-    private void checkFile(FileObject prj, FileObject mainFile, String name) throws IOException {
+    private void checkFile(FileObject prj, FileObject mainFile, String name) throws Exception {
         parse(mainFile);
         
         FileObject file = prj.getFileObject(name);
@@ -95,43 +96,43 @@ public class LaTeXFileOwnerQueryTest extends ProjectTestCase {
         assertTrue("Incorrect project found!", foundMainFile /*!!*/ == /*!!*/ mainFile);
     }
     
-    public void test_main1_tex_File() throws IOException {
+    public void test_main1_tex_File() throws Exception {
         checkFile(prj1, main1, "main1.tex");
     }
     
-    public void test_included1a_tex_File() throws IOException {
+    public void test_included1a_tex_File() throws Exception {
         checkFile(prj1, main1, "included1a.tex");
     }
     
-    public void test_main2_tex_File() throws IOException {
+    public void test_main2_tex_File() throws Exception {
         checkFile(prj2, main2, "main2.tex");
     }
     
-    public void test_included2a_tex_File() throws IOException {
+    public void test_included2a_tex_File() throws Exception {
         checkFile(prj2, main2, "included2a.tex");
     }
     
-    public void test_included1b_tex_File() throws IOException {
+    public void test_included1b_tex_File() throws Exception {
         checkFile(prj1, main1, "included1b.tex");
     }
     
-    public void test_included2b_tex_File() throws IOException {
+    public void test_included2b_tex_File() throws Exception {
         checkFile(prj2, main2, "included2b.tex");
     }
 
-    public void test_bibdatabase1a_bib_File() throws IOException {
+    public void test_bibdatabase1a_bib_File() throws Exception {
         checkFile(prj1, main1, "bibdatabase1a.bib");
     }
 
-    public void test_bibdatabase1b_bib_File() throws IOException {
+    public void test_bibdatabase1b_bib_File() throws Exception {
         checkFile(prj1, main1, "bibdatabase1b.bib");
     }
 
-    public void test_bibdatabase2a_bib_File() throws IOException {
+    public void test_bibdatabase2a_bib_File() throws Exception {
         checkFile(prj2, main2, "bibdatabase2a.bib");
     }
 
-    public void test_bibdatabase2b_bib_File() throws IOException {
+    public void test_bibdatabase2b_bib_File() throws Exception {
         checkFile(prj2, main2, "bibdatabase2b.bib");
     }
     

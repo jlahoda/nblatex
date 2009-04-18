@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -51,35 +51,26 @@ import java.util.Set;
 import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.event.ChangeListener;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.modules.gsf.api.CompilationInfo;
-import org.netbeans.modules.gsf.api.EditHistory;
-import org.netbeans.modules.gsf.api.Element;
-import org.netbeans.modules.gsf.api.ElementHandle;
-import org.netbeans.modules.gsf.api.IncrementalParser;
-import org.netbeans.modules.gsf.api.OccurrencesFinder;
-import org.netbeans.modules.gsf.api.OffsetRange;
-import org.netbeans.modules.gsf.api.ParseEvent;
-import org.netbeans.modules.gsf.api.Parser.Job;
-import org.netbeans.modules.gsf.api.ParserFile;
-import org.netbeans.modules.gsf.api.ParserResult;
-import org.netbeans.modules.gsf.api.ParserResult.UpdateState;
-import org.netbeans.modules.gsf.api.PositionManager;
-import org.netbeans.modules.gsf.api.SemanticAnalyzer;
-import org.netbeans.modules.gsf.api.SourceFileReader;
-import org.netbeans.modules.gsf.api.TranslatedSource;
 import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.ParseError;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.LaTeXSourceFactory;
 import org.netbeans.modules.latex.model.command.impl.CommandUtilitiesImpl;
-import org.netbeans.modules.latex.model.command.impl.NBDocumentNodeImpl;
 import org.netbeans.modules.latex.model.command.parser.CommandParser;
+import org.netbeans.modules.latex.model.hacks.RegisterParsingTaskFactory;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
 import org.netbeans.modules.latex.model.structural.parser.StructuralParserImpl;
+import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.parsing.api.Task;
+import org.netbeans.modules.parsing.spi.ParseException;
+import org.netbeans.modules.parsing.spi.Parser;
+import org.netbeans.modules.parsing.spi.ParserFactory;
+import org.netbeans.modules.parsing.spi.SourceModificationEvent;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -88,7 +79,7 @@ import org.openide.util.Lookup;
  *
  * @author Jan Lahoda
  */
-public class LaTeXGSFParser implements IncrementalParser {
+public class LaTeXGSFParser extends Parser {
 
     private static final boolean INCREMENTAL_REPARSE = !Boolean.getBoolean("latex.no.incremental.reparse");
     private static final Logger  LOG                 = Logger.getLogger(LaTeXGSFParser.class.getName());
@@ -97,60 +88,10 @@ public class LaTeXGSFParser implements IncrementalParser {
     public LaTeXGSFParser() {
     }
 
-    public void parseFiles(Job job) {
-        assert job.files.size() == 1;
-        
-        ParserFile parseFile = job.files.get(0);
-        LaTeXParserResult r = parseFile(parseFile);
-
-        if (r != null) {
-            job.listener.finished(new ParseEvent(ParseEvent.Kind.PARSE, parseFile, r));
-        }
-    }
-
-    public PositionManager getPositionManager() {
-        return new PositionManager() {
-//            public boolean isTranslatingSource() {
-//                return false;
-//            }
-//
-//            public int getLexicalOffset(ParserResult result, int astOffset) {
-//                return astOffset;
-//            }
-//
-//            public int getAstOffset(ParserResult result, int lexicalOffset) {
-//                return lexicalOffset;
-//            }
-//
-            public OffsetRange getOffsetRange(CompilationInfo info, ElementHandle eh) {
-                throw new UnsupportedOperationException();
-//                assert eh instanceof Node;
-//
-//                return new OffsetRange(((Node) eh).getStartingPosition().getOffsetValue(), ((Node) eh).getEndingPosition().getOffsetValue());
-            }
-        };
-    }
-
-    public SemanticAnalyzer getSemanticAnalysisTask() {
-        return null;
-    }
-
-    public OccurrencesFinder getMarkOccurrencesTask(int caretPosition) {
-        return null;
-    }
-
-    public ElementHandle createHandle(CompilationInfo info, Element element) {
-        return null;
-    }
-
-    public Element resolveHandle(CompilationInfo info, ElementHandle handle) {
-        return null;
-    }
-
-    private LaTeXParserResult parseFile(ParserFile parseFile) {
+    private LaTeXParserResult parseFile(Snapshot sh) {
         try {
             List<ParseError> errors = new LinkedList<ParseError>();
-            FileObject file = parseFile.getFileObject();
+            FileObject file = sh.getSource().getFileObject();
             FileObject main = null;
             for (LaTeXSourceFactory f : Lookup.getDefault().lookupAll(LaTeXSourceFactory.class)) {
                 if (f.supports(file)) {
@@ -167,7 +108,7 @@ public class LaTeXGSFParser implements IncrementalParser {
                 file2Root.put(main, p = new StructuralParserImpl());
             }
             StructuralElement structuralRoot = p.parse(dn, errors);
-            return new LaTeXParserResult(this, parseFile, main, dn, structuralRoot, new CommandUtilitiesImpl(dn), errors);
+            return new LaTeXParserResult(sh, main, dn, structuralRoot, new CommandUtilitiesImpl(dn), errors);
         } catch (IOException e) {
             Exceptions.printStackTrace(e);
             return null;
@@ -175,93 +116,54 @@ public class LaTeXGSFParser implements IncrementalParser {
     }
 
     private DocumentNode reparseImpl(FileObject main, List<ParseError> errors) throws IOException {
-//        try {
-            long start = System.currentTimeMillis();
-            
-            Collection newDocuments = new HashSet();
-            
-            long startParsing = System.currentTimeMillis();
-            
-            DocumentNode document = new CommandParser().parse(main, newDocuments, errors);
-            
-            long endParsing = System.currentTimeMillis();
-            
-            //XXX:
-//            synchronized (REPARSE_IMPL_LOCK) {
-//                DocumentNode oldDocument         = document;
-//                Set          oldDocumentHardRefs = getDocumentsHardRefs();
-//                
-//                Collection<ErrorDescription> errors = new ArrayList();
-//                
-//                if (documents == null)
-//                    documents = new HashSet();
-//                else
-//                    documents.clear();
-//                
-//                Iterator it = newDocuments.iterator();
-//                
-//                while (it.hasNext()) {
-//                    documents.add(new WeakReference(it.next()));
-//                }
-//                
-//                fireNodesRemoved(Collections.singletonList(oldDocument));
-//                fireNodesAdded(Collections.singletonList(document));
-//                
-//                Set          newDocumentHardRefs = getDocumentsHardRefs();
-//                
-//                resolveListeners(oldDocumentHardRefs, newDocumentHardRefs);
-//                
-//                setErrors(document, errors);
-//                
-//                synchronized (DOCUMENT_VERSION_LOCK) {
-//                    documentVersion++;
-//                }
-//            }
-            
-            long end = System.currentTimeMillis();
-            
-            Logger.getLogger("TIMER").log(Level.FINE, "LaTeX Parse", new Object[] {main, (endParsing - startParsing)});
-            Logger.getLogger("TIMER").log(Level.FINE, "LaTeX Parse Complete", new Object[] {main, (end - start)});
-            
-//        } finally {
-//            pcs.firePropertyChange("parsing", Boolean.TRUE, Boolean.FALSE);
-//            if (isUpToDate())
-//                setReparseStateDebug(REPARSE_DEBUG_ALL_VALID);
-//        }
+        long start = System.currentTimeMillis();
+
+        Collection newDocuments = new HashSet();
+
+        long startParsing = System.currentTimeMillis();
+
+        DocumentNode document = new CommandParser().parse(main, newDocuments, errors);
+
+        long endParsing = System.currentTimeMillis();
+
+        long end = System.currentTimeMillis();
+
+        Logger.getLogger("TIMER").log(Level.FINE, "LaTeX Parse", new Object[] {main, (endParsing - startParsing)});
+        Logger.getLogger("TIMER").log(Level.FINE, "LaTeX Parse Complete", new Object[] {main, (end - start)});
         
         return document;
     }
 
-    public ParserResult parse(ParserFile file, SourceFileReader reader, TranslatedSource translatedSource, EditHistory history, ParserResult previousResult) {
-        if (previousResult == null || previousResult.getInfo() == null || history.getStart() == (-1) || !INCREMENTAL_REPARSE) {
-            return parseFile(file);
-        }
-        
-        try {
-            long start = System.currentTimeMillis();
-            boolean fullReparse =    checkFullReparse(previousResult.getInfo().getText(), history.getStart(), history.getOriginalEnd())
-                                  || checkFullReparse(reader.read(file),                  history.getStart(), history.getEditedEnd());
-
-            if (!fullReparse) {
-                previousResult.setUpdateState(UpdateState.NO_SEMANTIC_CHANGE);
-                TokenHierarchy h = TokenHierarchy.create(reader.read(file), TexLanguage.description());
-
-                ((NBDocumentNodeImpl) ((LaTeXParserResult) previousResult).getDocument()).addUsedFile(file.getFileObject(), h);
-
-                long end = System.currentTimeMillis();
-                Logger.getLogger("TIMER").log(Level.FINE, "LaTeX Incremental Reparse", new Object[]{file.getFileObject(), (end - start)});
-                return previousResult;
-            }
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-
-        LOG.log(Level.INFO, "Full Reparse");
-
-        previousResult.setUpdateState(UpdateState.FAILED);
-        
-        return parseFile(file);
-    }
+//    public ParserResult parse(ParserFile file, SourceFileReader reader, TranslatedSource translatedSource, EditHistory history, ParserResult previousResult) {
+//        if (previousResult == null || previousResult.getInfo() == null || history.getStart() == (-1) || !INCREMENTAL_REPARSE) {
+//            return parseFile(file);
+//        }
+//
+//        try {
+//            long start = System.currentTimeMillis();
+//            boolean fullReparse =    checkFullReparse(previousResult.getInfo().getText(), history.getStart(), history.getOriginalEnd())
+//                                  || checkFullReparse(reader.read(file),                  history.getStart(), history.getEditedEnd());
+//
+//            if (!fullReparse) {
+//                previousResult.setUpdateState(UpdateState.NO_SEMANTIC_CHANGE);
+//                TokenHierarchy h = TokenHierarchy.create(reader.read(file), TexLanguage.description());
+//
+//                ((NBDocumentNodeImpl) ((LaTeXParserResult) previousResult).getDocument()).addUsedFile(file.getFileObject(), h);
+//
+//                long end = System.currentTimeMillis();
+//                Logger.getLogger("TIMER").log(Level.FINE, "LaTeX Incremental Reparse", new Object[]{file.getFileObject(), (end - start)});
+//                return previousResult;
+//            }
+//        } catch (IOException ex) {
+//            Exceptions.printStackTrace(ex);
+//        }
+//
+//        LOG.log(Level.INFO, "Full Reparse");
+//
+//        previousResult.setUpdateState(UpdateState.FAILED);
+//
+//        return parseFile(file);
+//    }
 
     private boolean checkFullReparse(CharSequence text, int start, int end) {
         TokenHierarchy h = TokenHierarchy.create(text, TexLanguage.description());
@@ -278,5 +180,35 @@ public class LaTeXGSFParser implements IncrementalParser {
     }
 
     private static final Set<TexTokenId> DO_NOT_PARSE_TOKENS = EnumSet.of(TexTokenId.COMMENT, TexTokenId.WHITESPACE, TexTokenId.WORD);
+
+    private LaTeXParserResult lpr;
     
+    @Override
+    public void cancel() {}
+
+    @Override
+    public void addChangeListener(ChangeListener changeListener) {}
+
+    @Override
+    public void removeChangeListener(ChangeListener changeListener) {}
+
+    @Override
+    public void parse(Snapshot snapshot, Task task, SourceModificationEvent event) throws ParseException {
+        lpr = parseFile(snapshot);
+    }
+
+    @Override
+    public Result getResult(Task task) throws ParseException {
+        return new LaTeXParserResult(lpr.getSnapshot(), lpr.getMainFile(), lpr.getDocument(), lpr.getStructuralRoot(), lpr.getCommandUtilities(), lpr.getErrors());
+    }
+
+    @RegisterParsingTaskFactory(mimeType="text/x-tex")
+    public static final class FactoryImpl extends ParserFactory {
+
+        @Override
+        public Parser createParser(Collection<Snapshot> snapshots) {
+            return new LaTeXGSFParser();
+        }
+        
+    }
 }

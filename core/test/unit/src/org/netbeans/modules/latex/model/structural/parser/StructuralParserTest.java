@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -49,11 +49,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import javax.swing.text.StyledDocument;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.core.startup.Main;
 import org.netbeans.junit.NbTestCase;
-import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.modules.latex.UnitUtilities;
 import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
@@ -61,9 +61,10 @@ import org.netbeans.modules.latex.model.impl.NBUtilities;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
 import org.netbeans.modules.latex.model.structural.StructuralNodeFactory;
 import org.netbeans.modules.latex.model.structural.section.SectionStructuralElement;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -110,37 +111,37 @@ public class StructuralParserTest extends NbTestCase {
         doc.putProperty("mime-type", "text/x-tex");
         doc.putProperty(Language.class, TexLanguage.description());
 
-        Source s = Source.forDocument(doc);
-        
         final StructuralElement[] section = new StructuralElement[1];
         
-        s.runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
+        final Source source = Source.create(file);
+
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
                 
-                StructuralElement root = LaTeXParserResult.get(parameter).getStructuralRoot();
+                StructuralElement root = lpr.getStructuralRoot();
                 
                 section[0] = root.getSubElements().get(1);
                 assertEquals("2 Test", StructuralNodeFactory.createNode(section[0]).getDisplayName());
             }
-        }, true);
+        });
         
         assertTrue(section[0] instanceof SectionStructuralElement);
         
         doc.insertString(code.indexOf("to-replace"), "long long long", null);
 
-        s.runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
-                
-                StructuralElement root = LaTeXParserResult.get(parameter).getStructuralRoot();
+        ParserManager.parse(Collections.singleton(source), new UserTask() {
+            @Override
+            public void run(ResultIterator resultIterator) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(resultIterator);
+
+                StructuralElement root = lpr.getStructuralRoot();
                 
                 assertTrue(section[0] == root.getSubElements().get(1));
                 assertEquals("2 Test", ((SectionStructuralElement) section[0]).getName());
             }
-        }, true);
+        });
     }
     
     /**

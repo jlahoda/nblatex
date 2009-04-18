@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -54,6 +54,7 @@ import java.io.ObjectOutput;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,16 +66,17 @@ import javax.swing.JScrollPane;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
 import org.netbeans.modules.latex.gui.Editor;
 import org.netbeans.modules.latex.gui.NodeStorage;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.Queue;
 import org.netbeans.modules.latex.model.command.SourcePosition;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.openide.cookies.SaveCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -114,41 +116,42 @@ public class VauElementTopComponent extends TopComponent implements PropertyChan
         
         start = (SourcePosition) oi.readObject();//TODO: this is kind of "hack", it should be generally done much better.
         
-        Source s = Source.forFileObject((FileObject) start.getFile());
+        Source s = Source.create((FileObject) start.getFile());
         final VauStructuralElement[] result = new VauStructuralElement[1];
-        
-        s.runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
 
-                Queue q = new Queue();
+        try {
+            ParserManager.parse(Collections.singleton(s), new UserTask() {
+                public void run(ResultIterator parameter) throws Exception {
+                    Queue q = new Queue();
 
-                q.put(LaTeXParserResult.get(parameter).getStructuralRoot());
+                    q.put(LaTeXParserResult.get(parameter).getStructuralRoot());
 
-                Logger.getLogger(VauElementTopComponent.class.getName()).log(Level.FINE, "start={0}", start);
+                    Logger.getLogger(VauElementTopComponent.class.getName()).log(Level.FINE, "start={0}", start);
 
-                while (!q.empty()) {
-                    StructuralElement el = (StructuralElement) q.pop();
+                    while (!q.empty()) {
+                        StructuralElement el = (StructuralElement) q.pop();
 
-                    Logger.getLogger(VauElementTopComponent.class.getName()).log(Level.FINE, "el={0}", el);
+                        Logger.getLogger(VauElementTopComponent.class.getName()).log(Level.FINE, "el={0}", el);
 
-                    if (el instanceof VauStructuralElement) {
-                        VauStructuralElement vel = (VauStructuralElement) el;
+                        if (el instanceof VauStructuralElement) {
+                            VauStructuralElement vel = (VauStructuralElement) el;
 
-                        Logger.getLogger(VauElementTopComponent.class.getName()).log(Level.FINE, "vel={0}, start={1}", new Object[]{vel, vel.getStart()});
-                        Logger.getLogger(VauElementTopComponent.class.getName()).log(Level.FINE, "?:{0}", vel.getStart().getFile().equals(start.getFile()));
+                            Logger.getLogger(VauElementTopComponent.class.getName()).log(Level.FINE, "vel={0}, start={1}", new Object[]{vel, vel.getStart()});
+                            Logger.getLogger(VauElementTopComponent.class.getName()).log(Level.FINE, "?:{0}", vel.getStart().getFile().equals(start.getFile()));
 
-                        if (vel.getStart().equals(start)) {
-                            result[0] = vel;
-                            return;
+                            if (vel.getStart().equals(start)) {
+                                result[0] = vel;
+                                return;
+                            }
                         }
-                    }
 
-                    q.putAll(el.getSubElements());
+                        q.putAll(el.getSubElements());
+                    }
                 }
-            }
-        }, true);
+            });
+        } catch (ParseException ex) {
+            throw (IOException) new IOException(ex.getMessage()).initCause(ex);
+        }
         
         if (result[0] != null) {
             initialize(result[0]);

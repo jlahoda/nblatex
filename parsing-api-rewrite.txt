@@ -1,0 +1,6 @@
+-matching brackets does not work
+-instant rename does not work
+-incremental parsing does not work
+-autorebuild and follow caret features of the in IDE viewer need to be tested and fixes
+-revalidate after project opened not rewritten
+-folding is broken

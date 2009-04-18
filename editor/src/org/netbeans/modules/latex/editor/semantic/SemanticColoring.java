@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -56,11 +56,9 @@ import org.netbeans.api.editor.mimelookup.MimeLookup;
 import org.netbeans.api.editor.mimelookup.MimePath;
 import org.netbeans.api.editor.settings.AttributesUtilities;
 import org.netbeans.api.editor.settings.FontColorSettings;
-import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.napi.gsfret.source.CompilationInfo;
 import org.netbeans.modules.latex.editor.TexColoringNames;
 import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
@@ -76,6 +74,10 @@ import org.netbeans.modules.latex.model.command.MathNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.TraverseHandler;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.parsing.spi.Parser.Result;
+import org.netbeans.modules.parsing.spi.ParserResultTask;
+import org.netbeans.modules.parsing.spi.Scheduler;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
 import org.netbeans.spi.editor.highlighting.support.OffsetsBag;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
@@ -87,7 +89,7 @@ import org.openide.util.Exceptions;
  *
  * @author Jan Lahoda
  */
-public class SemanticColoring implements CancellableTask<CompilationInfo> {
+public class SemanticColoring extends ParserResultTask {
 
     private static final Logger LOG = Logger.getLogger(SemanticColoring.class.getName());
     
@@ -117,7 +119,8 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
         }
     }
     
-    public void run(CompilationInfo parameter) throws Exception {
+    @Override
+    public void run(Result result, SchedulerEvent evt) {
         cancelled.set(false);
         
         final Document document = getDocument();
@@ -126,11 +129,12 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
             return ;
         }
         
-        DocumentNode dn = LaTeXParserResult.get(parameter).getDocument();
-        Node rootNode = dn.getRootForFile(parameter.getFileObject());
+        DocumentNode dn = LaTeXParserResult.get(result).getDocument();
+        FileObject file = result.getSnapshot().getSource().getFileObject();
+        Node rootNode = dn.getRootForFile(file);
         
         if (rootNode == null) {
-            LOG.log(Level.SEVERE, "No root for: {0}", FileUtil.getFileDisplayName(parameter.getFileObject()));
+            LOG.log(Level.SEVERE, "No root for: {0}", FileUtil.getFileDisplayName(file));
             getDelegate(document).setHighlights(new OffsetsBag(null));
             return;
         }
@@ -356,4 +360,15 @@ public class SemanticColoring implements CancellableTask<CompilationInfo> {
         
         return bag;
     }
+
+    @Override
+    public int getPriority() {
+        return 100;
+    }
+
+    @Override
+    public Class<? extends Scheduler> getSchedulerClass() {
+        return Scheduler.EDITOR_SENSITIVE_TASK_SCHEDULER;
+    }
+    
 }

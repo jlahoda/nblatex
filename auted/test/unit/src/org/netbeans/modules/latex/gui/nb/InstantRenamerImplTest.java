@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -25,7 +25,7 @@
  *
  * The Original Software is the LaTeX module.
  * The Initial Developer of the Original Software is Jan Lahoda.
- * Portions created by Jan Lahoda_ are Copyright (C) 2002-2008.
+ * Portions created by Jan Lahoda_ are Copyright (C) 2002-2009.
  * All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -50,6 +50,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -60,13 +61,14 @@ import org.netbeans.modules.latex.UnitUtilities;
 import org.openide.filesystems.FileUtil;
 import org.xml.sax.SAXException;
 
+import org.netbeans.api.lexer.Language;
 import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.core.startup.Main;
-import org.netbeans.modules.gsf.Language;
-import org.netbeans.modules.gsf.api.CancellableTask;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
+import org.netbeans.modules.latex.model.LaTeXParserResult;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -131,23 +133,22 @@ public class InstantRenamerImplTest extends NbTestCase {
         DataObject od = DataObject.find(testFileObject);
         final StyledDocument doc = od.getLookup().lookup(EditorCookie.class).openDocument();
 
-        doc.putProperty("mime-type", "text/x-tex");
+        doc.putProperty("mimeType", "text/x-tex");
         doc.putProperty(Language.class, TexLanguage.description());
 
-        Source s = Source.forDocument(doc);
+        Source s = Source.create(doc);
 
-        s.runUserActionTask(new CancellableTask<CompilationController>() {
-            public void cancel() {}
-            public void run(CompilationController parameter) throws Exception {
-                parameter.toPhase(Phase.RESOLVED);
+        ParserManager.parse(Collections.singleton(s), new UserTask() {
+            public void run(ResultIterator it) throws Exception {
+                LaTeXParserResult lpr = LaTeXParserResult.get(it);
 
                 for (int[] b : braces) {
-                    List<int[]> result = InstantRenamerImpl.getRenameRegionsImpl(parameter, (b[0] + b[1]) / 2);
-                    
+                    List<int[]> result = InstantRenamerImpl.getRenameRegionsImpl(lpr, (b[0] + b[1]) / 2);
+
                     assertEquals(braces, result);
                 }
             }
-        }, true);
+        });
     }
 
     private FileObject getTestFile(String testFile) throws IOException, InterruptedException {

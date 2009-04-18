@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -59,7 +59,7 @@ import org.netbeans.editor.BaseKit;
 import org.netbeans.editor.Syntax;
 import org.netbeans.editor.SyntaxSupport;
 import org.netbeans.modules.editor.NbEditorKit;
-import org.netbeans.modules.editor.gsfret.InstantRenameAction;
+//import org.netbeans.modules.editor.gsfret.InstantRenameAction;
 import org.netbeans.modules.latex.model.lexer.TexTokenId;
 import org.openide.util.Exceptions;
 
@@ -82,7 +82,7 @@ public class TexKit extends NbEditorKit {
             new UncommentAction("%"),
             new ToggleCommentAction("%"),
             new WrappingDefaultKeyTypedAction(),
-            new InstantRenameAction(),
+//            new InstantRenameAction(),XXX
         };
         return TextAction.augmentList(super.createActions(), texActions);
     }

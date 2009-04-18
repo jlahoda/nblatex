@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2008 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2008 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -44,21 +44,23 @@ package org.netbeans.modules.latex.model;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
-import org.netbeans.modules.gsf.api.CompilationInfo;
-import org.netbeans.modules.gsf.api.ElementHandle;
-import org.netbeans.modules.gsf.api.Parser;
-import org.netbeans.modules.gsf.api.ParserFile;
-import org.netbeans.modules.gsf.api.ParserResult;
+import org.netbeans.api.lexer.Language;
+import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.modules.latex.model.command.CommandUtilities;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.parsing.spi.ParseException;
+import org.netbeans.modules.parsing.spi.Parser;
+import org.netbeans.modules.parsing.spi.SchedulerEvent;
 import org.openide.filesystems.FileObject;
 
 /**
  *
  * @author Jan Lahoda
  */
-public final class LaTeXParserResult extends ParserResult {
+public final class LaTeXParserResult extends Parser.Result {
 
     private DocumentNode root;
     private StructuralElement structuralRoot;
@@ -66,21 +68,14 @@ public final class LaTeXParserResult extends ParserResult {
     private FileObject mainFile;
     private Collection<ParseError> errors;
             
-    public LaTeXParserResult(Parser p, ParserFile file, FileObject mainFile, DocumentNode root, StructuralElement structuralRoot, CommandUtilities utils, Collection<ParseError> errors) {
-        super(p, file, "text/x-tex");
+    public LaTeXParserResult(Snapshot snapshot, FileObject mainFile, DocumentNode root, StructuralElement structuralRoot, CommandUtilities utils, Collection<ParseError> errors) {
+        super(snapshot);
+//        super(p, file, "text/x-tex");
         this.root = root;
         this.structuralRoot = structuralRoot;
         this.utils = utils;
         this.mainFile = mainFile;
         this.errors = Collections.unmodifiableCollection(new LinkedList<ParseError>(errors));
-    }
-
-    public ElementHandle getRoot() {
-        return null;
-    }
-
-    public AstTreeNode getAst() {
-        return null;
     }
 
     public DocumentNode getDocument() {
@@ -103,11 +98,31 @@ public final class LaTeXParserResult extends ParserResult {
         return errors;
     }
 
-    public static final LaTeXParserResult get(CompilationInfo info) {
-        return (LaTeXParserResult) info.getEmbeddedResult("text/x-tex", 0);
+    public static final LaTeXParserResult get(Parser.Result r) {
+        return (LaTeXParserResult) r;
     }
 
-    public static final LaTeXParserResult get(CompilationInfo info, int offset) {
-        return (LaTeXParserResult) info.getEmbeddedResult("text/x-tex", offset);
+    public static final LaTeXParserResult get(ResultIterator i) throws ParseException {
+        return (LaTeXParserResult) i.getParserResult();
+    }
+
+
+    public static final LaTeXParserResult get(ResultIterator i, int offset) throws ParseException {
+        return (LaTeXParserResult) i.getParserResult(offset);
+    }
+
+    @Override
+    public void invalidate() {
+        //XXX
+    }
+
+    //XXX:
+    private TokenHierarchy<Void> th;
+    public TokenHierarchy<Void> getTokenHierarchy() {
+        if (th == null) {
+            th = (TokenHierarchy<Void>) (TokenHierarchy<?>) TokenHierarchy.create(getSnapshot().getText(), Language.find("text/x-tex"));
+        }
+
+        return th;
     }
 }

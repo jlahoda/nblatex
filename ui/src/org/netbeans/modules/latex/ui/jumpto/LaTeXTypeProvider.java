@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2007 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -43,22 +43,16 @@ package org.netbeans.modules.latex.ui.jumpto;
 
 import java.beans.BeanInfo;
 import java.io.IOException;
+import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
-import org.netbeans.modules.gsf.api.CancellableTask;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectUtils;
-import org.netbeans.napi.gsfret.source.CompilationController;
-import org.netbeans.napi.gsfret.source.Phase;
-import org.netbeans.napi.gsfret.source.Source;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.LaTeXSourceFactory;
 import org.netbeans.modules.latex.model.structural.GoToSourceAction;
@@ -67,7 +61,11 @@ import org.netbeans.modules.latex.model.structural.StructuralElement;
 import org.netbeans.modules.latex.model.structural.StructuralNodeFactory;
 import org.netbeans.modules.latex.model.structural.label.LabelStructuralElement;
 import org.netbeans.modules.latex.model.structural.section.SectionStructuralElement;
-import org.netbeans.spi.jumpto.type.SearchType;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.spi.jumpto.type.TypeDescriptor;
 import org.netbeans.spi.jumpto.type.TypeProvider;
 import org.openide.cookies.EditorCookie;
@@ -110,22 +108,19 @@ public class LaTeXTypeProvider implements TypeProvider {
         
         //section names&labels:
         for (final FileObject file : mainFiles) {
-            Source s = Source.forFileObject(file);
-            
+            final Source source = Source.create(file);
+
             try {
-            s.runUserActionTask(new CancellableTask<CompilationController>() {
-                public void cancel() {}
-                public void run(CompilationController parameter) throws Exception {
-                    parameter.toPhase(Phase.RESOLVED);
-                    
-                    LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
-                    
-                    for (StructuralElement e : lpr.getStructuralRoot().getSubElements()) {
-                        gatherStructuralDescriptions(file, e, r, null, context.getText());
+                ParserManager.parse(Collections.singleton(source), new UserTask() {
+                    public void run(ResultIterator parameter) throws Exception {
+                        LaTeXParserResult lpr = LaTeXParserResult.get(parameter);
+
+                        for (StructuralElement e : lpr.getStructuralRoot().getSubElements()) {
+                            gatherStructuralDescriptions(file, e, r, null, context.getText());
+                        }
                     }
-                }
-            }, true);
-            } catch (IOException e) {
+                });
+            } catch (ParseException e) {
                 Exceptions.printStackTrace(e);
             }
         }
