@@ -45,6 +45,9 @@ made subject to such option by the copyright holder.
     <folder name="Editors">
         <folder name="text">
             <folder name="x-tex">
+                <folder name="Actions">
+                    <file name="org.netbeans.modules.latex.refactoring.instant.InstantRenameAction.instance" />
+                </folder>
                 <folder name="Popup">
                     <attr name="Separatorb-tc.instance/RefactoringWhereUsed.instance" boolvalue="true"/>
                     <file name="RefactoringWhereUsed.instance">
@@ -59,7 +62,9 @@ made subject to such option by the copyright holder.
                         <attr name="instanceClass" stringvalue="javax.swing.JSeparator"/>
                     </file>
                     <attr name="Separatorc.instance/org-netbeans-modules-editor-NbSelectInPopupAction.instance" boolvalue="true"/>
+                    <file name="in-place-refactoring" />
                 </folder>
+                <file name="org.netbeans.modules.latex.refactoring.instant.HighlightsLayerFactoryImpl.instance" />
             </folder>
         </folder>
     </folder>

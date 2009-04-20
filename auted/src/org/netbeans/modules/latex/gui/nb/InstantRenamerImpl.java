@@ -44,6 +44,7 @@
 package org.netbeans.modules.latex.gui.nb;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -55,28 +56,25 @@ import org.netbeans.modules.latex.model.command.BlockNode;
 import org.netbeans.modules.latex.model.command.DefaultTraverseHandler;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
+import org.netbeans.modules.latex.model.features.InstantRenameProvider;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
  * @author Jan Lahoda
  */
-public class InstantRenamerImpl {
+@ServiceProvider(service=InstantRenameProvider.class)
+public class InstantRenamerImpl implements InstantRenameProvider {
 
     private static final Logger LOG = Logger.getLogger(InstantRenamerImpl.class.getName());
 
-//    public boolean isRenameAllowed(CompilationInfo info, int caretOffset, String[] explanationRetValue) {
-//        return lookupNodes(info, caretOffset, new Node[1], new String[1]);
-//    }
-//
-//    public Set<OffsetRange> getRenameRegions(CompilationInfo info, int caretOffset) {
-//        Set<OffsetRange> result = new HashSet<OffsetRange>();
-//
-//        for (int[] span : getRenameRegionsImpl(info, caretOffset)) {
-//            result.add(new OffsetRange(span[0], span[1]));
-//        }
-//
-//        return result;
-//    }
+    public boolean isRenameAllowed(LaTeXParserResult lpr, int caretOffset, String[] explanationRetValue) {
+        return lookupNodes(lpr, caretOffset, new Node[1], new String[1]);
+    }
+
+    public Collection<int[]> getRenameRegions(LaTeXParserResult lpr, int caretOffset) {
+        return getRenameRegionsImpl(lpr, caretOffset);
+    }
 
     static List<int[]> getRenameRegionsImpl(final LaTeXParserResult lpr, int caretOffset) {
         Node[] vcpicture = new Node[1];
