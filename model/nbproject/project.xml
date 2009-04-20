@@ -125,6 +125,7 @@ made subject to such option by the copyright holder.
                 <package>org.netbeans.modules.latex.model</package>
                 <package>org.netbeans.modules.latex.model.bibtex</package>
                 <package>org.netbeans.modules.latex.model.command</package>
+                <package>org.netbeans.modules.latex.model.features</package>
                 <package>org.netbeans.modules.latex.model.hacks</package>
                 <package>org.netbeans.modules.latex.model.lexer</package>
                 <package>org.netbeans.modules.latex.model.platform</package>
