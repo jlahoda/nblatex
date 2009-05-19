@@ -57,6 +57,7 @@ import org.netbeans.modules.parsing.spi.SourceModificationEvent;
 import org.netbeans.modules.parsing.spi.TaskFactory;
 import org.openide.filesystems.FileObject;
 import org.openide.util.Lookup;
+import org.openide.util.lookup.ServiceProvider;
 
 /**
  *
@@ -64,6 +65,12 @@ import org.openide.util.Lookup;
  */
 public class ProjectReparsedTaskFactory {
 
+    private static ProjectReparsedTaskFactory INSTANCE = new ProjectReparsedTaskFactory();
+
+    static ProjectReparsedTaskFactory getDefault() {
+        return INSTANCE;
+    }
+    
     static final class TaskImpl extends ParserResultTask<LaTeXParserResult> {
         @Override
         public void run(LaTeXParserResult lpr, SchedulerEvent event) {
@@ -129,6 +136,7 @@ public class ProjectReparsedTaskFactory {
 
     private List<FileObject> registeredFiles = new LinkedList<FileObject>();
 
+    @ServiceProvider(service=Scheduler.class)
     public static final class SchedulerImpl extends Scheduler {
 
         @Override
