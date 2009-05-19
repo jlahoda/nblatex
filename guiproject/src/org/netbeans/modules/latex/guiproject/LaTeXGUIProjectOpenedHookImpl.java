@@ -60,13 +60,11 @@ public class LaTeXGUIProjectOpenedHookImpl extends ProjectOpenedHook {
 
     protected void projectOpened() {
         LaTeXGUIProjectUpgrader.getUpgrader().upgrade(project);
-        //XXX:
-//        ProjectReparsedTaskFactory.get().registerFile(project.getMainFile());
+        ProjectReparsedTaskFactory.getDefault().registerFile(project.getMainFile());
     }
 
     protected void projectClosed() {
-        //XXX:
-//        ProjectReparsedTaskFactory.get().unregisterFile(project.getMainFile());
+        ProjectReparsedTaskFactory.getDefault().unregisterFile(project.getMainFile());
     }
     
 }
