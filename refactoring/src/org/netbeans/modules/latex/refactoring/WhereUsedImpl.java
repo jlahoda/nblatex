@@ -75,23 +75,39 @@ public class WhereUsedImpl implements RefactoringPlugin {
     }
     
     public Problem preCheck() {
-        return ref.getRefactoringSource().lookup(Data.class).getProblem();
+        return getProblemFromData();
     }
 
     public Problem checkParameters() {
-        return ref.getRefactoringSource().lookup(Data.class).getProblem();
+        return getProblemFromData();
     }
 
     public Problem fastCheckParameters() {
-        return ref.getRefactoringSource().lookup(Data.class).getProblem();
+        return getProblemFromData();
+    }
+
+    private Problem getProblemFromData() {
+        Data data = ref.getRefactoringSource().lookup(Data.class);
+
+        if (data == null) {
+            return null;
+        }
+
+        return data.getProblem();
     }
 
     public void cancelRequest() {
     }
 
     public Problem prepare(final RefactoringElementsBag refactoringElements) {
-        Source source = ref.getRefactoringSource().lookup(Data.class).getSource();
-        final int caret = ref.getRefactoringSource().lookup(Data.class).getCaret();
+        Data data = ref.getRefactoringSource().lookup(Data.class);
+
+        if (data == null) {
+            return null;
+        }
+        
+        Source source = data.getSource();
+        final int caret = data.getCaret();
         try {
             ParserManager.parse(Collections.singleton(source), new UserTask() {
                 public void run(ResultIterator parameter) throws Exception {

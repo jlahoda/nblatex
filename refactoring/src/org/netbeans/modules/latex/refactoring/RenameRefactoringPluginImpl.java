@@ -72,15 +72,25 @@ public class RenameRefactoringPluginImpl implements RefactoringPlugin {
     }
 
     public Problem preCheck() {
-        return ref.getRefactoringSource().lookup(Data.class).getProblem();
+        return getProblemFromData();
     }
 
     public Problem checkParameters() {
-        return ref.getRefactoringSource().lookup(Data.class).getProblem();
+        return getProblemFromData();
     }
 
     public Problem fastCheckParameters() {
-        return ref.getRefactoringSource().lookup(Data.class).getProblem();
+        return getProblemFromData();
+    }
+
+    private Problem getProblemFromData() {
+        Data data = ref.getRefactoringSource().lookup(Data.class);
+
+        if (data == null) {
+            return null;
+        }
+
+        return data.getProblem();
     }
 
     public void cancelRequest() {
@@ -88,6 +98,11 @@ public class RenameRefactoringPluginImpl implements RefactoringPlugin {
 
     public Problem prepare(final RefactoringElementsBag refactoringElements) {
         final Data data = ref.getRefactoringSource().lookup(Data.class);
+
+        if (data == null) {
+            return null;
+        }
+        
         Source source = data.getSource();
         final int caret = data.getCaret();
         final String replaceWith = ref.getNewName();
