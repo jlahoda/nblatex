@@ -327,6 +327,14 @@ Contributor(s): Jan Lahoda
             </folder>
         </folder>
     </folder>
+
+    <folder name="Navigator">
+        <folder name="text">
+            <folder name="x-tex">
+                <file name="org-netbeans-modules-latex-ui-DebugImpl$HighlightsLayerFactoryImpl.instance"/>
+            </folder>
+        </folder>
+    </folder>
     
     <folder name="OptionsDialog">
         <file name="org-netbeans-modules-latex-ui-options-LaTeXOption.instance"/>

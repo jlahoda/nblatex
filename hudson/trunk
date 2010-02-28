@@ -43,10 +43,6 @@ unpack() {
     wget -q -N http://deadlock.netbeans.org/hudson/job/nbms-and-javadoc/lastSuccessfulBuild/artifact/nbbuild/nbms/extra/$1 -O ../download/$1 || exit
     jar xf ../download/$1 netbeans || exit
 }
-unpack org-netbeans-modules-spellchecker-apimodule.nbm
-unpack org-netbeans-modules-spellchecker.nbm
-unpack org-netbeans-modules-spellchecker-dictionary_en.nbm
-unpack org-netbeans-modules-spellchecker-kit.nbm
 unpack org-netbeans-modules-showtodos.nbm
 cp -r netbeans/* ../netbeans/extra
 

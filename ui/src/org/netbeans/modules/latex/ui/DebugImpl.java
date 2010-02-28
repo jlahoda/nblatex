@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2006 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2010 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -43,14 +43,19 @@ package org.netbeans.modules.latex.ui;
 import java.awt.Color;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.Collections;
-import org.netbeans.editor.Coloring;
-import org.netbeans.modules.editor.highlights.spi.DefaultHighlight;
-import org.netbeans.modules.editor.highlights.spi.Highlighter;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.Document;
+import javax.swing.text.StyleConstants;
+import org.netbeans.api.editor.settings.AttributesUtilities;
 import org.netbeans.modules.latex.model.command.DebuggingSupport;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.SourcePosition;
-import org.openide.filesystems.FileObject;
+import org.netbeans.spi.editor.highlighting.HighlightsLayer;
+import org.netbeans.spi.editor.highlighting.HighlightsLayerFactory;
+import org.netbeans.spi.editor.highlighting.ZOrder;
+import org.netbeans.spi.editor.highlighting.support.OffsetsBag;
 
 /**
  *
@@ -58,32 +63,58 @@ import org.openide.filesystems.FileObject;
  */
 public class DebugImpl implements PropertyChangeListener {
     
-    /** Creates a new instance of DebugImpl */
-    public DebugImpl() {
-    }
+    private static final AttributeSet HIGHLIGHT_COLORING = AttributesUtilities.createImmutable(StyleConstants.Background, Color.GRAY);
+    public DebugImpl() {}
 
-    private FileObject lastFile;
-    
-    private static final Coloring HIGHLIGHT_COLORING = new Coloring(null, null, Color.GRAY);
-    
+    private Reference<Document> last;
+        
     public void propertyChange(PropertyChangeEvent evt) {
         if (!DebuggingSupport.getDefault().isDebuggingEnabled())
             return ;
         
         Node n = DebuggingSupport.getDefault().getCurrentSelectedNode();
-        
-        Highlighter.getDefault().setHighlights(lastFile, "latex-debugging", Collections.EMPTY_LIST);
-        
-        lastFile = null;
+        Document lastDocument = last != null ? last.get() : null;
+
+        if (lastDocument != null) {
+            getBag(lastDocument).setHighlights(new OffsetsBag(lastDocument));
+        }
+
+        last = null;
         
         if (n != null) {
             SourcePosition spos = n.getStartingPosition();
             SourcePosition epos = n.getEndingPosition();
             
-            lastFile = (FileObject) spos.getFile();
-            
-            Highlighter.getDefault().setHighlights(lastFile, "latex-debugging", Collections.singletonList(new DefaultHighlight(HIGHLIGHT_COLORING, spos.getOffset(), epos.getOffset())));
+            Document doc = spos.getDocument();
+
+            if (doc != null) {
+                OffsetsBag bag = new OffsetsBag(doc);
+
+                bag.addHighlight(spos.getOffset().getOffset(), epos.getOffset().getOffset(), HIGHLIGHT_COLORING);
+                getBag(doc);
+                last = new WeakReference<Document>(doc);
+            }
         }
+    }
+
+    private static OffsetsBag getBag(Document doc) {
+        OffsetsBag bag = (OffsetsBag) doc.getProperty(DebugImpl.class);
+
+        if (bag == null) {
+            doc.putProperty(DebugImpl.class, bag = new OffsetsBag(doc));
+        }
+
+        return bag;
+    }
+
+    public static final class HighlightsLayerFactoryImpl implements HighlightsLayerFactory {
+
+        public HighlightsLayer[] createLayers(Context context) {
+            return new HighlightsLayer[] {
+                HighlightsLayer.create(HighlightsLayerFactoryImpl.class.getName(), ZOrder.CARET_RACK, true, getBag(context.getDocument()))
+            };
+        }
+
     }
     
 }
