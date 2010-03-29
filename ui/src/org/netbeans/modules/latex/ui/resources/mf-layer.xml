@@ -386,4 +386,12 @@ Contributor(s): Jan Lahoda
             </folder>
         </folder>
     </folder>
+
+    <folder name="Editors">
+        <folder name="text">
+            <folder name="x-tex">
+                <file name="org-netbeans-modules-latex-ui-viewer-ProjectRebuilDer$TaskFactoryImpl.instance" />
+            </folder>
+        </folder>
+    </folder>
 </filesystem>
