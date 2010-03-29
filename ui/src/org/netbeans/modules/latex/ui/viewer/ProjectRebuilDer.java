@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 1997-2009 Sun Microsystems, Inc. All rights reserved.
+ * Copyright 1997-2010 Sun Microsystems, Inc. All rights reserved.
  *
  * The contents of this file are subject to the terms of either the GNU
  * General Public License Version 2 only ("GPL") or the Common
@@ -24,7 +24,7 @@
  * Contributor(s):
  *
  * The Original Software is NetBeans. The Initial Developer of the Original
- * Software is Sun Microsystems, Inc. Portions Copyright 1997-2009 Sun
+ * Software is Sun Microsystems, Inc. Portions Copyright 1997-2010 Sun
  * Microsystems, Inc. All Rights Reserved.
  *
  * If you wish your version of this file to be governed by only the CDDL
@@ -46,6 +46,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
@@ -53,8 +55,13 @@ import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.platform.FilePosition;
+import org.netbeans.modules.parsing.api.ParserManager;
+import org.netbeans.modules.parsing.api.ResultIterator;
 import org.netbeans.modules.parsing.api.Snapshot;
+import org.netbeans.modules.parsing.api.Source;
+import org.netbeans.modules.parsing.api.UserTask;
 import org.netbeans.modules.parsing.spi.CursorMovedSchedulerEvent;
+import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.parsing.spi.ParserResultTask;
 import org.netbeans.modules.parsing.spi.Scheduler;
 import org.netbeans.modules.parsing.spi.SchedulerEvent;
@@ -67,6 +74,7 @@ import org.openide.filesystems.FileEvent;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileRenameEvent;
 import org.openide.text.NbDocument;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.RequestProcessor;
 
@@ -99,8 +107,18 @@ public class ProjectRebuilDer implements FileChangeListener {
         this.p = p;
         this.dtc = dtc;
 
-        //XXX:
-//        FactoryImpl.getInstance().reschedule();
+        try {
+            //XXX: should really run the task on background, as was done before rewrite to parsing.api:
+            //FactoryImpl.getInstance().reschedule();
+            ParserManager.parse(Collections.singleton(Source.create(masterFile)), new UserTask() {
+                @Override
+                public void run(ResultIterator resultIterator) throws Exception {
+                    INSTANCE.setFiles(LaTeXParserResult.get(resultIterator.getParserResult()).getDocument().getFiles());
+                }
+            });
+        } catch (ParseException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     private final Set<FileObject> files = new HashSet<FileObject>();
@@ -167,6 +185,9 @@ public class ProjectRebuilDer implements FileChangeListener {
 
         @Override
         public void run(LaTeXParserResult lpr, SchedulerEvent evt) {
+            if (evt == null) {
+                Logger.getLogger(ProjectRebuilDer.class.getName()).log(Level.WARNING, "SchedulerEvent == null");
+            }
             try {
                 INSTANCE.caretMoved(lpr, evt);
             } catch (IOException ex) {
