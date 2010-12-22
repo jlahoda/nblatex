@@ -1,5 +1,9 @@
 #!/bin/bash -x
-TRUNK_ID=`wget -q http://deadlock.netbeans.org/hudson/job/nbms-and-javadoc/lastSuccessfulBuild/buildNumber -O -`
+if [ "$TRUNK_URL" == "" ] ; then
+    TRUNK_URL="http://deadlock.netbeans.org/hudson/job/nbms-and-javadoc";
+fi;
+
+TRUNK_ID=`wget -q $TRUNK_URL/lastSuccessfulBuild/buildNumber -O -`
 
 mkdir -p nbbuild
 
@@ -14,7 +18,7 @@ cd netbeans
 
 download_and_unpack_cluster() {
     if [ ! -e ../download/netbeans-hudson-trunk-$TRUNK_ID-$1.zip ] ; then
-        wget -q -N http://deadlock.netbeans.org/hudson/job/nbms-and-javadoc/$TRUNK_ID/artifact/nbbuild/dist/hudson-nbms-and-javadoc-$TRUNK_ID-$1.zip -O ../download/netbeans-hudson-trunk-$TRUNK_ID-$1.zip || exit
+        wget -q -N $TRUNK_URL/$TRUNK_ID/artifact/nbbuild/dist/hudson-nbms-and-javadoc-$TRUNK_ID-$1.zip -O ../download/netbeans-hudson-trunk-$TRUNK_ID-$1.zip || exit
     fi;
     unzip -q ../download/*$TRUNK_ID-$1.zip || exit
 }
@@ -22,29 +26,6 @@ download_and_unpack_cluster() {
 for cluster in ide platform java harness nb; do
     download_and_unpack_cluster $cluster;
 done
-
-if [ ! -e ../download/latex.zip ] ; then
-    wget -q -N http://deadlock.netbeans.org/hudson/job/latex/lastSuccessfulBuild/artifact/dist/latex.zip -O ../download/latex.zip
-fi;
-
-unzip -q ../download/latex.zip
-
-mv latex/extra ./
-
-rm -rf latex
-
-cd ../..
-
-cd nbbuild
-rm -rf tmp
-mkdir -p tmp
-cd tmp
-unpack() {
-    wget -q -N http://deadlock.netbeans.org/hudson/job/nbms-and-javadoc/lastSuccessfulBuild/artifact/nbbuild/nbms/extra/$1 -O ../download/$1 || exit
-    jar xf ../download/$1 netbeans || exit
-}
-unpack org-netbeans-modules-showtodos.nbm
-cp -r netbeans/* ../netbeans/extra
 
 cd ../..
 
