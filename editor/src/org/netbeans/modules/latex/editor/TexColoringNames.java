@@ -43,7 +43,7 @@
  */
 package org.netbeans.modules.latex.editor;
 
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 
 /**
  *

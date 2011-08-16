@@ -60,7 +60,6 @@ import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.modules.latex.editor.TexColoringNames;
-import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.ArgumentContainingNode;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
@@ -73,7 +72,7 @@ import org.netbeans.modules.latex.model.command.Environment;
 import org.netbeans.modules.latex.model.command.MathNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.TraverseHandler;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 import org.netbeans.modules.parsing.spi.Parser.Result;
 import org.netbeans.modules.parsing.spi.ParserResultTask;
 import org.netbeans.modules.parsing.spi.Scheduler;
@@ -261,7 +260,7 @@ public class SemanticColoring extends ParserResultTask {
                             int start = node.getStartingPosition().getOffsetValue();
                             int end   = node.getEndingPosition().getOffsetValue();
 
-                            TokenSequence<TexTokenId> ts = TokenHierarchy.get(document).tokenSequence(TexLanguage.description());
+                            TokenSequence<TexTokenId> ts = TokenHierarchy.get(document).tokenSequence(TexTokenId.language());
 
                             ts.move(start);
 

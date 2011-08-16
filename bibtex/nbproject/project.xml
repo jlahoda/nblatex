@@ -48,6 +48,14 @@ made subject to such option by the copyright holder.
             <suite-component/>
             <module-dependencies>
                 <dependency>
+                    <code-name-base>org.netbeans.modules.latex.lexer</code-name-base>
+                    <build-prerequisite/>
+                    <compile-dependency/>
+                    <run-dependency>
+                        <specification-version>1.0</specification-version>
+                    </run-dependency>
+                </dependency>
+                <dependency>
                     <code-name-base>org.netbeans.modules.latex.model</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>

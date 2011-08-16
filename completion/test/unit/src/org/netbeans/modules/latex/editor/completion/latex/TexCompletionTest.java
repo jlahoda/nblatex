@@ -58,7 +58,8 @@ import org.netbeans.modules.editor.completion.CompletionItemComparator;
 import org.netbeans.modules.editor.completion.CompletionResultSetImpl;
 import org.netbeans.modules.latex.UnitUtilities;
 import org.netbeans.modules.latex.bibtex.loaders.MyDataLoader;
-import org.netbeans.modules.latex.editor.TexLanguage;
+import org.netbeans.modules.latex.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.impl.TexLanguage;
 import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.spi.editor.completion.CompletionItem;
 import org.netbeans.spi.editor.completion.CompletionProvider;
@@ -351,7 +352,7 @@ public class TexCompletionTest extends NbTestCase {
         pane.putClientProperty("mimeType", "text/x-tex");
         pane.setDocument(doc);
         
-        doc.putProperty(Language.class, TexLanguage.description());
+        doc.putProperty(Language.class, TexTokenId.language());
         
         return pane;
     }

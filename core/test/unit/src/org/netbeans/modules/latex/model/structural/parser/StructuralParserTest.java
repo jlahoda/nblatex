@@ -55,7 +55,8 @@ import org.netbeans.api.lexer.Language;
 import org.netbeans.core.startup.Main;
 import org.netbeans.junit.NbTestCase;
 import org.netbeans.modules.latex.UnitUtilities;
-import org.netbeans.modules.latex.editor.TexLanguage;
+import org.netbeans.modules.latex.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.impl.TexLanguage;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.impl.NBUtilities;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
@@ -109,7 +110,7 @@ public class StructuralParserTest extends NbTestCase {
         StyledDocument doc = od.getLookup().lookup(EditorCookie.class).openDocument();
  
         doc.putProperty("mime-type", "text/x-tex");
-        doc.putProperty(Language.class, TexLanguage.description());
+        doc.putProperty(Language.class, TexTokenId.language());
 
         final StructuralElement[] section = new StructuralElement[1];
         

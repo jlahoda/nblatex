@@ -55,7 +55,7 @@ import org.netbeans.modules.latex.model.bibtex.FreeFormEntry;
 import org.netbeans.modules.latex.model.bibtex.PublicationEntry;
 import org.netbeans.modules.latex.model.bibtex.StringEntry;
 import org.netbeans.modules.latex.model.command.SourcePosition;
-import org.netbeans.modules.latex.model.lexer.BiBTeXTokenId;
+import org.netbeans.modules.latex.lexer.BiBTeXTokenId;
 
 /**
  *

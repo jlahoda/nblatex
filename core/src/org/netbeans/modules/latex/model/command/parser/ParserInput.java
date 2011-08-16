@@ -54,11 +54,11 @@ import javax.swing.text.Document;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 
+import org.netbeans.modules.latex.lexer.TexTokenId;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 
 import org.netbeans.api.lexer.Token;
-import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.model.Utilities;
 
 import org.netbeans.modules.latex.model.command.SourcePosition;
@@ -110,7 +110,7 @@ public class ParserInput {
             }
         });
         
-        TokenHierarchy h = TokenHierarchy.create(text[0], TexLanguage.description());
+        TokenHierarchy h = TokenHierarchy.create(text[0], TexTokenId.language());
         
         dnode.addUsedFile(file, h);
         

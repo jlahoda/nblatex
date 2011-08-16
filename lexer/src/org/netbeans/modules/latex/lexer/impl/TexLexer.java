@@ -41,12 +41,12 @@
  *
  * Contributor(s): Jan Lahoda.
  */
-package org.netbeans.modules.latex.editor;
+package org.netbeans.modules.latex.lexer.impl;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 import org.netbeans.spi.lexer.Lexer;
 import org.netbeans.spi.lexer.LexerInput;
 import org.netbeans.spi.lexer.TokenFactory;

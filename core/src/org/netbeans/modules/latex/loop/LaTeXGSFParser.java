@@ -54,7 +54,6 @@ import java.util.logging.Logger;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.ParseError;
 import org.netbeans.modules.latex.model.command.DocumentNode;
@@ -62,7 +61,7 @@ import org.netbeans.modules.latex.model.command.LaTeXSourceFactory;
 import org.netbeans.modules.latex.model.command.impl.CommandUtilitiesImpl;
 import org.netbeans.modules.latex.model.command.parser.CommandParser;
 import org.netbeans.modules.latex.model.hacks.RegisterParsingTaskFactory;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 import org.netbeans.modules.latex.model.structural.StructuralElement;
 import org.netbeans.modules.latex.model.structural.parser.StructuralParserImpl;
 import org.netbeans.modules.parsing.api.Snapshot;
@@ -166,7 +165,7 @@ public class LaTeXGSFParser extends Parser {
 //    }
 
     private boolean checkFullReparse(CharSequence text, int start, int end) {
-        TokenHierarchy h = TokenHierarchy.create(text, TexLanguage.description());
+        TokenHierarchy h = TokenHierarchy.create(text, TexTokenId.language());
         TokenSequence ts = h.tokenSequence();
         
         ts.move(start);

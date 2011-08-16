@@ -52,13 +52,12 @@ import javax.swing.text.Position;
 import javax.swing.text.StyledDocument;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.modules.latex.editor.TexLanguage;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.CommandNode;
 import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 import org.netbeans.modules.parsing.api.Source;
 import org.netbeans.modules.parsing.spi.CursorMovedSchedulerEvent;
 import org.netbeans.modules.parsing.spi.SchedulerEvent;
@@ -115,11 +114,11 @@ public class AddItemHint implements HintProvider {
             return null;
         }
         
-        if (checkOffset(lpr.getTokenHierarchy().tokenSequence(TexLanguage.description()).subSequence(start, offset), offset, TexTokenId.COMP_BRACKET_LEFT)) {
+        if (checkOffset(lpr.getTokenHierarchy().tokenSequence(TexTokenId.language()).subSequence(start, offset), offset, TexTokenId.COMP_BRACKET_LEFT)) {
             fixes.add(new FixImpl(doc, lpr.getSnapshot().getSource(), n.getStartingPosition().getOffset(), true, hasFirstArgument, hasBracketsInTheSecondArgument));
         }
         
-        if (checkOffset(lpr.getTokenHierarchy().tokenSequence(TexLanguage.description()).subSequence(offset, end), offset, TexTokenId.COMP_BRACKET_RIGHT)) {
+        if (checkOffset(lpr.getTokenHierarchy().tokenSequence(TexTokenId.language()).subSequence(offset, end), offset, TexTokenId.COMP_BRACKET_RIGHT)) {
             fixes.add(new FixImpl(doc, lpr.getSnapshot().getSource(), n.getEndingPosition().getOffset(), false, hasFirstArgument, hasBracketsInTheSecondArgument));
         }
         

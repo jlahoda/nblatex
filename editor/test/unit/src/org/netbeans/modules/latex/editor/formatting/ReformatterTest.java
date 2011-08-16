@@ -56,7 +56,8 @@ import org.netbeans.modules.editor.indent.IndentSpiPackageAccessor;
 import org.netbeans.modules.editor.indent.spi.Context.Region;
 import org.netbeans.modules.latex.UnitUtilities;
 import org.netbeans.modules.latex.bibtex.loaders.MyDataLoader;
-import org.netbeans.modules.latex.editor.TexLanguage;
+import org.netbeans.modules.latex.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.impl.TexLanguage;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -250,7 +251,7 @@ public class ReformatterTest extends NbTestCase {
         StyledDocument doc = od.getLookup().lookup(EditorCookie.class).openDocument();
  
         doc.putProperty("mimeType", "text/x-tex");
-        doc.putProperty(Language.class, TexLanguage.description());
+        doc.putProperty(Language.class, TexTokenId.language());
 
         Region reg = IndentSpiPackageAccessor.get().createContextRegion(new MutablePositionRegion(doc, start, end));
         Reformatter r = new Reformatter(doc, Collections.singletonList(reg));

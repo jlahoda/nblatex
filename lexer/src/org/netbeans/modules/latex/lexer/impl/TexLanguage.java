@@ -38,37 +38,44 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.modules.latex.model.lexer;
+package org.netbeans.modules.latex.lexer.impl;
 
-import org.netbeans.api.lexer.TokenId;
+import java.util.Collection;
+import java.util.EnumSet;
+import org.netbeans.api.lexer.Language;
+import org.netbeans.modules.latex.lexer.TexTokenId;
+import org.netbeans.spi.lexer.LanguageHierarchy;
+import org.netbeans.spi.lexer.Lexer;
+import org.netbeans.spi.lexer.LexerRestartInfo;
 
 /**
  *
  * @author Jan Lahoda
  */
-public enum TexTokenId implements TokenId {
+public class TexLanguage {
     
-    COMMAND("command"),
-    COMMENT("comment"),
-    COMP_BRACKET_LEFT("brackets"),
-    COMP_BRACKET_RIGHT("brackets"),
-    MATH("brackets"),
-    PARAGRAPH_END("whitespaces"),
-    RECT_BRACKET_LEFT("brackets"),
-    RECT_BRACKET_RIGHT("brackets"),
-    UNKNOWN_CHARACTER("unknown"),
-    WHITESPACE("whitespaces"),
-    WORD("word"),
-    EMBEDD("word");
+    private static final String TEX_MIME_TYPE = "text/x-tex"; // NOI18N
+
+    private TexLanguage() {
+    }
     
-    private String category;
+    private static Language<TexTokenId> description = new LanguageHierarchy<TexTokenId>() {
+        @Override
+        protected Lexer<TexTokenId> createLexer(LexerRestartInfo<TexTokenId> info) {
+            return new TexLexer(info.input(), info.tokenFactory(), info.state());
+        }
+        @Override
+        protected Collection<TexTokenId> createTokenIds() {
+            return EnumSet.allOf(TexTokenId.class);
+        }
+        @Override
+        protected String mimeType() {
+            return TEX_MIME_TYPE;
+        }
+    }.language();
     
-    TexTokenId(String category) {
-        this.category = category;
-    };
-    
-    public String primaryCategory() {
-        return category;
+    public static Language<TexTokenId> description() {
+        return description;
     }
     
 }

@@ -44,10 +44,11 @@
 
 package org.netbeans.modules.latex.editor;
 
+import org.netbeans.modules.latex.lexer.impl.TexLanguage;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.junit.NbTestCase;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 
 /**
  *
@@ -67,7 +68,7 @@ public class TexLexerTest extends NbTestCase {
  
     public void test99722() throws Exception {
         String text = "\\%adsfadsf";
-        TokenHierarchy<?> hi = TokenHierarchy.create(text, TexLanguage.description());
+        TokenHierarchy<?> hi = TokenHierarchy.create(text, TexTokenId.language());
         TokenSequence<?> ts = hi.tokenSequence();
         
         while (ts.moveNext()) {
