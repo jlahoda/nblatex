@@ -60,7 +60,7 @@ import org.netbeans.editor.Syntax;
 import org.netbeans.editor.SyntaxSupport;
 import org.netbeans.modules.editor.NbEditorKit;
 //import org.netbeans.modules.editor.gsfret.InstantRenameAction;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 import org.openide.util.Exceptions;
 
 /**
@@ -119,7 +119,7 @@ public class TexKit extends NbEditorKit {
     protected @Override void initDocument(final BaseDocument doc) {
         super.initDocument(doc);
         doc.putProperty("mime-type", TEX_MIME_TYPE);
-        doc.putProperty(Language.class, TexLanguage.description());
+        doc.putProperty(Language.class, TexTokenId.language());
     }
 
     private static final class WrappingDefaultKeyTypedAction extends ExtDefaultKeyTypedAction {
@@ -142,7 +142,7 @@ public class TexKit extends NbEditorKit {
                             boolean isComment = false;
                             
                             TokenHierarchy<Document> h = TokenHierarchy.get(target.getDocument());
-                            TokenSequence<TexTokenId> ts = h.tokenSequence(TexLanguage.description());
+                            TokenSequence<TexTokenId> ts = h.tokenSequence(TexTokenId.language());
                             
                             if (ts != null) {
                                 ts.move(caret);

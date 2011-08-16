@@ -41,10 +41,10 @@
  *
  * Contributor(s): Jan Lahoda.
  */
-package org.netbeans.modules.latex.editor.bibtex;
+package org.netbeans.modules.latex.lexer.impl;
 
 import org.netbeans.api.lexer.Token;
-import org.netbeans.modules.latex.model.lexer.BiBTeXTokenId;
+import org.netbeans.modules.latex.lexer.BiBTeXTokenId;
 import org.netbeans.spi.lexer.Lexer;
 import org.netbeans.spi.lexer.LexerInput;
 import org.netbeans.spi.lexer.TokenFactory;

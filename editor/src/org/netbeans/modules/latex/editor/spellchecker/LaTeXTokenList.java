@@ -49,7 +49,7 @@ import javax.swing.text.Document;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 import org.netbeans.modules.spellchecker.spi.language.TokenList;
 import org.openide.util.WeakSet;
 

@@ -41,6 +41,7 @@
 
 package org.netbeans.modules.latex.editor.bibtex;
 
+import org.netbeans.modules.latex.lexer.BiBTeXTokenId;
 import javax.swing.text.Document;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.editor.BaseDocument;
@@ -99,7 +100,7 @@ public class BiBTeXKit extends NbEditorKit {
     protected void initDocument(BaseDocument doc) {
         super.initDocument(doc);
         doc.putProperty("mime-type", getContentType());
-        doc.putProperty(Language.class, BiBTeXLanguage.description());
+        doc.putProperty(Language.class, BiBTeXTokenId.language());
     }
 
 }

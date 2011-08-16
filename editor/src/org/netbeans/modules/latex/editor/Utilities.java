@@ -51,8 +51,7 @@ import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenId;
 import org.netbeans.api.lexer.TokenSequence;
 import org.netbeans.editor.BaseDocument;
-import org.netbeans.modules.latex.editor.TexLanguage;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 
 /**
  *
@@ -65,7 +64,7 @@ public final class Utilities {
     }
     
     public static final Token<TexTokenId> getToken(Document doc, int offset) throws /*BadLocationException, */ClassCastException {
-        TokenSequence<TexTokenId> ts = TokenHierarchy.get(doc).tokenSequence(TexLanguage.description());
+        TokenSequence<TexTokenId> ts = TokenHierarchy.get(doc).tokenSequence(TexTokenId.language());
         
         ts.move(offset > 0 ? offset - 1 : 0); //TODO: -1??/
         
@@ -183,7 +182,7 @@ public final class Utilities {
     
     public static final int getStartingOffset(Document doc, int offset) /*throws BadLocationException*/ {
         TokenHierarchy<Document> h = TokenHierarchy.get(doc);
-        TokenSequence ts = h.tokenSequence(TexLanguage.description());
+        TokenSequence ts = h.tokenSequence(TexTokenId.language());
         
         ts.move(offset);
         
@@ -217,7 +216,7 @@ public final class Utilities {
     
     public static int countWords(Document doc) {
         TokenHierarchy<Document> h = TokenHierarchy.get(doc);
-        TokenSequence<TexTokenId> ts = h.tokenSequence(TexLanguage.description());
+        TokenSequence<TexTokenId> ts = h.tokenSequence(TexTokenId.language());
         int count = 0;
         
         while (ts.moveNext()) {

@@ -61,6 +61,7 @@ import org.netbeans.api.lexer.Language;
 import org.netbeans.junit.NbTestCase;
 import org.netbeans.modules.latex.UnitUtilities;
 import org.netbeans.modules.latex.bibtex.loaders.MyDataLoader;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 import org.netbeans.modules.parsing.api.Source;
 import static org.junit.Assert.*;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
@@ -71,7 +72,7 @@ import org.xml.sax.SAXException;
 
 import org.netbeans.core.startup.Main;
 import org.netbeans.modules.editor.bracesmatching.SpiAccessor;
-import org.netbeans.modules.latex.editor.TexLanguage;
+import org.netbeans.modules.latex.lexer.impl.TexLanguage;
 import org.netbeans.modules.parsing.api.ParserManager;
 import org.netbeans.modules.parsing.api.ResultIterator;
 import org.netbeans.modules.parsing.api.UserTask;
@@ -181,7 +182,7 @@ public class ComputeBracesTest extends NbTestCase {
         final StyledDocument doc = od.getLookup().lookup(EditorCookie.class).openDocument();
  
         doc.putProperty("mimeType", "text/x-tex");
-        doc.putProperty(Language.class, TexLanguage.description());
+        doc.putProperty(Language.class, TexTokenId.language());
 
         Source s = Source.create(doc);
         

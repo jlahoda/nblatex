@@ -45,7 +45,7 @@ package org.netbeans.modules.latex.model.command;
 
 import java.io.IOException;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 
 /**
  *

@@ -38,7 +38,7 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.modules.latex.editor.bibtex;
+package org.netbeans.modules.latex.lexer.impl;
 
 import java.util.Collection;
 import java.util.EnumSet;
@@ -46,7 +46,7 @@ import org.netbeans.api.lexer.InputAttributes;
 import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.LanguagePath;
 import org.netbeans.api.lexer.Token;
-import org.netbeans.modules.latex.model.lexer.BiBTeXTokenId;
+import org.netbeans.modules.latex.lexer.BiBTeXTokenId;
 import org.netbeans.spi.lexer.LanguageEmbedding;
 import org.netbeans.spi.lexer.LanguageHierarchy;
 import org.netbeans.spi.lexer.Lexer;

@@ -61,8 +61,10 @@ import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.LanguagePath;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.junit.NbTestCase;
-import org.netbeans.modules.latex.editor.TexLanguage;
-import org.netbeans.modules.latex.editor.bibtex.BiBTeXLanguage;
+import org.netbeans.modules.latex.lexer.BiBTeXTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.impl.TexLanguage;
+import org.netbeans.modules.latex.lexer.impl.BiBTeXLanguage;
 import org.netbeans.modules.latex.loop.LaTeXGSFParser;
 import org.netbeans.modules.latex.model.Utilities;
 import org.netbeans.modules.latex.model.impl.NBUtilities;
@@ -222,12 +224,12 @@ public class UnitUtilities extends ProxyLookup {
                     
                     if ("tex".equals(file.getExt())) {
                         doc.putProperty("mimeType", "text/x-tex");
-                        doc.putProperty(Language.class, TexLanguage.description());
+                        doc.putProperty(Language.class, TexTokenId.language());
                     }
                     
                     if ("bib".equals(file.getExt())) {
                         doc.putProperty("mimeType", "text/x-bibtex");
-                        doc.putProperty(Language.class, BiBTeXLanguage.description());
+                        doc.putProperty(Language.class, BiBTeXTokenId.language());
                     }
                     
                     file2Document.put(obj, doc);
@@ -267,9 +269,9 @@ public class UnitUtilities extends ProxyLookup {
         @Override
         public Language<?> findLanguage(String mimeType) {
             if ("text/x-tex".equals(mimeType))
-                return TexLanguage.description();
+                return TexTokenId.language();
             if ("text/x-bibtex".equals(mimeType))
-                return BiBTeXLanguage.description();
+                return BiBTeXTokenId.language();
 
             return null;
         }

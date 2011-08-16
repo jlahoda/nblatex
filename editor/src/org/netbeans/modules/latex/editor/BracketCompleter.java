@@ -52,7 +52,7 @@ import org.netbeans.api.editor.settings.SimpleValueNames;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.api.lexer.TokenHierarchy;
 import org.netbeans.api.lexer.TokenSequence;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 
 /**
  *
@@ -79,7 +79,7 @@ public class BracketCompleter {
     public static int possiblyAddBrackets(Document doc, int offset, String cmd) throws BadLocationException {
         TokenHierarchy th = TokenHierarchy.get(doc);
 
-        TokenSequence<TexTokenId> ts = th.tokenSequence(TexLanguage.description());
+        TokenSequence<TexTokenId> ts = th.tokenSequence(TexTokenId.language());
         
         ts.move(offset);
         
@@ -116,7 +116,7 @@ public class BracketCompleter {
     private static int possiblyRemoveBrackets(Document doc, int offset, String cmd) throws BadLocationException {
         TokenHierarchy th = TokenHierarchy.get(doc);
 
-        TokenSequence<TexTokenId> ts = th.tokenSequence(TexLanguage.description());
+        TokenSequence<TexTokenId> ts = th.tokenSequence(TexTokenId.language());
 
         ts.move(offset);
 

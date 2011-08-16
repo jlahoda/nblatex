@@ -50,7 +50,7 @@ import org.netbeans.api.lexer.Token;
 import org.netbeans.modules.latex.model.LaTeXParserResult;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.model.command.ParagraphNode;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 import org.openide.util.Exceptions;
 
 /**

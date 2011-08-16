@@ -41,6 +41,8 @@
 
 package org.netbeans.modules.latex.editor;
 
+import org.netbeans.modules.latex.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.impl.TexLanguage;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
@@ -112,7 +114,7 @@ public class BracketCompleterTest extends TestCase {
         
         Document doc = new PlainDocument();
 
-        doc.putProperty(Language.class, TexLanguage.description());
+        doc.putProperty(Language.class, TexTokenId.language());
         doc.insertString(0, text, null);
 
         assertEquals(targetCaret, BracketCompleter.typed(doc, offset, "" + text.charAt(offset - 1)));

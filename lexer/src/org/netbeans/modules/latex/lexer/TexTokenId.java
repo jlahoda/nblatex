@@ -38,37 +38,42 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.modules.latex.model.lexer;
+package org.netbeans.modules.latex.lexer;
 
+import org.netbeans.api.lexer.Language;
 import org.netbeans.api.lexer.TokenId;
+import org.netbeans.modules.latex.lexer.impl.TexLanguage;
 
 /**
  *
  * @author Jan Lahoda
  */
-public enum BiBTeXTokenId implements TokenId {
+public enum TexTokenId implements TokenId {
     
-    CL_BRAC("brackets"),
-    COMMA("comma"),
+    COMMAND("command"),
     COMMENT("comment"),
-    EQUALS("equals"),
-    OP_BRAC("brackets"),
-    STRING("string"),
-    TEXT("text"),
-    TYPE("type"),
+    COMP_BRACKET_LEFT("brackets"),
+    COMP_BRACKET_RIGHT("brackets"),
+    MATH("brackets"),
+    PARAGRAPH_END("whitespaces"),
+    RECT_BRACKET_LEFT("brackets"),
+    RECT_BRACKET_RIGHT("brackets"),
     UNKNOWN_CHARACTER("unknown"),
-    DASH("text"),
-    UNDERSCORE("text"),
-    WHITESPACE("whitespaces");
+    WHITESPACE("whitespaces"),
+    WORD("word"),
+    EMBEDD("word");
     
     private String category;
     
-    BiBTeXTokenId(String category) {
+    TexTokenId(String category) {
         this.category = category;
     };
     
     public String primaryCategory() {
         return category;
     }
-    
+
+    public static Language<TexTokenId> language() {
+        return TexTokenId.language();
+    }
 }

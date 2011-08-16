@@ -38,42 +38,42 @@
  * Version 2 license, then the option applies only if the new code is
  * made subject to such option by the copyright holder.
  */
-package org.netbeans.modules.latex.editor;
+package org.netbeans.modules.latex.lexer;
 
-import java.util.Collection;
-import java.util.EnumSet;
 import org.netbeans.api.lexer.Language;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
-import org.netbeans.spi.lexer.LanguageHierarchy;
-import org.netbeans.spi.lexer.Lexer;
-import org.netbeans.spi.lexer.LexerRestartInfo;
+import org.netbeans.api.lexer.TokenId;
+import org.netbeans.modules.latex.lexer.impl.BiBTeXLanguage;
 
 /**
  *
  * @author Jan Lahoda
  */
-public class TexLanguage {
+public enum BiBTeXTokenId implements TokenId {
     
-    private TexLanguage() {
+    CL_BRAC("brackets"),
+    COMMA("comma"),
+    COMMENT("comment"),
+    EQUALS("equals"),
+    OP_BRAC("brackets"),
+    STRING("string"),
+    TEXT("text"),
+    TYPE("type"),
+    UNKNOWN_CHARACTER("unknown"),
+    DASH("text"),
+    UNDERSCORE("text"),
+    WHITESPACE("whitespaces");
+    
+    private String category;
+    
+    BiBTeXTokenId(String category) {
+        this.category = category;
+    };
+    
+    public String primaryCategory() {
+        return category;
     }
-    
-    private static Language<TexTokenId> description = new LanguageHierarchy<TexTokenId>() {
-        @Override
-        protected Lexer<TexTokenId> createLexer(LexerRestartInfo<TexTokenId> info) {
-            return new TexLexer(info.input(), info.tokenFactory(), info.state());
-        }
-        @Override
-        protected Collection<TexTokenId> createTokenIds() {
-            return EnumSet.allOf(TexTokenId.class);
-        }
-        @Override
-        protected String mimeType() {
-            return TexKit.TEX_MIME_TYPE;
-        }
-    }.language();
-    
-    public static Language<TexTokenId> description() {
-        return description;
+
+    public static Language<BiBTeXTokenId> language() {
+        return BiBTeXTokenId.language();
     }
-    
 }

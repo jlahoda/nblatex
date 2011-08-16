@@ -46,7 +46,7 @@ package org.netbeans.modules.latex.model.command.parser;
 import org.netbeans.api.lexer.Token;
 import org.netbeans.modules.latex.model.command.ArgumentNode;
 import org.netbeans.modules.latex.model.command.Command;
-import org.netbeans.modules.latex.model.lexer.TexTokenId;
+import org.netbeans.modules.latex.lexer.TexTokenId;
 
 /**
  *
