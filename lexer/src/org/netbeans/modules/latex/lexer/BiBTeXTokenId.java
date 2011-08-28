@@ -74,6 +74,6 @@ public enum BiBTeXTokenId implements TokenId {
     }
 
     public static Language<BiBTeXTokenId> language() {
-        return BiBTeXTokenId.language();
+        return BiBTeXLanguage.description();
     }
 }

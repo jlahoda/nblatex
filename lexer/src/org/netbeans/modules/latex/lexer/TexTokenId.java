@@ -74,6 +74,6 @@ public enum TexTokenId implements TokenId {
     }
 
     public static Language<TexTokenId> language() {
-        return TexTokenId.language();
+        return TexLanguage.description();
     }
 }
