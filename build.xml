@@ -46,7 +46,6 @@ made subject to such option by the copyright holder.
 <project name="contrib/contrib/latex" basedir=".">
     <description>Builds the module suite latex.</description>
     <import file="nbproject/build-impl.xml"/>
-
     <target name="test">
         <subant target="test" buildpath="auted:core:editor:bibtex:completion:guiproject:hints" inheritall="false" failonerror="true">
 	    <property name="test-unit-sys-prop.nbjunit.workdir" location="${java.io.tmpdir}/latex/tests" />
