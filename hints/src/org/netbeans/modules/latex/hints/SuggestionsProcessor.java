@@ -96,7 +96,7 @@ public class SuggestionsProcessor extends ParserResultTask<LaTeXParserResult> {
     private List<ErrorDescription> compute(LaTeXParserResult info, SchedulerEvent evt) throws Exception {
         final Document doc = info.getSnapshot().getSource().getDocument(false);
 
-        if (doc == null) {
+        if (doc == null || !(evt instanceof CursorMovedSchedulerEvent)) {
             return null;
         }
 
@@ -139,5 +139,5 @@ public class SuggestionsProcessor extends ParserResultTask<LaTeXParserResult> {
     public Class<? extends Scheduler> getSchedulerClass() {
         return Scheduler.CURSOR_SENSITIVE_TASK_SCHEDULER;
     }
-        
+    
 }
