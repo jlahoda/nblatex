@@ -115,6 +115,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
     public static final String COMMAND_SHOW = "latex-show";//NOI18N
     
     private static final NavigatorLookupHint NAVIGATOR_HINT = new NavigatorHintImpl();
+    private static final RequestProcessor WORKER = new RequestProcessor(LaTeXGUIProject.class.getName(), 1, false, false);
     
     private static final Image LaTeXGUIProjectIMAGE;
     private static final Icon LaTeXGUIProjectICON;
@@ -451,7 +452,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
 
         public void annotationChanged(FileStatusEvent event) {
             if (task == null) {
-                task = RequestProcessor.getDefault().create(this);
+                task = WORKER.create(this);
             }
 
             synchronized (privateLock) {
