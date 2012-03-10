@@ -41,7 +41,6 @@
 
 package org.netbeans.modules.latex.hints;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -59,38 +58,28 @@ import org.netbeans.modules.latex.model.command.DocumentNode;
 import org.netbeans.modules.latex.model.command.Node;
 import org.netbeans.modules.latex.lexer.TexTokenId;
 import org.netbeans.modules.parsing.api.Source;
-import org.netbeans.modules.parsing.spi.CursorMovedSchedulerEvent;
-import org.netbeans.modules.parsing.spi.SchedulerEvent;
 import org.netbeans.spi.editor.hints.ChangeInfo;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.Fix;
 import org.netbeans.spi.editor.hints.Severity;
-import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
-import org.openide.loaders.DataObject;
-import org.openide.text.CloneableEditorSupport;
 import org.openide.text.NbDocument;
-import org.openide.text.PositionRef;
 import org.openide.util.Exceptions;
 
 /**
  *
  * @author Jan Lahoda
  */
-public class AddItemHint implements HintProvider {
+public class AddItemHint implements HintProvider<Integer> {
 
     public boolean accept(LaTeXParserResult lpr, Node n) {
         return n instanceof CommandNode && n.hasAttribute("item-command") && ((CommandNode) n).getCommand().getArgumentCount() == 2 /*XXX*/;
     }
 
-    private static int getCaret(SchedulerEvent event) {
-        return event instanceof CursorMovedSchedulerEvent ?
-            ((CursorMovedSchedulerEvent) event).getCaretOffset () : -1;
-    }
-
-    public List computeHints(LaTeXParserResult lpr, SchedulerEvent event, Node n, Data providerPrivateData) throws Exception {
-        return computeHints(lpr, n, getCaret(event));
+    public List computeHints(LaTeXParserResult lpr, Node n, Data<Integer> providerPrivateData) throws Exception {
+        Integer caret = providerPrivateData.getValue();
+        return computeHints(lpr, n, caret != null ? caret : -1);
     }
     
     List<ErrorDescription> computeHints(LaTeXParserResult lpr, Node n, int offset) throws Exception {
@@ -147,11 +136,6 @@ public class AddItemHint implements HintProvider {
         
         return true;
     }
-
-    public List computeHints(LaTeXParserResult lpr, Node n, Data providerPrivateData) throws Exception {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-        
 
     static final class FixImpl implements Fix {
 
