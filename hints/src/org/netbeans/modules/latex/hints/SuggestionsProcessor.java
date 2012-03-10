@@ -56,7 +56,6 @@ import org.netbeans.modules.parsing.spi.CursorMovedSchedulerEvent;
 import org.netbeans.modules.parsing.spi.ParserResultTask;
 import org.netbeans.modules.parsing.spi.Scheduler;
 import org.netbeans.modules.parsing.spi.SchedulerEvent;
-import org.netbeans.modules.parsing.spi.SchedulerTask;
 import org.netbeans.spi.editor.hints.ErrorDescription;
 import org.netbeans.spi.editor.hints.HintsController;
 import org.openide.filesystems.FileObject;
@@ -101,8 +100,8 @@ public class SuggestionsProcessor extends ParserResultTask<LaTeXParserResult> {
         }
 
         LaTeXParserResult lpr = LaTeXParserResult.get(info);
-        
-        Node n = lpr.getCommandUtilities().findNode(doc, ((CursorMovedSchedulerEvent) evt).getCaretOffset());
+        int caret = ((CursorMovedSchedulerEvent) evt).getCaretOffset();
+        Node n = lpr.getCommandUtilities().findNode(doc, caret);
         
         if (n == null) {
             return null;
@@ -110,6 +109,12 @@ public class SuggestionsProcessor extends ParserResultTask<LaTeXParserResult> {
         
         final List<ErrorDescription> hints = new LinkedList<ErrorDescription>();
         final Map<Class, Data<?>> providerPrivateData = new HashMap<Class, Data<?>>();
+        
+        for (HintProvider provider : providers) {
+            Data<Integer> data = new Data<Integer>();
+            data.setValue(caret);
+            providerPrivateData.put(provider.getClass(), data);
+        }
         
         while (n != null) {
             HintsProcessor.handleNode(info, providers, hints, n, providerPrivateData);
