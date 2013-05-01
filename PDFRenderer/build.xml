@@ -10,6 +10,6 @@
     
     <target name="build-init" depends="harness.build-init">
         <mkdir dir="release/modules/ext" />
-        <get src="http://java.net/projects/pdf-renderer/downloads/download/PDFRenderer-0.9.1.jar" dest="release/modules/ext" skipexisting="true" />
+        <get src="http://java.net/downloads/pdf-renderer/PDFRenderer-0.9.1.jar" dest="release/modules/ext" skipexisting="true" />
     </target>
 </project>
