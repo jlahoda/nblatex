@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- You may freely edit this file. See harness/README in the NetBeans platform -->
+<!-- for some information on what you could do (e.g. targets to override). -->
+<!-- If you delete this file and reopen the project it will be recreated. -->
+<project name="org.netbeans.libs.pdfrenderer" default="netbeans" basedir=".">
+    <description>Builds, tests, and runs the project org.netbeans.libs.pdfrenderer.</description>
+    <property name="license.file" location="PDFRenderer-0.9.1-license.txt"/>
+    <target name="-create-license.file"/>
+    <import file="nbproject/build-impl.xml"/>
+    
+    <target name="build-init" depends="harness.build-init">
+        <mkdir dir="release/modules/ext" />
+        <get src="http://java.net/projects/pdf-renderer/downloads/download/PDFRenderer-0.9.1.jar" dest="release/modules/ext" skipexisting="true" />
+    </target>
+</project>

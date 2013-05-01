@@ -4,3 +4,4 @@
 .*/nbproject/private
 ^nbproject/private$
 ^nbbuild$
+^PDFRenderer/release$

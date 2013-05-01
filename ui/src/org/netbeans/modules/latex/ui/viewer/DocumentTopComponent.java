@@ -40,23 +40,32 @@
  */
 package org.netbeans.modules.latex.ui.viewer;
 
+import com.sun.pdfview.PDFFile;
+import com.sun.pdfview.PDFPage;
+import com.sun.pdfview.PDFRenderer;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Image;
+import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel.MapMode;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
@@ -64,13 +73,14 @@ import java.util.logging.Logger;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
+import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
@@ -88,7 +98,6 @@ import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbPreferences;
 import org.openide.util.RequestProcessor;
-import org.openide.util.Utilities;
 import org.openide.windows.TopComponent;
 
 /**
@@ -99,28 +108,33 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
 
     private static double sqrt2 = Math.sqrt(2);
 
-    private static int[] resolutions = new int[] {
-        (int) (96 / sqrt2 / sqrt2 / sqrt2 / sqrt2),
-        (int) (96 / sqrt2 / sqrt2 / sqrt2),
-        (int) (96 / sqrt2 / sqrt2),
-        (int) (96 / sqrt2),
-        (int) (96),
-        (int) (96 * sqrt2),
-        (int) (96 * sqrt2 * sqrt2),
-        (int) (96 * sqrt2 * sqrt2 * sqrt2),
-        (int) (96 * sqrt2 * sqrt2 * sqrt2 * sqrt2),
+    private static double[] zooms = new double[] {
+        1.0/4.0,
+        1.0/3.0,
+        1.0/2.0,
+        2.0/3.0,
+        3.0/4.0,
+        1.0/1.0,
+        5.0/4.0,
+        3.0/2.0,
+        2.0/1.0,
+        4.0/1.0,
     };
-    
+
+    private static final RequestProcessor WORKER = new RequestProcessor(DocumentTopComponent.class.getName(), 1, false, false);
     private static final String REFRESH_PREF_KEY = DocumentTopComponent.class.getName() + ".refresh";
     private static final String FOLLOW_PREF_KEY = DocumentTopComponent.class.getName() + ".follow";
 
     private DocumentComponent viewer;
     private int resolutionIndex;
     private ViewerImpl viewerImpl;
+    private final JScrollPane spane;
     private List<DVIPageDescription> desc;
     private FileObject source;
+    private PDFFile pdfFile;
     
     private JComboBox pages;
+    private JComboBox zoom;
     private JToggleButton rebuildAutomatically;
     private JToggleButton followCaret;
 
@@ -131,33 +145,16 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
 	
 	this.viewerImpl = viewerImpl;
 
-        JScrollPane spane = new JScrollPane(viewer = new DocumentComponent());
-
+        spane = new ScrollPaneImpl(viewer = new DocumentComponent());
+        
         JToolBar toolBar = new JToolBar(JToolBar.HORIZONTAL);
 
-        JButton zoomInButton = new JButton("+");
-        JButton zoomOutButton = new JButton("-");
-        
         rebuildAutomatically = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("org/netbeans/modules/latex/ui/resources/refresh.png")));
         followCaret = new JToggleButton(new ImageIcon(ImageUtilities.loadImage("org/netbeans/modules/latex/ui/resources/caret.png")));
         
         rebuildAutomatically.setToolTipText("Automatically rebuild on save");
         followCaret.setToolTipText("Follow caret");
 
-        zoomInButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                resolutionIndex++; //!!!
-                viewer.showPage();
-            }
-        });
-
-        zoomOutButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                resolutionIndex--; //!!!
-                viewer.showPage();
-            }
-        });
-        
         rebuildAutomatically.setSelected(NbPreferences.forModule(DocumentTopComponent.class).getBoolean(REFRESH_PREF_KEY, true));
 
         rebuildAutomatically.addActionListener(new ActionListener() {
@@ -188,16 +185,37 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
                 viewer.setPage(d.getPageNumber());
             }
         });
-        toolBar.add(zoomOutButton);
-        toolBar.add(zoomInButton);
+        
+        zoom = new JComboBox();
+        
+        DefaultComboBoxModel zoomModel = new DefaultComboBoxModel();
+        
+        zoomModel.addElement(ZoomKind.FIT_WIDTH);
+        zoomModel.addElement(ZoomKind.FIT_PAGE);
+
+        for (double zoom : zooms) {
+            zoomModel.addElement(zoom);
+        }
+        
+        zoom.setModel(zoomModel);
+        zoom.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                viewer.updateSize();
+            }
+        });
+        zoom.setRenderer(new ZoomRenderer());
+        
+        toolBar.add(new JLabel("Page:"));
+        toolBar.add(pages);
+        toolBar.add(new JLabel("Zoom:"));
+        toolBar.add(zoom);
         toolBar.add(rebuildAutomatically);
         toolBar.add(followCaret);
-        toolBar.add(pages);
 
         add(toolBar, BorderLayout.PAGE_START);
         add(spane, BorderLayout.CENTER);
 
-        viewer.spane = spane;
+        viewer.setEnclosingScrollPane(spane);
 
         toolBar.addKeyListener(viewer);
         addKeyListener(viewer);
@@ -223,6 +241,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         final FileChangeListener sourceFileChangeListener = new FileChangeAdapter() {
             public void fileChanged(FileEvent fileEvent) {
                 handleDVI(FileUtil.findBrother(source, "dvi"));
+                updatePDFFile();
                 viewer.showPage();
             }
         };
@@ -241,6 +260,7 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         });
         
         handleDVI(FileUtil.findBrother(source, "dvi"));
+        updatePDFFile();
     }
     
     FileObject getFile() {
@@ -340,6 +360,22 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
             return -1;
         }
     }
+    
+    private void updatePDFFile() {
+        try {
+            File sourceFile = FileUtil.toFile(source);
+            ByteBuffer pdfContent;
+
+            if (sourceFile != null) {
+                pdfContent = new FileInputStream(sourceFile).getChannel().map(MapMode.READ_ONLY, 0, sourceFile.length());
+            } else {
+                pdfContent = ByteBuffer.wrap(source.asBytes());
+            }
+            pdfFile = new PDFFile(pdfContent);
+        } catch (IOException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
 
     public int getPersistenceType() {
         return PERSISTENCE_NEVER;
@@ -364,11 +400,9 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
     private class DocumentComponent extends JComponent implements KeyListener, MouseListener, MouseMotionListener {
 
         private int page;
-        private Image currentImage;
-
+        private PDFPage currentPage;
         private JScrollPane spane;
         
-        /** Creates a new instance of DocumentTopComponent */
         public DocumentComponent() {
             this.page = 1;
             
@@ -396,7 +430,13 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         }
         
         protected void paintComponent(Graphics g) {
-            g.drawImage(currentImage, 0, 0, null);
+            if (currentPage == null) return ;
+            
+            Dimension targetSize = getPreferredSize();
+            Rectangle targetBounds = new Rectangle(0, 0, targetSize.width, targetSize.height);
+            PDFRenderer pdfRenderer = new PDFRenderer(currentPage, (Graphics2D) g, targetBounds, null, Color.WHITE);
+
+            pdfRenderer.run();
         }
         
         private void showPage() {
@@ -406,13 +446,18 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
 
             RequestProcessor.getDefault().post(new Runnable() {
                 public void run() {
-                    final Image img = Renderer.getDefault().getImage(source, page, resolutions[resolutionIndex]);
+                    final PDFPage currPage = pdfFile.getPage(page);
+                    
+                    try {
+                        currPage.waitForFinish();
+                    } catch (InterruptedException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
                     
                     SwingUtilities.invokeLater(new Runnable() {
                         public void run() {
-                            currentImage = img;
-                            invalidate();
-                            repaint();
+                            currentPage = currPage;
+                            updateSize();
 
                             if (getCursor() == Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)) {
                                 setCursor(original);
@@ -422,7 +467,46 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
                 }
             });
         }
-        
+
+        private void updateSize() {
+            Dimension targetSize;
+            JViewport viewport = spane.getViewport();
+
+            if (currentPage == null) return;
+
+            Object selectedZoom = zoom.getSelectedItem();
+
+            if (selectedZoom == ZoomKind.FIT_WIDTH) {
+                targetSize = new Dimension(viewport.getWidth(), (int) (viewport.getWidth() / currentPage.getAspectRatio()));
+            } else if (selectedZoom == ZoomKind.FIT_PAGE) {
+                int computedWidth = (int) (viewport.getHeight() * currentPage.getAspectRatio());
+                if (computedWidth <= viewport.getWidth()) {
+                    targetSize = new Dimension(computedWidth, viewport.getHeight());
+                } else {
+                    targetSize = new Dimension(viewport.getWidth(), (int) (viewport.getWidth() / currentPage.getAspectRatio()));
+                }
+            } else if (selectedZoom instanceof Double) {
+                double zoom = (double) (Double) selectedZoom;
+
+                targetSize = new Dimension((int) (currentPage.getWidth() * zoom), (int) (currentPage.getHeight() * zoom));
+            } else {
+                throw new IllegalStateException();
+            }
+
+            setPreferredSize(targetSize);
+            invalidate();
+            repaint();
+        }
+
+        private void setEnclosingScrollPane(JScrollPane spane) {
+             this.spane = spane;
+             spane.addComponentListener(new ComponentAdapter() {
+                @Override public void componentResized(ComponentEvent e) {
+                    updateSize();
+                }
+             });
+        }
+
         public void keyTyped(KeyEvent e) {
         }
         
@@ -438,13 +522,6 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
         }
         
         public void keyReleased(KeyEvent e) {
-        }
-
-        public Dimension getPreferredSize() {
-            if (currentImage == null)
-                return super.getPreferredSize();
-
-            return new Dimension(currentImage.getWidth(null), currentImage.getHeight(null));
         }
 
         private Cursor beforeDragging;
@@ -518,5 +595,47 @@ public class DocumentTopComponent extends TopComponent /*implements KeyListener 
             }
         }
 
+    }
+    
+    private enum ZoomKind {
+        FIT_WIDTH,
+        FIT_PAGE;
+    }
+
+    private static final class ZoomRenderer extends DefaultListCellRenderer {
+        @Override public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            String toRender;
+
+            if (value == ZoomKind.FIT_WIDTH) {
+                toRender = "Fit Width";
+            } else if (value == ZoomKind.FIT_PAGE) {
+                toRender = "Fit Page";
+            } else if (value instanceof Double) {
+                toRender = String.format("%d%%", ((int) ((Double) value * 100)));
+            } else {
+                toRender = String.valueOf(value);
+            }
+
+            return super.getListCellRendererComponent(list, toRender, index, isSelected, cellHasFocus);
+        }
+    }
+
+    private final class ScrollPaneImpl extends JScrollPane {
+        ScrollPaneImpl(Component view) {
+            super(view);
+        }
+
+        @Override
+        protected JViewport createViewport() {
+            return new ViewportImpl();
+        }
+    }
+
+    private final class ViewportImpl extends JViewport {
+        @Override
+        public void reshape(int x, int y, int w, int h) {
+            super.reshape(x, y, w, h);
+            viewer.updateSize();
+        }
     }
 }
