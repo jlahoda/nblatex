@@ -76,6 +76,7 @@ import org.openide.awt.StatusDisplayer;
 import org.openide.execution.ExecutionEngine;
 import org.openide.filesystems.FileUtil;
 import org.openide.modules.InstalledFileLocator;
+import org.openide.nodes.NodeOp;
 import org.openide.util.ChangeSupport;
 import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
@@ -275,6 +276,8 @@ public class ActionsFactory implements ActionProvider {
         public void repeatExecution() {
             class Exec implements Runnable {
                 public void run() {
+                    NodeOp.registerPropertyEditors();
+                    
                     InputOutput inout;
                     synchronized (BuildExecutionSupportItemImpl.this) {
                         inout = BuildExecutionSupportItemImpl.this.inout;
