@@ -78,12 +78,7 @@ import org.netbeans.spi.project.ui.support.CommonProjectActions;
 import org.netbeans.spi.project.ui.support.ProjectSensitiveActions;
 import org.openide.ErrorManager;
 import org.openide.actions.FindAction;
-import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileStateInvalidException;
-import org.openide.filesystems.FileStatusEvent;
-import org.openide.filesystems.FileStatusListener;
-import org.openide.filesystems.FileSystem;
-import org.openide.filesystems.FileUtil;
+import org.openide.filesystems.*;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.nodes.AbstractNode;
@@ -368,7 +363,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             if (files != null && files.iterator().hasNext()) {
                 try {
                     FileObject fo = files.iterator().next();
-                    s = fo.getFileSystem ().getStatus ().annotateName (s, files);
+                    s = fo.getFileSystem ().getDecorator().annotateName (s, files);
                 } catch (FileStateInvalidException e) {
                     Logger.getLogger("global").log(Level.INFO,null, e);
                 }
@@ -382,17 +377,13 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             if (files != null && files.iterator().hasNext()) {
                 try {
                     FileObject fo = files.iterator().next();
-                    FileSystem.Status stat = fo.getFileSystem().getStatus();
-                    if (stat instanceof FileSystem.HtmlStatus) {
-                        FileSystem.HtmlStatus hstat = (FileSystem.HtmlStatus) stat;
+                    StatusDecorator decorator = fo.getFileSystem().getDecorator();
+                    String result = decorator.annotateNameHtml (
+                       super.getDisplayName(), files);
 
-                        String result = hstat.annotateNameHtml (
-                           super.getDisplayName(), files);
-
-                        //Make sure the super string was really modified
-                        if (result != null && !result.equals(getDisplayName())) {
-                            return result;
-                        }
+                    //Make sure the super string was really modified
+                    if (result != null && !result.equals(getDisplayName())) {
+                        return result;
                     }
                 } catch (FileStateInvalidException e) {
                     Logger.getLogger("global").log(Level.INFO,null, e);
@@ -408,7 +399,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             if (files != null && files.iterator().hasNext()) {
                 try {
                     FileObject fo = files.iterator().next();
-                    img = fo.getFileSystem ().getStatus ().annotateIcon (img, type, files);
+                    img = FileUIUtils.getImageDecorator(fo.getFileSystem()).annotateIcon(img, type, files);
                 } catch (FileStateInvalidException e) {
                     Logger.getLogger("global").log(Level.INFO,null, e);
                 }
@@ -423,7 +414,7 @@ public class LaTeXGUIProject implements Project, LogicalViewProvider {
             if (files != null && files.iterator().hasNext()) {
                 try {
                     FileObject fo = files.iterator().next();
-                    img = fo.getFileSystem ().getStatus ().annotateIcon (img, type, files);
+                    img = FileUIUtils.getImageDecorator(fo.getFileSystem()).annotateIcon(img, type, files);
                 } catch (FileStateInvalidException e) {
                     Logger.getLogger("global").log(Level.INFO,null, e);
                 }
