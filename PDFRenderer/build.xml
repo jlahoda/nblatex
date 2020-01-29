@@ -4,12 +4,12 @@
 <!-- If you delete this file and reopen the project it will be recreated. -->
 <project name="org.netbeans.libs.pdfrenderer" default="netbeans" basedir=".">
     <description>Builds, tests, and runs the project org.netbeans.libs.pdfrenderer.</description>
-    <property name="license.file" location="PDFRenderer-0.9.1-license.txt"/>
+    <property name="license.file" location="PDFRenderer-1.0.5-license.txt"/>
     <target name="-create-license.file"/>
     <import file="nbproject/build-impl.xml"/>
     
     <target name="build-init" depends="harness.build-init">
         <mkdir dir="release/modules/ext" />
-        <get src="http://java.net/downloads/pdf-renderer/PDFRenderer-0.9.1.jar" dest="release/modules/ext" skipexisting="true" />
+        <get src="https://search.maven.org/remotecontent?filepath=org/swinglabs/pdf-renderer/1.0.5/pdf-renderer-1.0.5.jar" dest="release/modules/ext/PDFRenderer-1.0.5.jar" skipexisting="true" />
     </target>
 </project>

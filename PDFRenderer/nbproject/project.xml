@@ -18,8 +18,8 @@
                 <package>com.sun.pdfview.pattern</package>
             </public-packages>
             <class-path-extension>
-                <runtime-relative-path>ext/PDFRenderer-0.9.1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/PDFRenderer-0.9.1.jar</binary-origin>
+                <runtime-relative-path>ext/PDFRenderer-1.0.5.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/PDFRenderer-1.0.5.jar</binary-origin>
             </class-path-extension>
         </data>
     </configuration>
